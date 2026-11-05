@@ -360,3 +360,42 @@ def test_round_trip_with_ids():
     restored = api.restore(result.session_id, result.masked_text)
     assert restored.text == text
     assert restored.unknown == restored.changed == restored.missing == []
+
+
+def test_genitive_of_name_part_is_masked_and_keeps_its_s():
+    _persons("Anna Müller")
+    result = api.analyze("Anna Müller klagt. Müllers Antrag liegt vor.")
+    assert result.masked_text == "[PERSON_1] klagt. [PERSON_1]s Antrag liegt vor."
+    assert api.restore(result.session_id, "Frau [PERSON_1]s Antrag").text == "Frau Anna Müllers Antrag"
+
+
+def test_longer_word_starting_with_name_part_stays():
+    _persons("Anna Müller")
+    result = api.analyze("Anna Müller wohnt in der Müllersiedlung.")
+    assert result.masked_text == "[PERSON_1] wohnt in der Müllersiedlung."
+
+
+def test_umlaut_spelling_variants_are_masked_both_ways():
+    _persons("Anna Müller", "Jonas Krueger")
+    result = api.analyze("Anna Müller und Jonas Krueger. Mueller und Krüger zahlen.")
+    assert "Mueller" not in result.masked_text
+    assert "Krüger" not in result.masked_text
+
+
+def test_sharp_s_spelling_variants_are_masked():
+    _persons("Hans Weiß")
+    result = api.analyze("Hans Weiß klagt. WEISS und Weiss zahlen.")
+    assert result.masked_text == "[PERSON_1] klagt. [PERSON_1] und [PERSON_1] zahlen."
+
+
+def test_full_name_in_other_spelling_is_one_placeholder():
+    _persons("Anna Müller")
+    result = api.analyze("Anna Müller klagt. ANNA MUELLER zahlt.")
+    assert result.masked_text == "[PERSON_1] klagt. [PERSON_1] zahlt."
+
+
+def test_ambiguous_genitive_warns():
+    _persons("Anna Müller", "Bernd Müller")
+    result = api.analyze("Anna Müller und Bernd Müller. Müllers Antrag.")
+    assert "Müllers" in result.masked_text
+    assert any("Müller" in warning for warning in result.warnings)

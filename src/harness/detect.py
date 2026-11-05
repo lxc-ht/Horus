@@ -39,7 +39,7 @@ class Detector(Protocol):
 
 # --- Regex -----------------------------------------------------------------
 
-_EMAIL = re.compile(r"(?<![\w.+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?![\w-])")
+_EMAIL = re.compile(r"(?<![\w.+-])[\w.%+-]+@[\w.-]+\.[^\W\d_]{2,}(?![\w-])")
 
 # IBAN in Blöcken (mit oder ohne Leerzeichen), allgemein: 2 Buchstaben, 2 Ziffern, bis 30 Zeichen.
 _IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,3})?\b")
@@ -242,10 +242,29 @@ def _load_gliner(model_name: str):
     return _gliner_cache[model_name]
 
 
+def _split_long(offset: int, chunk: str, max_chars: int, overlap: int = 100) -> list[tuple[int, str]]:
+    """Teilt ein zu langes Stück an Leerzeichen, sonst hart. Alles dahinter sähe das Modell sonst nie.
+
+    Die Stücke überlappen, damit ein Name an der Schnittstelle in einem davon ganz steht.
+    Doppelte Fundstellen löst merge_findings() auf.
+    """
+    pieces: list[tuple[int, str]] = []
+    start = 0
+    while len(chunk) - start > max_chars:
+        cut = chunk.rfind(" ", start + overlap + 1, start + max_chars)
+        if cut == -1:
+            cut = start + max_chars
+        pieces.append((offset + start, chunk[start:cut]))
+        start = chunk.find(" ", cut - overlap, cut) + 1 or cut - overlap
+    pieces.append((offset + start, chunk[start:]))
+    return pieces
+
+
 def _chunks(text: str, max_chars: int = 800) -> list[tuple[int, str]]:
     """Teilt den Text an Zeilengrenzen in Stücke, die GLiNER verarbeiten kann.
 
-    Liefert (Offset, Stück). Überlange Zeilen werden an Satzenden geteilt.
+    Liefert (Offset, Stück). Überlange Zeilen werden an Satzenden geteilt,
+    Sätze über max_chars an Leerzeichen.
     """
     pieces: list[tuple[int, str]] = []
     pos = 0
@@ -266,7 +285,7 @@ def _chunks(text: str, max_chars: int = 800) -> list[tuple[int, str]]:
             chunks[-1] = (chunks[-1][0], chunks[-1][1] + piece)
         else:
             chunks.append((offset, piece))
-    return chunks
+    return [split for offset, chunk in chunks for split in _split_long(offset, chunk, max_chars)]
 
 
 class GlinerDetector:

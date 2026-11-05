@@ -62,15 +62,27 @@ def build(original: str, spans: list[Span], types: dict[str, str]) -> tuple[str,
     return masked, replacements
 
 
-def occurrence_pattern(value: str, whole_word: bool = False) -> re.Pattern:
-    """Findet value ohne Groß-/Kleinschreibung und mit beliebigem Leerraum zwischen den Wörtern.
+# Gleichwertige Schreibweisen: „Müller“ und „Mueller“, „Weiß“ und „WEISS“.
+_SPELLINGS = {
+    "ä": "(?:ä|ae)", "ae": "(?:ä|ae)", "ö": "(?:ö|oe)", "oe": "(?:ö|oe)",
+    "ü": "(?:ü|ue)", "ue": "(?:ü|ue)", "ß": "(?:ß|ss)", "ss": "(?:ß|ss)",
+}
+_SPELLING_RE = re.compile("|".join(sorted(_SPELLINGS, key=len, reverse=True)), re.IGNORECASE)
 
-    whole_word=True: nur als ganzes Wort, nie mitten in einem längeren Wort.
+
+def occurrence_pattern(value: str, whole_word: bool = False) -> re.Pattern:
+    """Findet value ohne Groß-/Kleinschreibung, mit beliebigem Leerraum zwischen den Wörtern
+    und in gleichwertiger Schreibweise.
+
+    whole_word=True: nur als ganzes Wort, nie mitten in einem längeren Wort. Ein Genitiv-s
+    gehört noch zum Wort, bleibt aber außerhalb des Treffers: „[PERSON_1]s Antrag“.
     """
     words = value.split()
-    body = r"\s+".join(re.escape(w) for w in words)
+    body = r"\s+".join(
+        _SPELLING_RE.sub(lambda m: _SPELLINGS[m.group().lower()], re.escape(w)) for w in words
+    )
     if whole_word:
-        body = rf"(?<!\w){body}(?!\w)"
+        body = rf"(?<!\w){body}(?=s?(?!\w))"
     return re.compile(body, re.IGNORECASE)
 
 
