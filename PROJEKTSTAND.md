@@ -15,6 +15,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- [ ] „Beispiel laden“ und Eintippen setzen Analyse und Freigabe zurück, Fehler beim Datei laden stehen unter „Dein Original“. Ein kleiner PR, Review durch Paul (`lxc-ht`, Claude).
 
 
 
@@ -27,8 +28,6 @@ Kern (`Phantom-create-1`):
 
 Oberfläche (`lxc-ht`, `web/static/index.html`):
 
-- [ ] Klein, vor dem Code-Stopp: „Beispiel laden“ und Eintippen in „Dein Original“ setzen Analyse und Freigabe zurück, genau wie `loadOriginal()` beim Datei laden (steht in `web/BACKLOG.md`). Sonst bleibt auf der Bühne nach „Beispiel laden“ die alte Vorschau stehen und ist noch kopierbar. Beim Eintippen reicht es, wenn eine Änderung die Freigabe aufhebt.
-- [ ] Klein: Fehlermeldungen beim Datei laden erscheinen in der mittleren Spalte, weit weg vom Knopf. Wenn es schnell geht, unter „Dein Original“ zeigen. Sonst lassen.
 - [ ] Die aktualisierte echte Arbeitsoberfläche mit Paul am Vortragsrechner durchspielen.
 - [ ] Prüfen, ob es seit PR #26 noch so ist: Nach dem Zurückübersetzen blieb für die Antwort wenig Platz, weil Hinweis und Eingabefeld oben stehen bleiben (Stand vor PR #26, Screenshot bei Paul). Vorschlag: beides nach dem Zurückübersetzen einklappen.
 
