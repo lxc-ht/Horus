@@ -51,7 +51,7 @@ Beide:
 
 - [x] Weitere Umgehungen geschlossen: Werte über Zeilenumbrüche, Passwörter, API-Keys, Handles ([PR #24](https://github.com/lxc-ht/LP7/pull/24)).
 - [x] Dashboard poliert: lesbare Platzhalter, Legende zeigt alle erkannten Typen mit Anzahl, erledigte Schritte mit Haken, Verlauf bei abgeschnittenem Text. Element-IDs unverändert, keine externen Quellen, 173 Tests und Browserprüfung grün (PR #23, `Phantom-create-1`).
-- [x] Start per Doppelklick mit `LP7 starten.command` umgesetzt und geprüft, Browser öffnet sich automatisch, Server bleibt auf diesem Rechner (PR #20, `Phantom-create-1`).
+- [x] Start per Doppelklick mit `LP7 starten.command` umgesetzt und geprüft, Browser öffnet sich automatisch, Server bleibt auf diesem Rechner (PR #20, `Phantom-create-1`). Doppelklick im Finder am 05.11. getestet, bei laufender Demo kommt „LP7 läuft schon“.
 - [x] Repo angelegt, beide haben Schreibrechte.
 - [x] Kern gebaut: Erkennung, Maskierung, Freigabe, Senden, Rückübersetzung, CLI.
 - [x] Weboberfläche gebaut und auf `main` gemergt.
