@@ -42,14 +42,22 @@ class Detector(Protocol):
 _EMAIL = re.compile(r"(?<![\w.%+-])[\w.%+-]+@[\w.-]+\.[^\W\d_]{2,}(?![\w-])")
 
 # IBAN in Blöcken (mit oder ohne Leerzeichen), allgemein: 2 Buchstaben, 2 Ziffern, bis 30 Zeichen.
-_IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,3})?\b", re.IGNORECASE | re.ASCII)
+_IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?:[ \-.]?[A-Z0-9]{4}){2,7}(?:[ \-.]?[A-Z0-9]{1,3})?\b", re.IGNORECASE | re.ASCII)
+# Deutsche IBAN: genau 20 Ziffern, also auch mit ungewöhnlicher Gruppierung sicher zu erkennen.
+_IBAN_DE = re.compile(r"(?<![A-Za-z0-9])[Dd][Ee][ \-.]?\d{2}(?:[ \-.]?\d){18}(?!\d)")
+_IBAN_SEPARATORS = re.compile(r"[ \-.]")
 
 # Telefonnummern: +Ländervorwahl / 0049 / führende 0, Trennzeichen Leerzeichen, - oder /.
 _PHONE = re.compile(
     r"(?<![\w+])"
-    r"(?:(?:\+\d{1,3}|0049)[ \-/]?(?:\(0\)[ \-/]?)?\(?\d{1,5}\)?|\(?0\d{2,5}\)?)"
-    r"(?:[ \-/]?\d{2,}){1,4}"
+    r"(?:(?:\+\d{1,3}|0049)[ \-–/.]?(?:\(0\)[ \-–/.]?)?\(?\d{1,5}\)?|\(?0\d{2,5}\)?)"
+    r"(?:[ \-–/.]?\d{2,}){1,4}"
     r"(?![\w])"
+)
+# Mit Bezeichner davor ist jedes Format eine Telefonnummer, auch ohne Vorwahl oder in Einzelziffern.
+_LABELED_PHONE = re.compile(
+    r"(?<!\w)(?i:Tel(?:efon)?(?:-?(?:Nr\.?|nummer))?|Mobil(?:nummer)?|Handy(?:nummer)?|Fax)[\s:.]*"
+    r"(?P<value>\+?\(?\d(?:[ \-–/.()]{0,2}\d){5,14})(?!\d)"
 )
 
 # Kennungen mit Bezeichner davor: Der Bezeichner verrät den Typ, der Wert darf fast jedes Format haben.
@@ -57,7 +65,8 @@ _LABELED_ID = re.compile(
     r"(?<!\w)(?i:Steuer-?ID|(?:Steuer)?identifikationsnummer|IdNr\.?|Steuernummer|St\.?-?Nr\.?"
     r"|SV-?(?:Nr\.?|Nummer)|Sozialversicherungsnummer|Versicherten-?(?:Nr\.?|Nummer)"
     r"|Aktenzeichen|Az\.?|Gesch[äa]ftszeichen|Mandanten-?(?:Nr\.?|Nummer)|Patienten-?(?:Nr\.?|Nummer)"
-    r"|Personalausweis-?(?:Nr\.?|Nummer)|Kennzeichen)"
+    r"|Personalausweis-?(?:Nr\.?|Nummer)|Kennzeichen|BLZ|Bankleitzahl|(?:Unser|Ihr)\s+Zeichen"
+    r"|(?:Konto|Kunden|Fall|Vertrags|Rechnungs|Policen|Versicherungs|Beleg|Auftrags|Reisepass)-?(?:Nr\.?|Nummer))"
     # Wert: Blöcke aus Großbuchstaben und Ziffern. Ein Punkt am Blockende beendet ihn, sonst käme der nächste Satz mit.
     r"[\s:.#]*(?P<value>[A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w)(?: [A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w))*)"
 )
@@ -73,7 +82,13 @@ _BARE_IDS = [
     re.compile(r"\b[A-Z]\d{9}\b"),                                           # Krankenversichertennummer
     re.compile(r"(?<![\w/])(?:\d{1,3}|[IVX]+) [A-Z][A-Za-z]{0,2} \d{1,6}/\d{2,4}\b"),  # Aktenzeichen 3 O 123/26
     re.compile(r"(?<![\w@.])(?:https?://|www\.)[^\s<>\"']+"),                # URL, kann Patienten- oder Fallnummern enthalten
+    re.compile(r"(?<![\d.])(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?![\d.]\d)"),  # IP-Adresse
+    re.compile(r"(?<![\w\-])[A-ZÄÖÜ]{1,3}-[A-Z]{1,2} \d{1,4}[EH]?(?!\w)"),   # Kfz-Kennzeichen
 ]
+# BIC enthält oft keine Ziffer, zählt deshalb nur mit Bezeichner.
+_BIC = re.compile(r"(?<!\w)(?i:BIC|SWIFT(?:-Code)?)[\s:]*(?P<value>[A-Z]{6}[A-Z0-9]{2}(?:[A-Z0-9]{3})?)(?!\w)")
+# Kartennummern zählen nur mit gültiger Prüfziffer (Luhn), sonst wäre jede lange Zahl eine Karte.
+_CARD = re.compile(r"(?<![\d/.,\-])(?:\d{4}[ \-]?\d{4}[ \-]?\d{4}[ \-]?\d{1,4}|\d{4}[ \-]?\d{6}[ \-]?\d{5})(?!\d)")
 
 # Eindeutige Straßenendungen zählen immer, mehrdeutige („Bundesgerichtshof 12“) nur mit „Am …“ davor oder PLZ dahinter.
 _STREET_SUFFIXES = "straße|strasse|str\\.|weg|gasse|allee|ring|damm|ufer|chaussee|pfad|steig|stieg"
@@ -81,7 +96,7 @@ _PLACE_SUFFIXES = "platz|berg|bach|hof|feld|garten|kamp|bahn|markt|wall|graben|d
 _NOT_STREET = r"(?!(?:Rechts|Dienst|Instanzen)weg\b|Arbeitsplatz\b)"
 _HOUSE_NUMBER = r"\s+\d{1,4}(?:\s?[a-zA-Z](?!\w)|\s?[\-/]\s?\d{1,4})?"
 _POSTCODE_CITY = (
-    r"\d{5}\s+(?!(?:Euro|EUR|Dollar|Stück|Menschen|Personen|Kunden|Mitarbeiter)\b)[A-ZÄÖÜ][\w\-]+"
+    r"(?:D-)?\d{5}\s+(?!(?:Euro|EUR|Dollar|Stück|Menschen|Personen|Kunden|Mitarbeiter)\b)[A-ZÄÖÜ][\w\-]+"
     r"(?:\s+(?:im|am|an der|bei|ob der)\s+[A-ZÄÖÜ][\w\-]+)?"
 )
 # Straße mit Hausnummer, optional mit PLZ und Ort dahinter.
@@ -97,6 +112,7 @@ _ADDRESS = re.compile(
 )
 # PLZ und Ort allein. Nur nach einem Trenner oder „in“, sonst wären „es kamen 50000 Gäste“ auch Adressen.
 _POSTCODE_ALONE = re.compile(rf"(?<!\d){_POSTCODE_CITY}")
+_PO_BOX = re.compile(r"(?<!\w)Postfach\s+\d[\d ]*\d")
 _BEFORE_POSTCODE = re.compile(r"(?:^|[,:;(\n]|(?<!\w)(?:[Ii]n|aus|nach|bei|von|PLZ))[ \t]*$")
 
 _NAME_WORD = r"[^\W\d_]+(?:['’\-][^\W\d_]+)*"   # alle Schriften: Nguyễn, Çelik, O'Neill, Müller-Lüdenscheidt
@@ -109,13 +125,16 @@ _SALUTATION = re.compile(
 )
 
 _MONTHS = "Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember"
+_MONTHS_SHORT = "Jan|Feb|Mär|Mrz|Apr|Jun|Jul|Aug|Sept?|Okt|Nov|Dez"
 _DATE = re.compile(
     r"\b(?:"
     r"\d{1,2}\.\d{1,2}\.(?:\d{4}|\d{2})"            # 14.03.1979, 1.3.79
     r"|\d{4}-\d{2}-\d{2}"                           # 1979-03-14
     rf"|\d{{1,2}}\. ?(?:{_MONTHS})\b(?: \d{{4}})?"  # 14. März 1979, 14. März
     rf"|(?:{_MONTHS}) \d{{4}}"                      # März 1979
-    r"|\d{1,2}/\d{1,2}/\d{4}"                       # 03/14/1979
+    r"|\d{1,2}[/\-]\d{1,2}[/\-]\d{4}"               # 03/14/1979, 14-03-1979
+    r"|\d{1,2}\. \d{1,2}\. \d{4}"                   # 14. 03. 1979
+    rf"|\d{{1,2}}\.? ?(?:{_MONTHS}|{_MONTHS_SHORT})\.? \d{{4}}"  # 14 März 1979, 14. Mrz. 1979
     # Ohne Jahr nur zweistellig, sonst wird jede Gliederung wie „3.1.“ zum Datum.
     r"|(?:0[1-9]|[12]\d|3[01])\.(?:0[1-9]|1[0-2])\."  # 14.03.
     r")(?!\d)"
@@ -132,6 +151,11 @@ def _tax_id_valid(raw: str) -> bool:
         total = (d + product) % 10 or 10
         product = total * 2 % 11
     return (11 - product) % 10 == digits[10]
+
+
+def _luhn_valid(raw: str) -> bool:
+    digits = [int(c) for c in raw if c.isdigit()][::-1]
+    return sum(d if i % 2 == 0 else (d * 2 - 9 if d > 4 else d * 2) for i, d in enumerate(digits)) % 10 == 0
 
 
 def _salutation_name(m: re.Match) -> tuple[int, int] | None:
@@ -157,7 +181,7 @@ def _salutation_name(m: re.Match) -> tuple[int, int] | None:
 
 def _iban_valid(raw: str) -> bool:
     """Prüfsumme nach ISO 13616 (mod 97)."""
-    s = raw.replace(" ", "")
+    s = _IBAN_SEPARATORS.sub("", raw)
     if not 15 <= len(s) <= 34:
         return False
     rearranged = s[4:] + s[:4]
@@ -176,7 +200,14 @@ class RegexDetector:
         def add(m: re.Match, typ: str, group: str | int = 0) -> None:
             found.append(Finding(m.start(group), m.end(group), m.group(group), typ, self.name, 1.0))
 
-        # Kennungen vor TELEFON: Bei gleicher Länge gewinnt, was zuerst gefunden wurde („022/815/08150“).
+        # IBAN vor KENNUNG, Kennungen vor TELEFON: Bei gleicher Länge gewinnt, was zuerst gefunden wurde („022/815/08150“).
+        for m in _IBAN_DE.finditer(text):
+            add(m, "IBAN")
+        for m in _IBAN.finditer(text):
+            compact = _IBAN_SEPARATORS.sub("", m.group())
+            # Deutsche IBAN am Format erkennen, alle anderen nur mit gültiger Prüfsumme.
+            if (compact[:2].upper() == "DE" and len(compact) == 22) or _iban_valid(m.group()):
+                add(m, "IBAN")
         for m in _LABELED_ID.finditer(text):
             if any(c.isdigit() for c in m.group("value")):
                 add(m, "KENNUNG", "value")
@@ -186,7 +217,14 @@ class RegexDetector:
         for pattern in _BARE_IDS:
             for m in pattern.finditer(text):
                 add(m, "KENNUNG")
+        for m in _BIC.finditer(text):
+            add(m, "KENNUNG", "value")
+        for m in _CARD.finditer(text):
+            if _luhn_valid(m.group()):
+                add(m, "KENNUNG")
         for m in _ADDRESS.finditer(text):
+            add(m, "ADRESSE")
+        for m in _PO_BOX.finditer(text):
             add(m, "ADRESSE")
         for m in _POSTCODE_ALONE.finditer(text):
             if _BEFORE_POSTCODE.search(text[max(0, m.start() - 8) : m.start()]):
@@ -196,11 +234,8 @@ class RegexDetector:
                 found.append(Finding(span[0], span[1], text[span[0] : span[1]], "PERSON", self.name, 1.0))
         for m in _EMAIL.finditer(text):
             add(m, "EMAIL")
-        for m in _IBAN.finditer(text):
-            compact = m.group().replace(" ", "")
-            # Deutsche IBAN am Format erkennen, alle anderen nur mit gültiger Prüfsumme.
-            if (compact[:2].upper() == "DE" and len(compact) == 22) or _iban_valid(m.group()):
-                add(m, "IBAN")
+        for m in _LABELED_PHONE.finditer(text):
+            add(m, "TELEFON", "value")
         for m in _PHONE.finditer(text):
             if 6 <= sum(c.isdigit() for c in m.group()) <= 15:
                 add(m, "TELEFON")
@@ -264,6 +299,22 @@ def _split_long(offset: int, chunk: str, max_chars: int, overlap: int = 100) -> 
     return pieces
 
 
+# GLiNER liest höchstens 384 Wörter und schneidet den Rest still ab. Sein Tokenizer zählt so:
+_MODEL_TOKEN = re.compile(r"\w+(?:[-_]\w+)*|\S")
+
+
+def _split_tokens(offset: int, chunk: str, max_tokens: int = 350, overlap: int = 30) -> list[tuple[int, str]]:
+    """Teilt ein Stück mit zu vielen Wörtern (Tabellen, Listen). Die Stücke überlappen wie in _split_long()."""
+    tokens = list(_MODEL_TOKEN.finditer(chunk))
+    if len(tokens) <= max_tokens:
+        return [(offset, chunk)]
+    pieces = []
+    for i in range(0, len(tokens) - overlap, max_tokens - overlap):
+        start, end = tokens[i].start(), tokens[min(i + max_tokens, len(tokens)) - 1].end()
+        pieces.append((offset + start, chunk[start:end]))
+    return pieces
+
+
 def _chunks(text: str, max_chars: int = 800) -> list[tuple[int, str]]:
     """Teilt den Text an Zeilengrenzen in Stücke, die GLiNER verarbeiten kann.
 
@@ -289,7 +340,12 @@ def _chunks(text: str, max_chars: int = 800) -> list[tuple[int, str]]:
             chunks[-1] = (chunks[-1][0], chunks[-1][1] + piece)
         else:
             chunks.append((offset, piece))
-    return [split for offset, chunk in chunks for split in _split_long(offset, chunk, max_chars)]
+    return [
+        piece
+        for offset, chunk in chunks
+        for split_offset, split in _split_long(offset, chunk, max_chars)
+        for piece in _split_tokens(split_offset, split)
+    ]
 
 
 # Unterhalb davon rät das Modell nur noch, das wäre für die Prüfung bloß Rauschen.

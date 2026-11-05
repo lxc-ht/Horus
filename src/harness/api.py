@@ -118,6 +118,7 @@ REASON_NUMBER = "Diese Nummer wurde nicht ersetzt. Prüfe, ob sie eine Kennung i
 REASON_UNSURE = "Ersetzt, aber das Modell war sich nicht sicher. Prüfe, ob das wirklich eine sensible Angabe ist."
 REASON_NAME_PART = "Nur ein Namensteil von „{full}“. Prüfe, ob hier wirklich diese Person gemeint ist."
 
+_LITERAL_PLACEHOLDER = re.compile(r"\b([A-Z]+)_(\d+)\b")
 _NUMBER_LIKE = re.compile(r"(?<![\w/.-])[\w/.-]*\d[\w/.-]*")
 _YEAR = re.compile(r"(?:19|20)\d\d")
 _NOT_AN_ID_AFTER = re.compile(r"(?:,\d+)?\s*(?:Euro|EUR|€|%|Prozent)", re.IGNORECASE)
@@ -170,13 +171,20 @@ def _log_counts(action: str, session_id: str, s: _Session) -> None:
     log.info("%s: Sitzung %s, %d Stellen %s", action, session_id[:8], len(s.spans), dict(counts))
 
 
+def _literal_placeholders(text: str) -> set[str]:
+    """Was im Text schon wie ein Platzhalter aussieht, mit oder ohne Klammern."""
+    return {f"[{typ}_{number}]" for typ, number in _LITERAL_PLACEHOLDER.findall(text)}
+
+
 def analyze(text: str) -> MaskResult:
-    """Neue Sitzung: erkennen und maskieren."""
+    """Neue Sitzung: erkennen und maskieren. original_text ist der vereinheitlichte Text (mask.canonical)."""
+    text = mask.canonical(text)
+    reserved = _literal_placeholders(text)
     with _lock:
         session_id = vault.create_session()
         s = _Session(original_text=text)
         for f in detect_all(text, _active_detectors()):
-            placeholder = vault.placeholder_for(session_id, f.text, f.typ)
+            placeholder = vault.placeholder_for(session_id, f.text, f.typ, reserved)
             if all(f.end <= x.start or f.start >= x.end for x in s.spans):
                 s.spans.append(Span(f.start, f.end, placeholder))
                 if f.quelle == GlinerDetector.name and f.score < UNSURE_BELOW_SCORE:
@@ -203,14 +211,14 @@ def add_manual(session_id: str, term: str, typ: str) -> MaskResult:
     typ = typ.strip().upper()
     if typ not in TYPES:
         raise ValueError(f"Unbekannter Typ: {typ}. Erlaubt: {', '.join(TYPES)}")
-    term = " ".join(term.split())
+    term = " ".join(mask.canonical(term).split())
     if not term:
         raise ValueError("Leerer Begriff.")
     with _lock:
         s = _session(session_id)
         if not mask.occurrence_pattern(term).search(s.original_text):
             return _result(session_id, [WARN_TERM_NOT_FOUND.format(term=term)])
-        placeholder = vault.placeholder_for(session_id, term, typ)
+        placeholder = vault.placeholder_for(session_id, term, typ, _literal_placeholders(s.original_text))
         s.spans = mask.add_occurrences(s.original_text, s.spans, term, placeholder)
         # Namensteile neu berechnen: Eine neue Person kann einen bisher eindeutigen Teil mehrdeutig machen.
         s.spans = mask.propagate(s.original_text, s.spans, _all_mappings(session_id))
@@ -281,7 +289,8 @@ def restore(session_id: str, answer: str) -> RestoreResult:
         s = _session(session_id)
         masked, _, mappings = _masked(session_id, s)
     originals = {m.placeholder: m.original for m in mappings}
-    sent = list(dict.fromkeys(gate.PLACEHOLDER_RE.findall(masked)))
+    # Nur eigene Platzhalter: Ein wörtlich im Text stehender wird nicht ersetzt, restore() meldet ihn als unbekannt.
+    sent = [p for p in dict.fromkeys(gate.PLACEHOLDER_RE.findall(masked)) if p in originals]
     result = _restore.restore(answer, originals, sent)
     # Ein Platzhalter kennt nur den vollen Wert. Stand er für einen Namensteil, kann das Eingesetzte falsch sein („Antrag“).
     parts = {

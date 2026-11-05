@@ -104,8 +104,10 @@ def mappings(session_id: str, active_only: bool = True) -> list[Mapping]:
     return [Mapping(p, o, t, bool(a)) for p, o, t, a in rows]
 
 
-def placeholder_for(session_id: str, original: str, typ: str) -> str:
+def placeholder_for(session_id: str, original: str, typ: str, reserved: set[str] = frozenset()) -> str:
     """Liefert den Platzhalter für original und legt ihn bei Bedarf an.
+
+    reserved: Platzhalter, die wörtlich im Text stehen. Sie würden sonst bei der Rückübersetzung mit ersetzt.
 
     Ein zuvor zurückgenommener Wert wird wieder aktiv und behält seinen Platzhalter.
     """
@@ -125,7 +127,10 @@ def placeholder_for(session_id: str, original: str, typ: str) -> str:
 
         prefix = f"[{typ}_"
         numbers = [int(p[len(prefix):-1]) for p, _, _ in rows if p.startswith(prefix)]
-        placeholder = f"{prefix}{max(numbers, default=0) + 1}]"
+        number = max(numbers, default=0) + 1
+        while f"{prefix}{number}]" in reserved:
+            number += 1
+        placeholder = f"{prefix}{number}]"
         conn.execute(
             "INSERT INTO mappings (session_id, placeholder, original, typ) VALUES (?, ?, ?, ?)",
             (session_id, placeholder, original, typ),

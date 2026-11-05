@@ -27,3 +27,10 @@ def test_gliner_finds_name_late_in_long_paragraph_without_sentence_end():
     assert "Jonas Weidenfeld" in {f.text for f in found if f.typ == "PERSON"}
     for f in found:
         assert text[f.start : f.end] == f.text
+
+
+@pytest.mark.slow
+def test_gliner_finds_name_behind_many_short_tokens():
+    """Das Modell liest nur 384 Wörter. Eine Tabelle mit kurzen Zellen darf den Namen dahinter nicht verstecken."""
+    text = "\n".join(f"{i};x;y;z" for i in range(60)) + "\nJonas Weidenfeld;x;y"
+    assert any("Weidenfeld" in f.text for f in GlinerDetector().detect(text))

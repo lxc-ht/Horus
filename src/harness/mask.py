@@ -8,8 +8,10 @@ jedes Mal neu gebaut, von hinten nach vorn, damit die Positionen stimmen.
 from __future__ import annotations
 
 import re
+import unicodedata
 from dataclasses import dataclass, field
 
+from .detect import _STREET_SUFFIXES
 from .vault import Mapping
 
 
@@ -53,6 +55,16 @@ class Span:
 
 # Namensteile, die allein nichts über eine Person verraten.
 NAME_STOPWORDS = {"dr", "prof", "med", "herr", "frau", "von", "van", "der", "den", "die", "und", "zu"}
+
+
+def canonical(text: str) -> str:
+    """Die Form, in der geprüft, maskiert und gesendet wird. Sonst sieht Claude, was die Erkennung nicht erkennt.
+
+    NFKC vereinheitlicht NFD-Umlaute, geschützte Leerzeichen, Ligaturen und Vollbreite-Zeichen.
+    Unsichtbare Formatzeichen (weicher Trennstrich, Zero-Width, Bidi) fallen weg.
+    """
+    normalized = unicodedata.normalize("NFKC", text).replace("‐", "-")   # NFKC macht aus U+2011 nur U+2010
+    return "".join(c for c in normalized if unicodedata.category(c) != "Cf")
 
 
 def build(original: str, spans: list[Span], types: dict[str, str]) -> tuple[str, list[Replacement]]:
@@ -108,6 +120,23 @@ def name_parts(value: str) -> list[str]:
     return parts
 
 
+_STREET_ENDINGS = _STREET_SUFFIXES.replace("str\\.", "str")   # Satzzeichen am Wortrand sind hier schon entfernt
+_STREET_WORD = re.compile(rf"[^\W\d_][\w\-]*(?:{_STREET_ENDINGS})", re.IGNORECASE)
+_POSTCODE_WORD = re.compile(r"(?:D-)?(\d{5})")
+
+
+def address_parts(value: str) -> list[str]:
+    """Straßenname und PLZ, die allein auf die Adresse zeigen. Hausnummern und Wörter wie „Lange“ oder „Straße“ nicht."""
+    parts: list[str] = []
+    for word in value.split():
+        word = word.strip(".,;:()\"'")
+        if postcode := _POSTCODE_WORD.fullmatch(word):
+            parts.append(postcode.group(1))
+        elif _STREET_WORD.fullmatch(word):
+            parts.append(word.lower())
+    return parts
+
+
 def _fold(value: str) -> str:
     """Einheitliche Schreibweise, damit „Müller“ und „Mueller“ als derselbe Namensteil zählen."""
     return value.replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss")
@@ -122,9 +151,9 @@ def name_part_owners(mappings: list[Mapping]) -> dict[str, list[str]]:
     owners: dict[str, list[str]] = {}
     spellings: dict[str, str] = {}
     for m in mappings:
-        if m.typ != "PERSON":
+        if m.typ not in ("PERSON", "ADRESSE"):
             continue
-        for part in name_parts(m.original):
+        for part in name_parts(m.original) if m.typ == "PERSON" else address_parts(m.original):
             placeholders = owners.setdefault(spellings.setdefault(_fold(part), part), [])
             if m.placeholder not in placeholders:
                 placeholders.append(m.placeholder)
