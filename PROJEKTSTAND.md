@@ -15,6 +15,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- [ ] PDF laden: Text aus digitalen PDFs lokal auslesen und ins Textfeld setzen, Scans ausdrücklich nicht. Endpunkt `/api/pdf`, Knopf und Ablegen in `index.html`, eigener PR, Review durch Paul (`lxc-ht`, Claude).
 
 
 
@@ -27,7 +28,6 @@ Kern (`Phantom-create-1`):
 
 Oberfläche (`lxc-ht`, `web/static/index.html`):
 
-- [ ] PDF laden: Text aus digitalen PDFs lokal auslesen und ins Textfeld setzen, Scans ausdrücklich nicht. Auftrag liegt bei Paul (Bau-Prompt vom 05.11.). Bitte vor dem Code-Stopp und als eigener PR.
 - [ ] Die aktualisierte echte Arbeitsoberfläche mit Paul am Vortragsrechner durchspielen.
 - [ ] Prüfen, ob es seit PR #26 noch so ist: Nach dem Zurückübersetzen blieb für die Antwort wenig Platz, weil Hinweis und Eingabefeld oben stehen bleiben (Stand vor PR #26, Screenshot bei Paul). Vorschlag: beides nach dem Zurückübersetzen einklappen.
 
