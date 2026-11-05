@@ -42,7 +42,7 @@ class Detector(Protocol):
 _EMAIL = re.compile(r"(?<![\w.%+-])[\w.%+-]+@[\w.-]+\.[^\W\d_]{2,}(?![\w-])")
 
 # IBAN in Blöcken (mit oder ohne Leerzeichen), allgemein: 2 Buchstaben, 2 Ziffern, bis 30 Zeichen.
-_IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,3})?\b")
+_IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,3})?\b", re.IGNORECASE | re.ASCII)
 
 # Telefonnummern: +Ländervorwahl / 0049 / führende 0, Trennzeichen Leerzeichen, - oder /.
 _PHONE = re.compile(
@@ -113,7 +113,11 @@ _DATE = re.compile(
     r"\b(?:"
     r"\d{1,2}\.\d{1,2}\.(?:\d{4}|\d{2})"            # 14.03.1979, 1.3.79
     r"|\d{4}-\d{2}-\d{2}"                           # 1979-03-14
-    rf"|\d{{1,2}}\. ?(?:{_MONTHS}) \d{{4}}"         # 14. März 1979
+    rf"|\d{{1,2}}\. ?(?:{_MONTHS})\b(?: \d{{4}})?"  # 14. März 1979, 14. März
+    rf"|(?:{_MONTHS}) \d{{4}}"                      # März 1979
+    r"|\d{1,2}/\d{1,2}/\d{4}"                       # 03/14/1979
+    # Ohne Jahr nur zweistellig, sonst wird jede Gliederung wie „3.1.“ zum Datum.
+    r"|(?:0[1-9]|[12]\d|3[01])\.(?:0[1-9]|1[0-2])\."  # 14.03.
     r")(?!\d)"
 )
 
@@ -195,7 +199,7 @@ class RegexDetector:
         for m in _IBAN.finditer(text):
             compact = m.group().replace(" ", "")
             # Deutsche IBAN am Format erkennen, alle anderen nur mit gültiger Prüfsumme.
-            if (compact.startswith("DE") and len(compact) == 22) or _iban_valid(m.group()):
+            if (compact[:2].upper() == "DE" and len(compact) == 22) or _iban_valid(m.group()):
                 add(m, "IBAN")
         for m in _PHONE.finditer(text):
             if 6 <= sum(c.isdigit() for c in m.group()) <= 15:
