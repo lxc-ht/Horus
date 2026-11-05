@@ -19,6 +19,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- Datum ohne Jahr, Monat und Jahr, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung. Nur `detect.py` und `vault.py` (Branch `kern/datum-iban-rechte`, `lxc-ht`).
 - Erkennungslücken im Kern (lange Absätze, E-Mails mit Umlaut, Namensvarianten): [PR #8](https://github.com/lxc-ht/LP7/pull/8) wartet auf den Merge (`lxc-ht`).
 - Löschen der Zuordnung auch bei SIGTERM und geschlossenem Terminal, Warnung bei teilweiser Überlappung in `add_manual`. Nur `api.py` (`lxc-ht`).
 
