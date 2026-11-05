@@ -2,85 +2,195 @@
 
 Signaturen, Feldnamen und Ausnahmen bleiben stabil. Ergänzungen nur zusätzlich
 und mit Eintrag in BACKLOG.md unter „Vertrag erweitert“.
+
+Datentypen (Felder siehe jeweiliges Modul, hier re-exportiert):
+    Replacement(placeholder, original, typ, start, end)             mask.py
+    MaskResult(session_id, original_text, masked_text,
+               replacements, warnings)                               mask.py
+    Release(session_id, text, sha256, created_at)                    gate.py
+    RestoreResult(text, unknown, changed, missing, warnings)         restore.py
+    LeakError, ReleaseMismatchError                                  gate.py
+    NoApiKeyError                                                    cloud.py
+
+Sitzungszustand (Originaltext, Stellen) liegt im Speicher, die Zuordnung in SQLite.
+Keine Funktion gibt etwas auf stdout aus. Logs enthalten nur Platzhalter, Typen, Zählungen.
 """
 
-from dataclasses import dataclass
+from __future__ import annotations
 
-TYPES = ["PERSON", "FIRMA", "ADRESSE", "ORT", "EMAIL", "TELEFON", "IBAN", "DATUM"]
+import logging
+import threading
+from collections import Counter
+from dataclasses import dataclass, field
+
+from . import cloud, gate, mask, vault
+from . import restore as _restore
+from .cloud import CloudError, NoApiKeyError
+from .detect import TYPES, Detector, GlinerDetector, RegexDetector, detect_all
+from .gate import LeakError, Release, ReleaseMismatchError
+from .mask import MaskResult, Replacement, Span
+from .restore import RestoreResult
+
+__all__ = [
+    "TYPES", "Replacement", "MaskResult", "Release", "RestoreResult",
+    "LeakError", "ReleaseMismatchError", "NoApiKeyError", "CloudError",
+    "analyze", "add_manual", "remove", "get", "release", "has_api_key", "send", "restore",
+    "set_detectors",
+]
+
+log = logging.getLogger(__name__)
+
+WARN_TERM_NOT_FOUND = "„{term}“ kommt im Text nicht vor, es wurde nichts maskiert."
 
 
 @dataclass
-class Replacement:
-    placeholder: str   # "[PERSON_1]"
-    original: str      # "Max Müller"  (nur lokal, für die Anzeige)
-    typ: str           # einer aus TYPES
-    start: int         # Position im maskierten Text
-    end: int
-
-
-@dataclass
-class MaskResult:
-    session_id: str
+class _Session:
     original_text: str
-    masked_text: str
-    replacements: list[Replacement]   # nach start sortiert
-    warnings: list[str]               # fertige deutsche Sätze
+    spans: list[Span] = field(default_factory=list)
+    issued: set[str] = field(default_factory=set)   # SHA-256 der gültigen Freigaben
 
 
-@dataclass
-class Release:
-    session_id: str
-    text: str
-    sha256: str
-    created_at: str    # ISO 8601
+_sessions: dict[str, _Session] = {}
+_lock = threading.RLock()
+_detectors: list[Detector] | None = None
 
 
-@dataclass
-class RestoreResult:
-    text: str
-    unknown: list[str]    # Platzhalter, die nicht in der Sitzung stehen
-    changed: list[str]    # verdächtige Formen wie „Person 1“, nicht ersetzt
-    missing: list[str]    # gesendete Platzhalter, die in der Antwort fehlen
-    warnings: list[str]   # fertige deutsche Sätze
+def set_detectors(detectors: list[Detector] | None) -> None:
+    """Erweiterung: Detektoren festlegen (Tests, weitere Detektoren). None = Standard (Regex + GLiNER)."""
+    global _detectors
+    _detectors = detectors
 
 
-class LeakError(Exception): ...
-class ReleaseMismatchError(Exception): ...
-class NoApiKeyError(Exception): ...
+def _active_detectors() -> list[Detector]:
+    global _detectors
+    if _detectors is None:
+        _detectors = [RegexDetector(), GlinerDetector()]
+    return _detectors
+
+
+def _session(session_id: str) -> _Session:
+    try:
+        return _sessions[session_id]
+    except KeyError:
+        raise KeyError(f"Unbekannte Sitzung: {session_id}") from None
+
+
+def _masked(session_id: str, s: _Session) -> tuple[str, list[Replacement], list[vault.Mapping]]:
+    mappings = vault.mappings(session_id)
+    types = {m.placeholder: m.typ for m in vault.mappings(session_id, active_only=False)}
+    masked, replacements = mask.build(s.original_text, s.spans, types)
+    return masked, replacements, mappings
+
+
+def _result(session_id: str, extra_warnings: list[str] | None = None) -> MaskResult:
+    s = _session(session_id)
+    masked, replacements, mappings = _masked(session_id, s)
+    warnings = gate.name_part_warnings(masked, mappings) + (extra_warnings or [])
+    return MaskResult(session_id, s.original_text, masked, replacements, warnings)
+
+
+def _log_counts(action: str, session_id: str, s: _Session) -> None:
+    counts = Counter(p.placeholder.strip("[]").rsplit("_", 1)[0] for p in s.spans)
+    log.info("%s: Sitzung %s, %d Stellen %s", action, session_id[:8], len(s.spans), dict(counts))
 
 
 def analyze(text: str) -> MaskResult:
     """Neue Sitzung: erkennen und maskieren."""
-    raise NotImplementedError
+    with _lock:
+        session_id = vault.create_session()
+        s = _Session(original_text=text)
+        for f in detect_all(text, _active_detectors()):
+            placeholder = vault.placeholder_for(session_id, f.text, f.typ)
+            if all(f.end <= x.start or f.start >= x.end for x in s.spans):
+                s.spans.append(Span(f.start, f.end, placeholder))
+        s.spans = mask.propagate(text, sorted(s.spans, key=lambda x: x.start), vault.mappings(session_id))
+        _sessions[session_id] = s
+        _log_counts("analyze", session_id, s)
+        return _result(session_id)
 
 
 def add_manual(session_id: str, term: str, typ: str) -> MaskResult:
     """Jedes Vorkommen von term zusätzlich maskieren."""
-    raise NotImplementedError
+    typ = typ.strip().upper()
+    if typ not in TYPES:
+        raise ValueError(f"Unbekannter Typ: {typ}. Erlaubt: {', '.join(TYPES)}")
+    term = " ".join(term.split())
+    if not term:
+        raise ValueError("Leerer Begriff.")
+    with _lock:
+        s = _session(session_id)
+        if not mask.occurrence_pattern(term).search(s.original_text):
+            return _result(session_id, [WARN_TERM_NOT_FOUND.format(term=term)])
+        placeholder = vault.placeholder_for(session_id, term, typ)
+        s.spans = mask.add_occurrences(s.original_text, s.spans, term, placeholder)
+        s.issued.clear()   # jede Änderung macht bisherige Freigaben ungültig
+        _log_counts(f"add_manual {placeholder}", session_id, s)
+        return _result(session_id)
 
 
 def remove(session_id: str, placeholder: str) -> MaskResult:
     """Ersetzung zurücknehmen."""
-    raise NotImplementedError
+    placeholder = placeholder.strip()
+    if not placeholder.startswith("["):
+        placeholder = f"[{placeholder}]"
+    with _lock:
+        s = _session(session_id)
+        if not vault.deactivate(session_id, placeholder):
+            raise ValueError(f"Platzhalter nicht in dieser Sitzung: {placeholder}")
+        s.spans = mask.drop(s.spans, placeholder)
+        # Andere bekannte Werte, die in der freigelegten Stelle stecken, bleiben maskiert.
+        s.spans = mask.propagate(s.original_text, s.spans, vault.mappings(session_id))
+        s.issued.clear()
+        _log_counts(f"remove {placeholder}", session_id, s)
+        return _result(session_id)
 
 
 def get(session_id: str) -> MaskResult:
-    raise NotImplementedError
+    with _lock:
+        return _result(session_id)
 
 
 def release(session_id: str) -> Release:
     """Gibt den AKTUELLEN maskierten Text frei, LeakError bei Leck."""
-    raise NotImplementedError
+    with _lock:
+        s = _session(session_id)
+        masked, _, mappings = _masked(session_id, s)
+        try:
+            rel = gate.make_release(session_id, masked, mappings)
+        except LeakError as e:
+            log.warning("release blockiert: Sitzung %s, Leck bei %s", session_id[:8], e.placeholders)
+            raise
+        s.issued.add(rel.sha256)
+        log.info("release: Sitzung %s, sha256 %s", session_id[:8], rel.sha256[:12])
+        return rel
 
 
 def has_api_key() -> bool:
-    raise NotImplementedError
+    return cloud.has_api_key()
 
 
 def send(rel: Release) -> str:
-    """Antwort von Claude; ReleaseMismatchError / NoApiKeyError."""
-    raise NotImplementedError
+    """Antwort von Claude; ReleaseMismatchError / NoApiKeyError.
+
+    Die Freigabe wird immer zuerst geprüft. NoApiKeyError heißt also auch:
+    rel.text ist gültig freigegeben und darf im Kopier-Modus ausgegeben werden.
+    """
+    with _lock:
+        s = _sessions.get(rel.session_id)
+        current = _masked(rel.session_id, s)[0] if s else None
+        gate.verify(rel, current, s.issued if s else set())
+    return cloud.ask(rel.text)
 
 
 def restore(session_id: str, answer: str) -> RestoreResult:
-    raise NotImplementedError
+    with _lock:
+        s = _session(session_id)
+        masked, _, mappings = _masked(session_id, s)
+    originals = {m.placeholder: m.original for m in mappings}
+    sent = list(dict.fromkeys(gate.PLACEHOLDER_RE.findall(masked)))
+    result = _restore.restore(answer, originals, sent)
+    log.info(
+        "restore: Sitzung %s, unbekannt %s, verändert %d, fehlend %s",
+        session_id[:8], result.unknown, len(result.changed), result.missing,
+    )
+    return result
