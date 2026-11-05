@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>LP7 · UI Kit</title>
+<link rel="stylesheet" href="kit.css">
+</head>
+<body data-look="glass">
+<svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <symbol id="i-analyze" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3M7 8h10M7 12h7M7 16h10"/></symbol>
+  <symbol id="i-preview" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-output" viewBox="0 0 24 24"><path d="M5 3h9l5 5v4M14 3v5h5M5 3v18h7m0-5h9m-3-3 3 3-3 3"/></symbol>
+  <symbol id="i-original" viewBox="0 0 24 24"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M8 12h8m-8 4h6"/></symbol>
+  <symbol id="i-mask" viewBox="0 0 24 24"><path d="M7 4H4v16h3m10-16h3v16h-3M9 9h6m-6 6h6"/></symbol>
+  <symbol id="i-release" viewBox="0 0 24 24"><path d="M12 2.5 20 6v6c0 4.5-4 7.8-8 9.5C8 19.8 4 16.5 4 12V6l8-3.5Z M8.5 11.8l2.4 2.4 4.8-4.8"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="m21 3-6.5 18-4-7.5L3 9.5 21 3Z M10.5 13.5 21 3"/></symbol>
+  <symbol id="i-restore" viewBox="0 0 24 24"><path d="M4 9h11a5 5 0 0 1 0 10h-3M8 5 4 9l4 4M6 19h2"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="13" rx="2.5"/><path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3m-4 4 4-4 4 4M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v13m-4-4 4 4 4-4M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.7 2.7L16 9.4"/></symbol>
+  <symbol id="i-warning" viewBox="0 0 24 24"><path d="m10.3 4-8 14a2 2 0 0 0 1.7 3h16a2 2 0 0 0 1.7-3l-8-14a2 2 0 0 0-3.4 0ZM12 9v4m0 3v.5"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1.8 8.7M4 4v6h6"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 6h4m4 0h8M4 12h10m4 0h2M4 18h3m4 0h9"/><circle cx="10" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="9" cy="18" r="2"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+  <symbol id="i-local" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4M8.5 10.5l2.4 2.4 4.6-4.6"/></symbol>
+</svg>
+<div class="ambient" aria-hidden="true"></div>
+<div class="site-shell">
+  <header class="site-header">
+    <a class="brand" href="#"><svg class="icon" aria-hidden="true"><use href="#i-mask"/></svg>LP7<span class="brand-caption">Interface Kit</span></a>
+    <nav aria-label="UI Kit Bereiche"><a href="#icons">Icons</a><a href="#components">Komponenten</a><a href="#demos">Demos</a></nav>
+    <span class="edition">Designstudie · 2026</span>
+  </header>
+  <main>
+    <section class="hero" aria-labelledby="title">
+      <div><p class="eyebrow">WENIGER RAUSCHEN. MEHR KLARHEIT.</p><h1 id="title">Ein klarer Ablauf.<br>Ein leichtes Gefühl.</h1><p class="lead">Die Bausteine für deinen lokalen KI Arbeitsbereich.</p></div>
+      <div class="hero-art" aria-hidden="true"><span class="art-icon small"><svg class="icon"><use href="#i-analyze"/></svg></span><span class="art-icon large"><svg class="icon"><use href="#i-preview"/></svg></span><span class="art-icon small"><svg class="icon"><use href="#i-output"/></svg></span><span class="art-label">Klar. Lokal. Unter deiner Kontrolle.</span></div>
+    </section>
+    <div class="look-bar"><span>Drei Looks. Eine Designsprache.</span><div class="segmented" role="group" aria-label="Designrichtung"><button type="button" data-look="glass" aria-pressed="true">Liquid Glass</button><button type="button" data-look="lime" aria-pressed="false">Lime Soda</button><button type="button" data-look="pure" aria-pressed="false">Pure White</button></div></div>
+
+    <section id="icons" class="section" aria-labelledby="icons-title">
+      <div class="section-heading"><div><p class="eyebrow">01 / ICONS</p><h2 id="icons-title">Kleine Zeichen. Klare Bedeutung.</h2></div><p>18 Icons · 24 px · runde Konturen</p></div>
+      <div class="icon-grid" id="iconGrid" role="group" aria-label="Icon auswählen"></div>
+      <div class="icon-inspector glass-panel">
+        <div class="inspector-symbol" id="selectedSymbol" aria-hidden="true"></div>
+        <div class="inspector-info"><strong id="selectedName">Analysieren</strong><span id="selectedHelp">Sensible Angaben im Text erkennen.</span></div>
+        <div class="size-samples" aria-label="Größenvergleich: 16, 20 und 24 Pixel"><span id="size16"></span><span id="size20"></span><span id="size24"></span></div>
+        <div class="button-row"><button type="button" class="button secondary" id="copySvg"><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>SVG kopieren</button><button type="button" class="button primary" id="downloadSvg"><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg>SVG laden</button></div>
+      </div>
+      <p class="feedback" id="iconFeedback" role="status"></p>
+    </section>
+
+    <section id="components" class="section" aria-labelledby="components-title">
+      <div class="section-heading"><div><p class="eyebrow">02 / BAUSTEINE</p><h2 id="components-title">Vertraut, bevor du klickst.</h2></div><p>Beschriftete Aktionen statt Rätselraten.</p></div>
+      <div class="component-grid">
+        <article class="component glass-panel"><h3>Aktionen</h3><p>Eine klare Hauptaktion pro Schritt.</p><div class="button-row"><button type="button" class="button primary sample-action" data-message="Analysieren startet die lokale Prüfung des Textes."><svg class="icon" aria-hidden="true"><use href="#i-analyze"/></svg>Analysieren</button><button type="button" class="button accent sample-action" data-message="Freigeben bestätigt die geprüfte Vorschau."><svg class="icon" aria-hidden="true"><use href="#i-release"/></svg>Freigeben</button></div><div class="button-row"><button type="button" class="button secondary sample-action" data-message="Kopieren übernimmt nur die freigegebene Fassung."><svg class="icon" aria-hidden="true"><use href="#i-copy"/></svg>Kopieren</button><button type="button" class="button secondary" disabled><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg>Senden</button></div><p class="component-note">Gesperrte Aktionen bleiben erkennbar.</p></article>
+        <article class="component glass-panel"><h3>Status & Hinweise</h3><p>Farbe und Symbol sagen dasselbe.</p><div class="badge-row"><span class="badge warning"><svg class="icon" aria-hidden="true"><use href="#i-preview"/></svg>Prüfung nötig</span><span class="badge success"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg>Freigegeben</span></div><div class="notice"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><span><strong>Versand gesperrt</strong>Prüfe die Vorschau und gib sie frei.</span></div></article>
+        <article class="component glass-panel"><h3>Text & Platzhalter</h3><p>Das Original bleibt verständlich.</p><label class="input-label" for="sampleSubject">Betreff</label><input id="sampleSubject" value="Rückfrage zum Mandat" maxlength="100"><div class="chip-row"><span class="data-chip person">[PERSON_1]</span><span class="data-chip email">[EMAIL_1]</span><span class="data-chip firm">[FIRMA_1]</span></div><div class="local-note"><svg class="icon" aria-hidden="true"><use href="#i-local"/></svg>Zuordnung bleibt auf deinem Rechner.</div></article>
+      </div>
+      <p class="feedback" id="componentFeedback" role="status"></p>
+    </section>
+
+    <section id="demos" class="section" aria-labelledby="demos-title">
+      <div class="section-heading"><div><p class="eyebrow">03 / LIVE DEMOS</p><h2 id="demos-title">Drei Richtungen zum Ausprobieren.</h2></div><p>Erfundener Beispieltext. Kein Versand.</p></div>
+      <div class="demo-grid" id="demoGrid"></div>
+    </section>
+    <footer><span>LP7 · Interface Kit</span><span>Eigenständige Designstudie. Keine Verbindung zu Claude.</span><a href="icons.zip" download>Alle 18 SVG Icons laden <span aria-hidden="true">↗</span></a></footer>
+  </main>
+</div>
+<script src="kit.js"></script>
+</body>
+</html>
