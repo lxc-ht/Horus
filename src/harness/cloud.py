@@ -32,6 +32,9 @@ NO_KEY_MESSAGE = (
 )
 
 
+TRUNCATED_NOTE = "\n\nACHTUNG: Die Antwort wurde wegen des Längenlimits abgeschnitten und ist unvollständig."
+
+
 class NoApiKeyError(Exception):
     def __init__(self, message: str = NO_KEY_MESSAGE):
         super().__init__(message)
@@ -86,4 +89,9 @@ def ask(text: str) -> str:
 
     if response.stop_reason == "refusal":
         raise CloudError("Claude hat die Anfrage abgelehnt.")
-    return "".join(block.text for block in response.content if block.type == "text")
+    answer = "".join(block.text for block in response.content if block.type == "text")
+    if response.stop_reason == "max_tokens":
+        # Der Teil kann brauchbar sein, also nicht verwerfen, aber sichtbar machen. send() liefert laut Vertrag nur Text.
+        log.warning("Antwort wegen Längenlimit abgeschnitten")
+        answer += TRUNCATED_NOTE
+    return answer

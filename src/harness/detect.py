@@ -75,30 +75,37 @@ _BARE_IDS = [
     re.compile(r"(?<![\w@.])(?:https?://|www\.)[^\s<>\"']+"),                # URL, kann Patienten- oder Fallnummern enthalten
 ]
 
-_STREET_SUFFIXES = (
-    "straße|strasse|str\\.|weg|gasse|allee|platz|ring|damm|ufer|chaussee|pfad|steig|stieg"
-    "|berg|bach|hof|feld|garten|kamp|bahn|markt|wall|graben|deich"
-)
+# Eindeutige Straßenendungen zählen immer, mehrdeutige („Bundesgerichtshof 12“) nur mit „Am …“ davor oder PLZ dahinter.
+_STREET_SUFFIXES = "straße|strasse|str\\.|weg|gasse|allee|ring|damm|ufer|chaussee|pfad|steig|stieg"
+_PLACE_SUFFIXES = "platz|berg|bach|hof|feld|garten|kamp|bahn|markt|wall|graben|deich"
+_NOT_STREET = r"(?!(?:Rechts|Dienst|Instanzen)weg\b|Arbeitsplatz\b)"
+_HOUSE_NUMBER = r"\s+\d{1,4}(?:\s?[a-zA-Z](?!\w)|\s?[\-/]\s?\d{1,4})?"
 _POSTCODE_CITY = (
-    r"\d{5}\s+(?!Euro\b|EUR\b|Dollar\b|Stück\b)[A-ZÄÖÜ][\w\-]+"
+    r"\d{5}\s+(?!(?:Euro|EUR|Dollar|Stück|Menschen|Personen|Kunden|Mitarbeiter)\b)[A-ZÄÖÜ][\w\-]+"
     r"(?:\s+(?:im|am|an der|bei|ob der)\s+[A-ZÄÖÜ][\w\-]+)?"
 )
-# Straße mit Hausnummer, optional mit PLZ und Ort dahinter, oder PLZ und Ort allein.
+# Straße mit Hausnummer, optional mit PLZ und Ort dahinter.
 _ADDRESS = re.compile(
     r"(?<![\w\-])(?:"
-    r"(?:(?:Am|An der|Auf der|Auf dem|Im|In der|Zum|Zur)\s+)?"
-    rf"(?:[A-ZÄÖÜ][\w\-]*(?:{_STREET_SUFFIXES})|[A-ZÄÖÜ][\w\-]+(?:\s+|-)(?:Straße|Strasse|Str\.|Weg|Platz|Allee|Gasse|Ring|Damm|Ufer))"
-    r"\s+\d{1,4}(?:\s?[a-zA-Z](?!\w)|\s?[\-/]\s?\d{1,4})?"
-    rf"(?:,?\s+{_POSTCODE_CITY})?"
-    rf"|{_POSTCODE_CITY}"
+    rf"(?:(?:Am|An der|Auf der|Auf dem|Im|In der|Zum|Zur)\s+)?{_NOT_STREET}"
+    rf"(?:[A-ZÄÖÜ][\w\-]*(?:{_STREET_SUFFIXES})"
+    r"|(?!(?:Der|Die|Das|Diese[rs]?|Eine?)\b)[A-ZÄÖÜ][\w\-]+(?:\s+|-)(?:Straße|Strasse|Str\.|Weg|Platz|Allee|Gasse|Ring|Damm|Ufer))"
+    rf"{_HOUSE_NUMBER}(?:,?\s+{_POSTCODE_CITY})?"
+    rf"|(?:Am|An der|Auf der|Auf dem|Zum|Zur)\s+{_NOT_STREET}[A-ZÄÖÜ][\w\-]*(?:{_PLACE_SUFFIXES}){_HOUSE_NUMBER}(?:,?\s+{_POSTCODE_CITY})?"
+    rf"|{_NOT_STREET}[A-ZÄÖÜ][\w\-]*(?:{_PLACE_SUFFIXES}){_HOUSE_NUMBER},?\s+{_POSTCODE_CITY}"
     r")"
 )
+# PLZ und Ort allein. Nur nach einem Trenner oder „in“, sonst wären „es kamen 50000 Gäste“ auch Adressen.
+_POSTCODE_ALONE = re.compile(rf"(?<!\d){_POSTCODE_CITY}")
+_BEFORE_POSTCODE = re.compile(r"(?:^|[,:;(\n]|(?<!\w)(?:[Ii]n|aus|nach|bei|von|PLZ))[ \t]*$")
 
-_NAME = r"(?:(?:von|van|de|zu) )?[A-ZÄÖÜ][a-zäöüß]+(?:-[A-ZÄÖÜ][a-zäöüß]+)?"
-# Anrede oder Titel gefolgt von ein bis zwei Namen. Nur die Namen werden zur Fundstelle: „Frau [PERSON_1]“.
+_NAME_WORD = r"[^\W\d_]+(?:['’\-][^\W\d_]+)*"   # alle Schriften: Nguyễn, Çelik, O'Neill, Müller-Lüdenscheidt
+_NAME_PARTICLES = {"von", "van", "de", "der", "den", "zu", "la", "di", "da", "del", "ten", "ter"}
+# Anrede oder Titel, dahinter bis zu vier Wörter. Welche davon zum Namen gehören, entscheidet _salutation_name().
 _SALUTATION = re.compile(
-    r"(?<!\w)(?:Herrn?|Frau|Dr\.|Prof\.)\s+(?:(?:Dr\.|Prof\.|med\.|jur\.|rer\.|nat\.)\s+)*"
-    rf"(?P<name>{_NAME}(?: {_NAME})?)"
+    r"(?<!\w)(?:(?i:Herrn?|Frau)|Dr\.|Prof\.)\s+(?:(?:Dr\.|Prof\.|med\.|jur\.|rer\.|nat\.)\s+)*"
+    # Nur vorausschauen: Die Wörter dürfen die nächste Anrede nicht verbrauchen („Frau Çelik schreibt Herrn Šimić“).
+    rf"(?=(?P<name>{_NAME_WORD}(?: {_NAME_WORD}){{0,3}}))"
 )
 
 _MONTHS = "Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember"
@@ -121,6 +128,27 @@ def _tax_id_valid(raw: str) -> bool:
         total = (d + product) % 10 or 10
         product = total * 2 % 11
     return (11 - product) % 10 == digits[10]
+
+
+def _salutation_name(m: re.Match) -> tuple[int, int] | None:
+    """Position des Namens hinter einer Anrede: überspringt Berufe, endet am ersten kleingeschriebenen Wort."""
+    start = end = None
+    for word in re.finditer(r"\S+", m.group("name")):
+        value = word.group()
+        if value.lower() in _ROLE_WORDS:
+            if end is not None:
+                break
+        elif value[0].isupper():
+            start = word.start() if start is None else start
+            end = word.end()
+        elif value in _NAME_PARTICLES:
+            start = word.start() if start is None else start
+        else:
+            break
+    if end is None:
+        return None
+    offset = m.start("name")
+    return offset + start, offset + end
 
 
 def _iban_valid(raw: str) -> bool:
@@ -156,9 +184,12 @@ class RegexDetector:
                 add(m, "KENNUNG")
         for m in _ADDRESS.finditer(text):
             add(m, "ADRESSE")
+        for m in _POSTCODE_ALONE.finditer(text):
+            if _BEFORE_POSTCODE.search(text[max(0, m.start() - 8) : m.start()]):
+                add(m, "ADRESSE")
         for m in _SALUTATION.finditer(text):
-            if m.group("name").split()[0].lower() not in _ROLE_WORDS:
-                add(m, "PERSON", "name")
+            if (span := _salutation_name(m)) is not None:
+                found.append(Finding(span[0], span[1], text[span[0] : span[1]], "PERSON", self.name, 1.0))
         for m in _EMAIL.finditer(text):
             add(m, "EMAIL")
         for m in _IBAN.finditer(text):
@@ -191,7 +222,10 @@ _ROLE_WORDS = {
     "mandant", "mandantin", "patient", "patientin", "vermieter", "vermieterin", "mieter", "mieterin",
     "kläger", "klägerin", "beklagte", "beklagter", "kollege", "kollegin", "kolleginnen", "kollegen",
     "ärztin", "arzt", "ansprechpartner", "ansprechpartnerin", "gesellschafter", "gesellschafterin",
+    "doktor", "rechtsanwalt", "rechtsanwältin", "anwalt", "anwältin", "richter", "richterin", "notar", "notarin",
+    "professor", "professorin", "steuerberater", "steuerberaterin", "vorsitzender", "vorsitzende",
 }
+_NOT_A_NAME = _ROLE_WORDS | {"herr", "herrn", "frau"}
 
 _gliner_cache: dict[str, object] = {}
 
@@ -271,6 +305,12 @@ def _trim(f: Finding, text: str) -> Finding | None:
         start += 1
     while end > start and text[end - 1] in _EDGE_CHARS:
         end -= 1
+    if f.typ == "PERSON":
+        # Anrede und Beruf gehören nicht zum Wert, sonst ergibt die Rückübersetzung „Frau Frau Muster“.
+        while (m := re.match(r"(\S+)\s+", text[start:end])) and m[1].lower() in _NOT_A_NAME:
+            start += m.end()
+        if text[start:end].lower() in _NOT_A_NAME:
+            return None
     if end - start < 2:
         return None
     return Finding(start, end, text[start:end], f.typ, f.quelle, f.score)
