@@ -36,6 +36,11 @@ class Span:
     start: int   # im Originaltext
     end: int
     placeholder: str
+    name_part: bool = False   # nur ein Namensteil einer Person, wird bei propagate() neu berechnet
+
+
+# Namensteile, die allein nichts über eine Person verraten.
+NAME_STOPWORDS = {"dr", "prof", "med", "herr", "frau", "von", "van", "der", "den", "die", "und", "zu"}
 
 
 def build(original: str, spans: list[Span], types: dict[str, str]) -> tuple[str, list[Replacement]]:
@@ -57,13 +62,45 @@ def build(original: str, spans: list[Span], types: dict[str, str]) -> tuple[str,
     return masked, replacements
 
 
-def occurrence_pattern(value: str) -> re.Pattern:
-    """Findet value ohne Groß-/Kleinschreibung und mit beliebigem Leerraum zwischen den Wörtern."""
+def occurrence_pattern(value: str, whole_word: bool = False) -> re.Pattern:
+    """Findet value ohne Groß-/Kleinschreibung und mit beliebigem Leerraum zwischen den Wörtern.
+
+    whole_word=True: nur als ganzes Wort, nie mitten in einem längeren Wort.
+    """
     words = value.split()
-    return re.compile(r"\s+".join(re.escape(w) for w in words), re.IGNORECASE)
+    body = r"\s+".join(re.escape(w) for w in words)
+    if whole_word:
+        body = rf"(?<!\w){body}(?!\w)"
+    return re.compile(body, re.IGNORECASE)
 
 
-def add_occurrences(original: str, spans: list[Span], value: str, placeholder: str) -> list[Span]:
+def name_parts(value: str) -> list[str]:
+    """Einzelne Namensteile ab 3 Zeichen, ohne nichtssagende Teile wie „Frau“ oder „Dr.“."""
+    parts: list[str] = []
+    for part in re.split(r"[\s\-]+", value):
+        part = part.strip(".,;:()\"'")
+        if len(part) >= 3 and part.lower() not in NAME_STOPWORDS and part.lower() not in parts:
+            parts.append(part.lower())
+    return parts
+
+
+def name_part_owners(mappings: list[Mapping]) -> dict[str, list[str]]:
+    """Namensteil (klein geschrieben) → Platzhalter aller Personen, zu denen er gehört."""
+    owners: dict[str, list[str]] = {}
+    for m in mappings:
+        if m.typ != "PERSON":
+            continue
+        for part in name_parts(m.original):
+            placeholders = owners.setdefault(part, [])
+            if m.placeholder not in placeholders:
+                placeholders.append(m.placeholder)
+    return owners
+
+
+def add_occurrences(
+    original: str, spans: list[Span], value: str, placeholder: str,
+    whole_word: bool = False, name_part: bool = False,
+) -> list[Span]:
     """Maskiert jedes Vorkommen von value zusätzlich.
 
     Überlappt ein Vorkommen bestehende Stellen, wird es nur übernommen, wenn es sie
@@ -72,14 +109,14 @@ def add_occurrences(original: str, spans: list[Span], value: str, placeholder: s
     result = list(spans)
     if not value.split():
         return result
-    for m in occurrence_pattern(value).finditer(original):
+    for m in occurrence_pattern(value, whole_word).finditer(original):
         start, end = m.start(), m.end()
         overlapping = [s for s in result if s.start < end and start < s.end]
         if not overlapping:
-            result.append(Span(start, end, placeholder))
+            result.append(Span(start, end, placeholder, name_part))
         elif all(start <= s.start and s.end <= end and (end - start) > (s.end - s.start) for s in overlapping):
             result = [s for s in result if s not in overlapping]
-            result.append(Span(start, end, placeholder))
+            result.append(Span(start, end, placeholder, name_part))
     return sorted(result, key=lambda s: s.start)
 
 
@@ -88,9 +125,24 @@ def propagate(original: str, spans: list[Span], mappings: list[Mapping]) -> list
 
     So bekommt derselbe Wert überall denselben Platzhalter, auch wenn der Detektor
     nur eine Stelle gefunden hat.
+
+    Danach einzelne Namensteile von Personen („Frau Musterfrau“ → „Frau [PERSON_1]“),
+    aber nur als ganzes Wort und nur, wenn der Teil zu genau einer Person der Sitzung
+    gehört. Zurückgenommene Personen (active=False) zählen dabei mit: Ihre Teile werden
+    nicht wieder maskiert, machen einen gleichen Teil einer anderen Person aber
+    mehrdeutig. Mehrdeutiges bleibt stehen, dafür warnt gate.name_part_warnings().
+
+    mappings darf zurückgenommene Werte enthalten, maskiert werden nur aktive.
     """
-    for mapping in sorted(mappings, key=lambda m: -len(m.original)):
+    # Namensteile jedes Mal neu berechnen: Eine neue Person kann einen Teil mehrdeutig machen.
+    spans = [s for s in spans if not s.name_part]
+    active = [m for m in mappings if m.active]
+    for mapping in sorted(active, key=lambda m: -len(m.original)):
         spans = add_occurrences(original, spans, mapping.original, mapping.placeholder)
+    active_placeholders = {m.placeholder for m in active}
+    for part, placeholders in name_part_owners(mappings).items():
+        if len(placeholders) == 1 and placeholders[0] in active_placeholders:
+            spans = add_occurrences(original, spans, part, placeholders[0], whole_word=True, name_part=True)
     return spans
 
 

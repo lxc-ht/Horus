@@ -24,11 +24,15 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Freigaben liegen nur im Speicher. Nach einem Neustart des Prozesses sind Sitzungen und Freigaben weg, die Zuordnung in SQLite bleibt. Alte Sitzungen sollten nach einer Frist aus der Datenbank gelöscht werden.
 - Der Leck-Check vergleicht ohne Unicode-Normalisierung. NFC- und NFD-„ü“ gelten als verschieden.
 - Der stdin-Modus der CLI liest die Prüfbefehle von /dev/tty. Ohne Terminal (CI, Pipe ohne tty) bricht er mit Meldung ab.
+- Namensteile, die auch gewöhnliche Wörter sind, werden mitmaskiert: Bei einer Person „Anna Berg“ wird aus „am Berg“ „am [PERSON_1]“, zurückübersetzt „am Anna Berg“. Sicher, verfälscht aber die Antwort. Eventuell eine Liste häufiger Wörter oder Großschreibung als Bedingung.
+- Für die Eindeutigkeit eines Namensteils zählen nur Personen. Steckt derselbe Teil in einer Firma („Kettelhut & Brenner Tischlerei GmbH“), wird ein allein stehendes „Kettelhut“ trotzdem der Person zugeordnet, auch wenn die Firma gemeint ist.
+- Der Bindestrich gilt als Wortgrenze: Aus „Musterfrau-Stiftung“ wird „[PERSON_1]-Stiftung“.
+- Erkennt der Detektor einen Nachnamen allein als eigene Person („Weidenfeld“ neben „Jonas Weidenfeld“), gibt es zwei Platzhalter für dieselbe Person. Der Teil ist dann mehrdeutig und wird nicht dem vollen Namen zugeordnet. Gleiches gilt, wenn der Mensch den Nachnamen per `add_manual` als PERSON ergänzt.
 
 ## Später
 
 - PDF, Word, OCR als Eingabe (Achtung: Lecks über Metadaten).
 - Zweiter Detektor, z. B. lokales LLM über Ollama – die Detektor-Schnittstelle in `detect.py` ist dafür vorbereitet.
-- Varianten derselben Person zusammenführen („Max Müller“ = „Herr Müller“). Bis dahin meldet der Leck-Check den Fall als Warnung.
+- Varianten derselben Person mit Tippfehlern, Genitiv („Musterfraus“) oder Spitznamen erkennen. Einzelne Namensteile als ganzes Wort werden schon mitmaskiert, alles andere meldet höchstens die Warnung.
 - Verschlüsselung der Datenbank.
 - Streaming der Claude-Antwort für lange Texte (aktuell eine Anfrage, max_tokens 16000).

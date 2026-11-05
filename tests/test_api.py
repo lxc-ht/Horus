@@ -34,7 +34,7 @@ def test_same_name_twice_same_placeholder():
     hits = [r for r in result.replacements if r.original == "Jonas Weidenfeld"]
     assert len(hits) == 2
     assert hits[0].placeholder == hits[1].placeholder == "[PERSON_1]"
-    assert result.masked_text.count("[PERSON_1]") == 2
+    assert result.masked_text.count("[PERSON_1]") == 3   # dazu „Herr [PERSON_1]“ aus dem Nachnamen
 
 
 def test_numbering_per_type():
@@ -48,12 +48,6 @@ def test_missed_occurrence_is_propagated():
     api.set_detectors([RegexDetector(), FakeDetector({"Jonas Weidenfeld": "PERSON"}, first_only=True)])
     result = api.analyze("Jonas Weidenfeld schreibt. Später: JONAS  WEIDENFELD unterschreibt.")
     assert result.masked_text == "[PERSON_1] schreibt. Später: [PERSON_1] unterschreibt."
-
-
-def test_last_name_alone_gives_warning():
-    result = api.analyze(SAMPLE)
-    assert "Herr Weidenfeld" in result.masked_text
-    assert "Achtung: „Weidenfeld“ steht noch im Text und gehört vermutlich zu [PERSON_1]." in result.warnings
 
 
 def test_add_manual_masks_every_occurrence():
@@ -108,6 +102,82 @@ def test_get_returns_current_state():
 def test_unknown_session():
     with pytest.raises(KeyError):
         api.get("gibt-es-nicht")
+
+
+# --- Namensteile ---------------------------------------------------------------
+
+def _persons(*names):
+    api.set_detectors([RegexDetector(), FakeDetector({n: "PERSON" for n in names})])
+
+
+def test_last_name_alone_gets_same_placeholder():
+    result = api.analyze(SAMPLE)
+    assert "Herr [PERSON_1] zahlt" in result.masked_text
+    assert "Weidenfeld" not in result.masked_text
+    assert result.warnings == []
+    hit = next(r for r in result.replacements if r.original == "Weidenfeld")
+    assert hit.placeholder == "[PERSON_1]"
+
+
+def test_name_part_whole_word_and_case_insensitive():
+    _persons("Erika Musterfrau")
+    result = api.analyze("Erika Musterfrau klagt. Frau MUSTERFRAU zweifelt, Erika auch.")
+    assert result.masked_text == "[PERSON_1] klagt. Frau [PERSON_1] zweifelt, [PERSON_1] auch."
+    assert result.warnings == []
+
+
+def test_name_part_inside_longer_word_is_untouched():
+    _persons("Erika Musterfrau")
+    result = api.analyze("Erika Musterfrau ist Mitglied im Musterfrauenverband.")
+    assert result.masked_text == "[PERSON_1] ist Mitglied im Musterfrauenverband."
+    assert result.warnings == []
+
+
+def test_shared_last_name_stays_with_warning():
+    _persons("Max Mustermann", "Erika Mustermann")
+    result = api.analyze("Max Mustermann und Erika Mustermann streiten. Mustermann gibt nach.")
+    assert result.masked_text == "[PERSON_1] und [PERSON_2] streiten. Mustermann gibt nach."
+    assert result.warnings == [
+        "Achtung: „Mustermann“ steht noch im Text und gehört vermutlich zu [PERSON_1] oder [PERSON_2]."
+    ]
+    api.release(result.session_id)   # nur eine Warnung, kein Leck
+
+
+def test_new_person_makes_name_part_ambiguous_again():
+    _persons("Max Mustermann")
+    result = api.analyze("Max Mustermann trifft Erika Mustermann. Mustermann gibt nach.")
+    assert result.masked_text.endswith("[PERSON_1] gibt nach.")
+    result = api.add_manual(result.session_id, "Erika Mustermann", "PERSON")
+    assert result.masked_text == "[PERSON_1] trifft [PERSON_2]. Mustermann gibt nach."
+    assert any("[PERSON_1] oder [PERSON_2]" in w for w in result.warnings)
+
+
+def test_removed_person_name_part_is_not_masked_again():
+    _persons("Erika Musterfrau")
+    result = api.analyze("Erika Musterfrau klagt. Frau Musterfrau zweifelt.")
+    result = api.remove(result.session_id, "[PERSON_1]")
+    assert result.masked_text == "Erika Musterfrau klagt. Frau Musterfrau zweifelt."
+    # Auch eine spätere Änderung, die alles neu berechnet, holt den Teil nicht zurück.
+    result = api.add_manual(result.session_id, "klagt", "ORT")
+    assert result.masked_text == "Erika Musterfrau [ORT_1]. Frau Musterfrau zweifelt."
+    assert result.warnings == []
+
+
+def test_removed_person_keeps_shared_part_ambiguous():
+    # Der Mensch hat Erika zurückgenommen. „Mustermann“ kann trotzdem sie meinen, also kein Raten.
+    _persons("Max Mustermann", "Erika Mustermann")
+    result = api.analyze("Max Mustermann und Erika Mustermann streiten. Mustermann gibt nach.")
+    result = api.remove(result.session_id, "[PERSON_2]")
+    assert result.masked_text == "[PERSON_1] und Erika Mustermann streiten. Mustermann gibt nach."
+    assert result.warnings == [
+        "Achtung: „Mustermann“ steht noch im Text und gehört vermutlich zu [PERSON_1]."
+    ]
+
+
+def test_stopword_parts_are_not_masked():
+    _persons("Dr. med. Konrad Haslinger")
+    result = api.analyze("Dr. med. Konrad Haslinger schreibt. Herr Dr. Haslinger grüßt.")
+    assert result.masked_text == "[PERSON_1] schreibt. Herr Dr. [PERSON_1] grüßt."
 
 
 # --- Freigabe und Senden -------------------------------------------------------
@@ -213,9 +283,19 @@ def test_send_passes_exactly_the_released_text(monkeypatch):
 # --- Rückübersetzung -----------------------------------------------------------
 
 def test_round_trip_gives_original():
+    text = SAMPLE.replace("Herr Weidenfeld", "Jonas Weidenfeld")
+    result = api.analyze(text)
+    restored = api.restore(result.session_id, result.masked_text)
+    assert restored.text == text
+    assert restored.unknown == restored.changed == restored.missing == []
+    assert restored.warnings == []
+
+
+def test_round_trip_last_name_comes_back_as_full_name():
+    # Bekannte Eigenheit: Ein allein maskierter Nachname kommt als voller Name zurück.
     result = api.analyze(SAMPLE)
     restored = api.restore(result.session_id, result.masked_text)
-    assert restored.text == SAMPLE
+    assert restored.text == SAMPLE.replace("Herr Weidenfeld", "Herr Jonas Weidenfeld")
     assert restored.unknown == restored.changed == restored.missing == []
     assert restored.warnings == []
 

@@ -7,6 +7,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
+from .mask import name_part_owners, occurrence_pattern
 from .vault import Mapping, normalize
 
 LEAK_MESSAGE = "Gestoppt: Ein Originalwert steht noch im Text. Maskiere ihn oder nimm die Ersetzung bewusst zurück."
@@ -14,9 +15,6 @@ MISMATCH_MESSAGE = "Gestoppt: Der Text wurde nach der Freigabe geändert. Bitte 
 NAME_PART_WARNING = "Achtung: „{teil}“ steht noch im Text und gehört vermutlich zu {platzhalter}."
 
 PLACEHOLDER_RE = re.compile(r"\[[A-Z]+_\d+\]")
-
-# Namensteile, die allein nichts über eine Person verraten.
-_NAME_STOPWORDS = {"dr", "prof", "med", "herr", "frau", "von", "van", "der", "den", "die", "und", "zu"}
 
 
 @dataclass
@@ -56,20 +54,18 @@ def find_leaks(masked_text: str, mappings: list[Mapping]) -> list[str]:
 
 
 def name_part_warnings(masked_text: str, mappings: list[Mapping]) -> list[str]:
-    """Warnungen für einzelne Namensteile (ab 3 Zeichen) von Personen, die noch im Text stehen."""
+    """Warnungen für einzelne Namensteile (ab 3 Zeichen) von Personen, die noch im Text stehen.
+
+    Eindeutige Teile hat mask.propagate() schon maskiert. Übrig bleiben Teile, die zu
+    mehreren Personen gehören (die Warnung nennt alle Platzhalter), und Teile, die aus
+    anderem Grund noch im Klartext stehen.
+    """
     visible = PLACEHOLDER_RE.sub("\x00", masked_text)
     warnings: list[str] = []
-    seen: set[str] = set()
-    for m in mappings:
-        if not m.active or m.typ != "PERSON":
-            continue
-        for part in re.split(r"[\s\-]+", m.original):
-            part = part.strip(".,;:()\"'")
-            if len(part) < 3 or part.lower() in _NAME_STOPWORDS or part.lower() in seen:
-                continue
-            if re.search(rf"(?<!\w){re.escape(part)}(?!\w)", visible, re.IGNORECASE):
-                seen.add(part.lower())
-                warnings.append(NAME_PART_WARNING.format(teil=part, platzhalter=m.placeholder))
+    for part, placeholders in name_part_owners([m for m in mappings if m.active]).items():
+        match = occurrence_pattern(part, whole_word=True).search(visible)
+        if match:
+            warnings.append(NAME_PART_WARNING.format(teil=match.group(), platzhalter=" oder ".join(placeholders)))
     return warnings
 
 

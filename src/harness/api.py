@@ -82,6 +82,11 @@ def _masked(session_id: str, s: _Session) -> tuple[str, list[Replacement], list[
     return masked, replacements, mappings
 
 
+def _all_mappings(session_id: str) -> list[vault.Mapping]:
+    """Auch zurückgenommene Werte: propagate() maskiert sie nicht, braucht sie aber für mehrdeutige Namensteile."""
+    return vault.mappings(session_id, active_only=False)
+
+
 def _result(session_id: str, extra_warnings: list[str] | None = None) -> MaskResult:
     s = _session(session_id)
     masked, replacements, mappings = _masked(session_id, s)
@@ -103,7 +108,7 @@ def analyze(text: str) -> MaskResult:
             placeholder = vault.placeholder_for(session_id, f.text, f.typ)
             if all(f.end <= x.start or f.start >= x.end for x in s.spans):
                 s.spans.append(Span(f.start, f.end, placeholder))
-        s.spans = mask.propagate(text, sorted(s.spans, key=lambda x: x.start), vault.mappings(session_id))
+        s.spans = mask.propagate(text, sorted(s.spans, key=lambda x: x.start), _all_mappings(session_id))
         _sessions[session_id] = s
         _log_counts("analyze", session_id, s)
         return _result(session_id)
@@ -123,6 +128,8 @@ def add_manual(session_id: str, term: str, typ: str) -> MaskResult:
             return _result(session_id, [WARN_TERM_NOT_FOUND.format(term=term)])
         placeholder = vault.placeholder_for(session_id, term, typ)
         s.spans = mask.add_occurrences(s.original_text, s.spans, term, placeholder)
+        # Namensteile neu berechnen: Eine neue Person kann einen bisher eindeutigen Teil mehrdeutig machen.
+        s.spans = mask.propagate(s.original_text, s.spans, _all_mappings(session_id))
         s.issued.clear()   # jede Änderung macht bisherige Freigaben ungültig
         _log_counts(f"add_manual {placeholder}", session_id, s)
         return _result(session_id)
@@ -139,7 +146,7 @@ def remove(session_id: str, placeholder: str) -> MaskResult:
             raise ValueError(f"Platzhalter nicht in dieser Sitzung: {placeholder}")
         s.spans = mask.drop(s.spans, placeholder)
         # Andere bekannte Werte, die in der freigelegten Stelle stecken, bleiben maskiert.
-        s.spans = mask.propagate(s.original_text, s.spans, vault.mappings(session_id))
+        s.spans = mask.propagate(s.original_text, s.spans, _all_mappings(session_id))
         s.issued.clear()
         _log_counts(f"remove {placeholder}", session_id, s)
         return _result(session_id)
