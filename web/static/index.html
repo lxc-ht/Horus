@@ -7,135 +7,209 @@
 <style>
   :root {
     color-scheme: light;
-    --ink: #1c2026; --muted: #5d6673; --line: #e2e5ea; --paper: #fff; --soft: #f6f7f9;
-    --accent: #1f4fd8; --accent-ink: #fff;
-    --red: #b3261e; --red-soft: #fdecea; --yellow: #7a5900; --yellow-soft: #fff6d6;
-    --green: #17663a; --green-soft: #dcf5e4;
+    --ink: #101110; --muted: #555a54; --line: #e7ece4; --paper: #fff;
+    --accent: #c6ff3d; --accent-ink: #101110;
+    --red: #9b2823; --red-soft: #fff1ed; --yellow: #70540a; --yellow-soft: #fff9dd;
+    --green: #17613d; --green-soft: #dffbe8;
   }
   * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; }
-  body {
-    display: flex; flex-direction: column; background: var(--paper); color: var(--ink);
-    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  }
+  html { min-height: 100%; background: #fff; }
+  body { margin: 0; color: var(--ink); font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
   [hidden] { display: none !important; }
-  #fakeBand {
-    background: var(--red); color: #fff; font-weight: 700; text-align: center; padding: 4px 16px;
-  }
-  header {
-    display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
-    gap: 4px 24px; padding: 14px 24px 10px;
-  }
-  h1 { font-size: 20px; margin: 0; letter-spacing: -.01em; }
-  #counter { color: var(--muted); font-variant-numeric: tabular-nums; }
-  main {
-    flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px; padding: 0 24px 16px;
-  }
-  section { display: flex; flex-direction: column; gap: 10px; min-height: 0; min-width: 0; }
-  h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0; }
-  textarea, .pane {
-    width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 12px;
-    font: inherit; color: inherit; background: var(--paper);
-  }
-  textarea { resize: none; }
-  textarea:focus-visible, button:focus-visible, .pane:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button, textarea { font: inherit; }
+  button, textarea, .pane { -webkit-tap-highlight-color: transparent; }
+  button:focus-visible, textarea:focus-visible, .pane:focus-visible { outline: 3px solid #0087bd; outline-offset: 4px; }
+  #fakeBand { background: #fff8d7; color: #70540a; font-size: 12px; font-weight: 600; text-align: center; padding: 6px 18px; border-bottom: 1px solid #f4e9b4; }
+  header { height: 86px; background: #fff; }
+  .topbar { max-width: 1600px; height: 100%; margin: auto; padding: 0 48px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+  .brand { display: flex; align-items: center; gap: 9px; font-size: 26px; font-weight: 750; letter-spacing: -1.5px; }
+  .brand-mark { width: 25px; height: 32px; display: grid; place-items: center; color: var(--ink); }
+  .brand-mark svg { width: 22px; height: 26px; }
+  .brand-divider { width: 1px; height: 20px; background: var(--line); margin: 0 9px 0 16px; }
+  .brand-caption { color: var(--muted); font-size: 12px; font-weight: 400; letter-spacing: -.1px; }
+  .connection { display: flex; align-items: center; gap: 20px; color: var(--muted); font-size: 11px; }
+  .local-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: #fff; color: var(--ink); border: 1px solid #e5ebdf; box-shadow: 0 2px 7px #273e1604; border-radius: 30px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+  .dot { height: 7px; width: 7px; border-radius: 50%; background: #2be0a0; box-shadow: 0 0 0 3px #2be0a01a; }
+  .workspace { max-width: 1600px; margin: 0 auto; padding: 0 48px 24px; }
+  .intro { position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 290px; margin: 0 -12px 21px; padding: 46px 20px 40px; text-align: center; }
+  .intro::before { content: ""; position: absolute; z-index: -2; inset: -35px 0; background: radial-gradient(ellipse at 25% 57%, #00b8ff 0, transparent 49%), radial-gradient(ellipse at 77% 36%, #ffe53b 0, transparent 47%), radial-gradient(ellipse at 60% 64%, #c6ff3d 5%, transparent 48%), linear-gradient(115deg, #00b8ff, #2be0a0 43%, #c6ff3d 67%, #ffe53b); filter: blur(23px); mask-image: radial-gradient(ellipse closest-side, #000 42%, #000b 65%, transparent 100%); }
+  .intro::after { content: ""; position: absolute; z-index: -1; inset: -26px 0; background: repeating-linear-gradient(90deg, #fff0 0 59px, #ffffff17 61px, #ffffff73 63px, #ffffff20 66px, #005d4712 69px, #fff0 73px); mask-image: radial-gradient(ellipse closest-side, #000 50%, transparent 100%); pointer-events: none; }
+  .eyebrow { margin: 0 0 12px; font-size: 10px; font-weight: 600; letter-spacing: 2.5px; color: #1c3224; text-transform: uppercase; }
+  h1 { margin: 0; font-size: clamp(40px, 5.3vw, 78px); font-weight: 700; line-height: 1.06; letter-spacing: -.065em; }
+  h1 span { white-space: nowrap; margin-left: .12em; }
+  .subtitle { color: #24412c; margin: 17px 0 0; font-size: 13px; letter-spacing: -.1px; }
+  .privacy-card { display: inline-flex; align-items: center; gap: 8px; margin-top: 22px; padding: 7px 15px; border: 1px solid #ffffffb3; border-radius: 40px; background: #ffffff66; box-shadow: 0 4px 18px #316b3220, inset 0 1px 0 #ffffffc4; backdrop-filter: blur(14px); }
+  .privacy-card::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #2be0a0; box-shadow: inset 0 0 0 1px #00000008; }
+  .privacy-card strong { font-size: 11px; font-weight: 500; }
+  .privacy-card small { display: none; }
+  .workflow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); list-style: none; margin: 0 0 16px; padding: 0; gap: 22px; }
+  .workflow li { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 11px; padding: 0 6px; }
+  .step-number { display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid #e1e9da; border-radius: 50%; font-size: 10px; background: #fff; flex-shrink: 0; }
+  .workflow .current { color: var(--ink); font-weight: 600; }
+  .workflow .current .step-number { background: #c6ff3d; border-color: #b9ee34; }
+  .workflow .complete .step-number { background: #fff; color: #146a43; border-color: #2be0a0; }
+  .step-line { flex: 1; height: 1px; background: linear-gradient(90deg, #dbe6d2, #fff); margin-left: 9px; }
+  main { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; align-items: stretch; height: clamp(500px, calc(100dvh - 505px), 800px); }
+  .work-card { display: flex; flex-direction: column; gap: 14px; min-width: 0; min-height: 0; padding: 24px; background: #fff; border: 1px solid #e6ecdfe6; border-radius: 22px; box-shadow: 0 14px 44px -20px #27541522, 0 3px 9px #153c1803; }
+  .review-card { border-color: #c9e3aa; box-shadow: 0 16px 46px -20px #699d302b, 0 0 0 3px #c6ff3d0c; }
+  .card-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  h2 { font-size: 18px; font-weight: 600; letter-spacing: -.6px; margin: 0; }
+  .card-icon { display: grid; place-items: center; color: #161b14; flex-shrink: 0; }
+  .card-icon svg { width: 17px; height: 17px; }
+  .card-subtitle { margin: -8px 0 2px; color: var(--muted); font-size: 11px; }
+  .editor-wrap { flex: 1; position: relative; display: flex; min-height: 0; }
+  textarea, .pane { width: 100%; border: 0; border-top: 1px solid #edf1e7; border-radius: 0; padding: 16px 0; color: #1b2119; background: #fff; font: 13px/1.85 -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif; }
+  textarea { resize: vertical; }
+  textarea::placeholder { color: #60665c; opacity: 1; }
   #original { flex: 1; min-height: 0; }
   .pane { flex: 1; min-height: 0; overflow-y: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
-  .empty { color: var(--muted); }
+  .empty { display: block; max-width: 260px; color: #59614f; font-size: 13px; line-height: 1.8; }
+  .pane:has(> .empty:only-child) { display: grid; place-items: center; text-align: center; padding: 28px 10px; }
   .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  button {
-    font: inherit; border-radius: 8px; border: 1px solid var(--line); background: var(--paper);
-    color: var(--ink); padding: 6px 14px; cursor: pointer;
-  }
-  button:hover:not(:disabled) { background: var(--soft); }
-  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
-  button.primary:hover:not(:disabled) { background: #1a43b8; }
-  button:disabled { background: var(--soft); border-color: var(--line); color: #7c8490; cursor: not-allowed; }
-  .hint { font-size: 13px; color: var(--muted); margin: 0; }
-  .note { font-size: 13px; border-radius: 6px; padding: 6px 10px; margin: 0; }
-  .warn { background: var(--yellow-soft); color: var(--yellow); }
-  .error { background: var(--red-soft); color: var(--red); }
-  .stack { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; max-height: 30%; overflow-y: auto; }
+  .actions { margin-top: auto; }
+  button { min-height: 42px; border-radius: 30px; border: 1px solid #dee7d5; background: #fff; color: var(--ink); padding: 10px 16px; font-size: 11px; font-weight: 550; cursor: pointer; transition: background .15s, border-color .15s, box-shadow .15s; }
+  button:hover:not(:disabled) { background: #f6ffe9; border-color: #b9d69a; }
+  button.primary { background: var(--ink); border-color: var(--ink); color: #fff; font-weight: 550; box-shadow: 0 3px 6px #0000000c; }
+  button.primary:hover:not(:disabled) { background: #27311b; border-color: #27311b; box-shadow: 0 4px 12px #0000001a; }
+  button:disabled { background: #fff; border-color: #e6ebdf; color: #66705d; box-shadow: none; cursor: not-allowed; }
+  #btnAnalyze { flex: 1; }
+  #btnRelease.primary:not(:disabled) { background: var(--accent); border-color: #bced42; color: var(--ink); }
+  #btnRelease.primary:hover:not(:disabled) { background: #b8f330; }
+  .hint { font-size: 10px; color: var(--muted); margin: 0; min-height: 17px; }
+  .card-foot { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); margin: 0; min-height: 17px; }
+  .status-badge { border-radius: 30px; background: #fff; color: #526142; border: 1px solid #e2ebd8; padding: 4px 9px; font-size: 9px; font-weight: 500; white-space: nowrap; }
+  .status-badge.ready { color: #155d3a; background: #e3ffef; border-color: #c6f5da; }
+  .note { font-size: 11px; line-height: 1.65; border-radius: 10px; padding: 10px 12px; margin: 0; }
+  .warn { background: var(--yellow-soft); color: var(--yellow); border: 1px solid #f5e9b5; }
+  .error { background: var(--red-soft); color: var(--red); border: 1px solid #f3d7d0; }
+  .stack { display: flex; flex-direction: column; gap: 7px; max-height: 170px; overflow-y: auto; flex-shrink: 0; }
   .stack:empty { display: none; }
-  .chip {
-    display: inline-flex; align-items: center; gap: 2px; border-radius: 5px; padding: 0 2px 0 6px;
-    font-size: 13px; font-weight: 600; user-select: none; -webkit-user-select: none;
-    white-space: nowrap; color: #1c2026; background: var(--chip); cursor: default;
-  }
-  .chip button {
-    border: 0; background: transparent; color: inherit; padding: 0 4px; line-height: 1.4;
-    font-size: 12px; border-radius: 4px;
-  }
-  .chip button:hover:not(:disabled) { background: rgba(0, 0, 0, .12); }
-  .t-PERSON { --chip: #cfe0ff; } .t-FIRMA { --chip: #e4d6fb; } .t-ADRESSE { --chip: #fbdcc4; }
-  .t-ORT { --chip: #cdeef0; } .t-EMAIL { --chip: #f9d5e5; } .t-TELEFON { --chip: #e3ecb9; }
-  .t-IBAN { --chip: #f6e2a1; } .t-DATUM { --chip: #dcdfe5; }
-  #tooltip {
-    position: fixed; z-index: 20; background: var(--ink); color: #fff; font-size: 13px;
-    padding: 3px 8px; border-radius: 5px; pointer-events: none; max-width: 320px;
-  }
-  #typeMenu {
-    position: fixed; z-index: 10; display: flex; flex-wrap: wrap; gap: 4px; width: 280px; padding: 6px;
-    background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, .14);
-  }
-  #typeMenu button { padding: 1px 8px; font-size: 12px; font-weight: 600; border: 0; background: var(--chip); color: #1c2026; }
-  #typeMenu button:hover:not(:disabled) { background: var(--chip); filter: brightness(.93); }
-  #answerInput { height: 96px; flex-shrink: 0; }
-  label { font-size: 13px; color: var(--muted); }
+  .chip { display: inline-flex; align-items: center; gap: 1px; border-radius: 6px; padding: 1px 2px 1px 6px; margin: 1px 0; font: 550 10px/1.8 ui-monospace, SFMono-Regular, Consolas, monospace; user-select: none; -webkit-user-select: none; white-space: nowrap; color: #152616; background: var(--chip); cursor: default; }
+  .chip button { min-height: 24px; min-width: 24px; border: 0; background: transparent; color: inherit; padding: 0 4px; line-height: 1.4; font-size: 9px; border-radius: 4px; box-shadow: none; }
+  .chip button:hover:not(:disabled) { background: #0000000c; }
+  .t-PERSON { --chip: #d3fbbd; } .t-FIRMA { --chip: #e9deff; } .t-ADRESSE { --chip: #ffe8c9; }
+  .t-ORT { --chip: #c7f9e9; } .t-EMAIL { --chip: #cff1ff; } .t-TELEFON { --chip: #e4ffb1; }
+  .t-IBAN { --chip: #fff29f; } .t-DATUM { --chip: #deeee0; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: 9px; }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .legend i { height: 6px; width: 6px; border-radius: 50%; background: var(--chip); box-shadow: inset 0 0 0 1px #00000010; }
+  #tooltip { position: fixed; z-index: 20; background: var(--ink); color: #fff; font-size: 12px; padding: 6px 11px; border-radius: 8px; pointer-events: none; max-width: 320px; }
+  #typeMenu { position: fixed; z-index: 10; display: flex; flex-wrap: wrap; gap: 5px; width: 280px; padding: 10px; background: #ffffffeb; backdrop-filter: blur(16px); border: 1px solid #e4ebdb; border-radius: 16px; box-shadow: 0 10px 40px #15261920; }
+  #typeMenu button { padding: 5px 10px; font-size: 10px; border: 0; background: var(--chip); color: #152616; border-radius: 8px; }
+  #typeMenu button:hover:not(:disabled) { background: var(--chip); filter: brightness(.96); }
+  #answerInput { height: 94px; flex-shrink: 0; border: 1px solid #e2ebd8; border-radius: 10px; padding: 10px; }
+  label { font-size: 11px; color: var(--muted); }
   .good { background: var(--green-soft); color: var(--green); font-weight: 600; border-radius: 3px; padding: 0 2px; }
   .bad { background: var(--red-soft); color: var(--red); font-weight: 600; border-radius: 3px; padding: 0 2px; }
   .odd { background: var(--yellow-soft); color: var(--yellow); font-weight: 600; border-radius: 3px; padding: 0 2px; }
-  @media (max-width: 860px) {
-    html, body { height: auto; }
-    header { padding: 12px 16px 8px; }
-    main { grid-template-columns: minmax(0, 1fr); padding: 0 16px 16px; }
-    #original, .pane { min-height: 220px; flex: none; }
+  .summary { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; padding: 23px 5px 18px; color: var(--muted); font-size: 10px; }
+  #counter { color: #3d572b; font-variant-numeric: tabular-nums; }
+  footer { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; border-top: 1px solid #edf1e8; padding: 15px 5px 0; color: var(--muted); font-size: 9px; }
+  footer p { margin: 0; max-width: 800px; }
+  .footer-brand { font-weight: 500; white-space: nowrap; color: var(--ink); }
+  @media (max-width: 1100px) {
+    .topbar { padding: 0 28px; }
+    .workspace { padding: 0 28px 24px; }
+    .work-card { padding: 19px; }
+    main, .workflow { gap: 15px; }
+    .brand-caption { display: none; }
+    h2 { font-size: 16px; }
+    button { padding: 10px 13px; }
   }
+  @media (max-width: 860px) {
+    header { height: 75px; }
+    .topbar { padding: 0 20px; }
+    .brand-divider, #connectionMode { display: none; }
+    .workspace { padding: 0 20px 22px; }
+    .intro { min-height: 270px; margin: 0 0 24px; padding: 35px 0; }
+    .intro::before { inset: -8px -10px; filter: blur(17px); }
+    .intro::after { inset: -8px -10px; background: repeating-linear-gradient(90deg, #fff0 0 37px, #ffffff17 39px, #ffffff73 41px, #ffffff20 44px, #005d4712 46px, #fff0 50px); }
+    .eyebrow { font-size: 9px; letter-spacing: 2px; }
+    h1 { max-width: 520px; font-size: clamp(42px, 8vw, 62px); line-height: 1.02; }
+    h1 span { margin-left: 0; }
+    .subtitle { max-width: 300px; margin: 15px auto 0; font-size: 12px; }
+    .privacy-card { margin-top: 19px; }
+    main { grid-template-columns: minmax(0, 1fr); gap: 22px; height: auto; }
+    .workflow { gap: 9px; margin-bottom: 20px; }
+    .workflow li { font-size: 10px; gap: 6px; padding: 0; }
+    .step-line { display: none; }
+    .step-number { width: 22px; height: 22px; }
+    .work-card { min-height: 455px; padding: 23px; }
+    h2 { font-size: 19px; }
+    #original, .pane, .editor-wrap { min-height: 245px; }
+    .summary { padding: 22px 0 18px; }
+    footer { align-items: start; flex-direction: column; gap: 9px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
-<div id="fakeBand" role="alert" hidden>ATTRAPPE — kein echter Kern</div>
+<div id="fakeBand" role="alert" hidden>Testmodus: Attrappe aktiv. Keine vollständige Erkennung sensibler Angaben.</div>
 <header>
-  <h1>KI nutzen. Daten behalten.</h1>
-  <div id="counter" aria-live="polite" hidden></div>
+  <div class="topbar">
+    <div class="brand" aria-label="LP7 Arbeitsbereich">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 26" fill="none"><path d="M8 5H4v16h4m8-16h4v16h-4" stroke="currentColor" stroke-width="2" stroke-linecap="square"/></svg></span>
+      LP7<span class="brand-divider" aria-hidden="true"></span><span class="brand-caption">Pseudonymisierung</span>
+    </div>
+    <div class="connection"><span id="connectionMode" role="status">Verbindung wird geprüft …</span><span class="local-badge"><span class="dot" aria-hidden="true"></span>Lokal auf deinem Rechner</span></div>
+  </div>
 </header>
-<main>
-  <section aria-labelledby="h-original">
-    <h2 id="h-original">Original — bleibt auf diesem Rechner</h2>
-    <textarea id="original" aria-labelledby="h-original"></textarea>
-    <div class="row">
-      <button id="btnExample" type="button">Beispiel laden</button>
-      <button id="btnAnalyze" type="button" class="primary">Analysieren</button>
+<div class="workspace">
+  <div class="intro">
+    <div>
+      <p class="eyebrow">Lokaler Arbeitsbereich</p>
+      <h1>KI nutzen. <span>Daten behalten.</span></h1>
+      <p class="subtitle">Text einfügen, sensible Angaben ersetzen und die Vorschau prüfen.</p>
     </div>
-  </section>
-
-  <section aria-labelledby="h-masked">
-    <h2 id="h-masked">Das geht an Claude</h2>
-    <div id="notes" class="stack"></div>
-    <div id="masked" class="pane" tabindex="-1"></div>
-    <div class="row">
-      <button id="btnRelease" type="button" class="primary">Freigeben</button>
-      <button id="btnSend" type="button">An Claude senden</button>
-      <button id="btnCopy" type="button" hidden>Kopieren</button>
-      <span id="copied" class="hint" role="status"></span>
-    </div>
-    <p id="hint" class="hint"></p>
-  </section>
-
-  <section aria-labelledby="h-answer">
-    <h2 id="h-answer">Antwort — lokal zurückübersetzt</h2>
-    <div id="copyPanel" class="stack" style="max-height:none" hidden>
-      <p class="note warn">Kein API-Key — kopiere den Text in Claude und füge die Antwort hier ein.</p>
-      <label for="answerInput">Antwort von Claude hier einfügen</label>
-      <textarea id="answerInput"></textarea>
-      <div class="row"><button id="btnRestore" type="button" class="primary">Zurückübersetzen</button></div>
-    </div>
-    <div id="answer" class="pane"></div>
-    <div id="report" class="stack"></div>
-  </section>
-</main>
+    <div class="privacy-card"><strong>Originale und Zuordnung bleiben lokal.</strong><small>Versand nur nach deiner Freigabe.</small></div>
+  </div>
+  <ol class="workflow" aria-label="Arbeitsschritte">
+    <li id="stepOriginal" class="current" aria-current="step"><span class="step-number">01</span>Text vorbereiten<span class="step-line" aria-hidden="true"></span></li>
+    <li id="stepReview"><span class="step-number">02</span>Prüfen & freigeben<span class="step-line" aria-hidden="true"></span></li>
+    <li id="stepAnswer"><span class="step-number">03</span>Antwort erhalten</li>
+  </ol>
+  <main id="workspace" aria-label="Dokument bearbeiten">
+    <section class="work-card" aria-labelledby="h-original">
+      <div class="card-heading"><h2 id="h-original">Dein Original</h2><span class="card-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><path d="M5 2h7l4 4v12H5V2Z" stroke="currentColor" stroke-width="1.4"/><path d="M11 2v5h5M8 10h5m-5 3h5" stroke="currentColor" stroke-width="1.4"/></svg></span></div>
+      <p class="card-subtitle" id="originalHelp">Bleibt auf diesem Rechner.</p>
+      <div class="editor-wrap"><textarea id="original" aria-labelledby="h-original" aria-describedby="originalHelp" spellcheck="false" placeholder="Füge hier deinen Text ein …&#10;&#10;Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.&#10;&#10;Noch keinen Text zur Hand? Starte mit unserem erfundenen Kanzleibeispiel."></textarea></div>
+      <div class="row actions">
+        <button id="btnExample" type="button">Beispiel laden</button>
+        <button id="btnAnalyze" type="button" class="primary">Text analysieren <span aria-hidden="true">↗</span></button>
+      </div>
+      <p class="card-foot">Erkennung und Ersetzung erfolgen lokal.</p>
+    </section>
+    <section class="work-card review-card" aria-labelledby="h-masked">
+      <div class="card-heading"><h2 id="h-masked">Vorschau für Claude</h2><span id="releaseStatus" class="status-badge" role="status">Gesperrt</span></div>
+      <p class="card-subtitle">Nur diese Fassung wird nach Freigabe gesendet.</p>
+      <div id="notes" class="stack" aria-live="polite"></div>
+      <div id="masked" class="pane" tabindex="-1" aria-labelledby="h-masked"></div>
+      <div class="legend" aria-label="Beispiele für erkannte Datentypen"><span class="t-PERSON"><i aria-hidden="true"></i>Person</span><span class="t-EMAIL"><i aria-hidden="true"></i>E-Mail</span><span class="t-FIRMA"><i aria-hidden="true"></i>Firma</span><span class="t-IBAN"><i aria-hidden="true"></i>IBAN</span></div>
+      <div class="row actions">
+        <button id="btnRelease" type="button" class="primary" disabled>Freigeben</button>
+        <button id="btnSend" type="button" disabled>An Claude senden</button>
+        <button id="btnCopy" type="button" hidden>Kopieren</button>
+        <span id="copied" class="hint" role="status"></span>
+      </div>
+      <p id="hint" class="hint" aria-live="polite"></p>
+    </section>
+    <section class="work-card" aria-labelledby="h-answer">
+      <div class="card-heading"><h2 id="h-answer">Deine Antwort</h2><span id="answerStatus" class="status-badge" role="status">Ausstehend</span></div>
+      <p class="card-subtitle">Originale Angaben werden lokal wieder eingesetzt.</p>
+      <div id="copyPanel" class="stack" style="max-height:none" hidden>
+        <p class="note warn">Kopiermodus aktiv. Kopiere den freigegebenen Text in Claude und füge die Antwort hier ein.</p>
+        <label for="answerInput">Antwort von Claude</label>
+        <textarea id="answerInput" placeholder="Antwort mit Platzhaltern einfügen …" spellcheck="false"></textarea>
+        <div class="row"><button id="btnRestore" type="button" class="primary">Lokal zurückübersetzen</button></div>
+      </div>
+      <div id="answer" class="pane" aria-labelledby="h-answer" aria-live="polite"></div>
+      <div id="report" class="stack" aria-live="polite"></div>
+      <p class="card-foot">Wieder eingesetzte Angaben erscheinen grün.</p>
+    </section>
+  </main>
+  <div class="summary"><span id="counter" aria-live="polite">Bereit, wenn du es bist.</span><span>Original → Platzhalter → Original</span></div>
+  <footer><p>Die Erkennung kann Angaben übersehen. Prüfe den gesamten Text vor der Freigabe. Auch der Kontext kann Rückschlüsse auf Personen zulassen.</p><span class="footer-brand">LP7 · Hackathon 2026</span></footer>
+</div>
 <div id="typeMenu" role="group" aria-label="Typ für die Markierung wählen" hidden></div>
 <div id="tooltip" role="tooltip" hidden></div>
 
@@ -149,7 +223,7 @@ Unsere Mandantin Erika Musterfrau (erika.musterfrau@example.org, Tel. 040 555012
 Bitte fasse den Sachverhalt kurz zusammen, nenne die Frist für eine Kündigungsschutzklage und entwirf ein kurzes Schreiben an Max Mustermann. Übernimm alle Platzhalter in eckigen Klammern unverändert.`;
 
 const $ = (id) => document.getElementById(id);
-const state = { result: null, release: null, apiKey: false, copyMode: false, busy: false, error: "" };
+const state = { result: null, release: null, apiKey: false, copyMode: false, busy: false, restored: false, error: "" };
 
 async function api(path, body) {
   const options = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
@@ -181,6 +255,7 @@ async function run(action) {
 }
 
 function clearAnswer() {
+  state.restored = false;
   $("answer").replaceChildren();
   $("report").replaceChildren();
   $("answerInput").value = "";
@@ -198,7 +273,7 @@ function renderMasked() {
   box.replaceChildren();
   const result = state.result;
   if (!result) {
-    box.append(emptyNote("Hier erscheint der maskierte Text."));
+    box.append(emptyNote("Dein Text, mit Platzhaltern statt sensibler Angaben. Starte links mit der Analyse."));
     return;
   }
   let position = 0;
@@ -246,7 +321,7 @@ function note(text, kind) {
 function render() {
   const { result, release, busy, error, copyMode } = state;
   renderMasked();
-  if (!$("answer").childNodes.length) $("answer").append(emptyNote("Hier erscheint die Antwort mit den echten Angaben."));
+  if (!$("answer").childNodes.length) $("answer").append(emptyNote("Die Antwort von Claude erscheint hier. Platzhalter werden lokal durch die ursprünglichen Angaben ersetzt."));
 
   const notes = [];
   if (error) notes.push(note(error, "error"));
@@ -254,8 +329,23 @@ function render() {
   $("notes").replaceChildren(...notes);
 
   const counter = $("counter");
-  counter.hidden = !result;
-  if (result) counter.textContent = `${result.replacements.length} sensible Angaben ersetzt · 0 davon verlassen den Rechner`;
+  counter.textContent = result
+    ? `${result.replacements.length} sensible Angaben ersetzt · Versand nur nach deiner Freigabe`
+    : "Bereit, wenn du es bist.";
+  $("workspace").setAttribute("aria-busy", String(busy));
+  $("releaseStatus").textContent = release ? "Freigegeben" : result ? "Prüfung nötig" : "Gesperrt";
+  $("releaseStatus").classList.toggle("ready", Boolean(release));
+  $("answerStatus").textContent = state.restored ? "Zurückübersetzt" : "Ausstehend";
+  $("answerStatus").classList.toggle("ready", state.restored);
+  const activeStep = release ? "stepAnswer" : result ? "stepReview" : "stepOriginal";
+  for (const id of ["stepOriginal", "stepReview", "stepAnswer"]) {
+    const step = $(id);
+    const current = id === activeStep;
+    step.classList.toggle("current", current);
+    step.classList.toggle("complete", id === "stepOriginal" && Boolean(result) || id === "stepReview" && Boolean(release));
+    if (current) step.setAttribute("aria-current", "step");
+    else step.removeAttribute("aria-current");
+  }
 
   const showCopy = Boolean(release) && copyMode;
   $("btnExample").disabled = busy;
@@ -270,10 +360,11 @@ function render() {
   $("copyPanel").hidden = !showCopy;
   $("hint").textContent = release
     ? "Freigegeben. Ändert sich etwas, ist eine neue Freigabe nötig."
-    : "Erst prüfen und freigeben.";
+    : result ? "Text markieren, um weitere Angaben zu ersetzen. × nimmt eine Ersetzung zurück." : "Der Versand bleibt bis zu deiner Freigabe gesperrt.";
 }
 
 function renderAnswer(restored) {
+  state.restored = true;
   const box = $("answer");
   box.replaceChildren();
   const originals = [...new Set(state.result.replacements.map((r) => r.original))];
@@ -446,9 +537,11 @@ for (const [on, off] of [["mouseover", "mouseout"], ["focusin", "focusout"]]) {
     const status = await api("/api/status");
     state.apiKey = status.api_key;
     state.copyMode = !status.api_key;
+    $("connectionMode").textContent = status.fake ? "Testmodus" : status.api_key ? "API-Modus" : "Kopiermodus";
     $("fakeBand").hidden = !status.fake;
   } catch (e) {
     state.error = e.message;
+    $("connectionMode").textContent = "Verbindung unterbrochen";
   }
   render();
 })();
