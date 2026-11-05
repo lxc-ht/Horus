@@ -14,9 +14,9 @@ Danach http://127.0.0.1:8000 öffnen. Das erste Analysieren lädt das Modell und
 
 ## Arbeitsoberfläche
 
-Layout A ist direkt in `web/static/index.html` eingebaut: drei flexible Spalten mit hellen Arbeitsflächen und einem feinen Farbrand. Auf dem Desktop wird die genutzte Spalte durch Hover, Klick oder Tastaturfokus breiter. Beim Schreiben in einem Eingabefeld und bei markiertem Text ist der Hoverwechsel ausgesetzt. Auf Mobilgeräten bleiben die Bereiche untereinander. Das Glasmotiv ist klein und mittig; die äußere Kopfzeile, Schrittleiste und der Footer sind entfernt. Die Legende erklärt erkannte Datentypen und markierte unsichere Stellen. Die Oberfläche verwendet den echten Kern, sofern sie nicht ausdrücklich mit `HARNESS_FAKE=1` gestartet wird.
+Layout A ist direkt in `web/static/index.html` eingebaut: drei flexible Spalten mit hellen Arbeitsflächen und einem feinen Farbrand. Auf dem Desktop wird die genutzte Spalte durch Hover, Klick oder Tastaturfokus breiter. Beim Schreiben in einem Eingabefeld und bei markiertem Text ist der Hoverwechsel ausgesetzt. Auf Mobilgeräten bleiben die Bereiche untereinander. Das Glasmotiv steht zwischen „Klar. Lokal.“ und „Unter deiner Kontrolle.“ frei ohne äußeren Rahmen. Die mittlere Spalte heißt „Vorschau für LLM“. Das Motiv ist klein und mittig; die äußere Kopfzeile, Schrittleiste und der Footer sind entfernt. Die Legende erklärt erkannte Datentypen und markierte unsichere Stellen. Die Oberfläche verwendet den echten Kern, sofern sie nicht ausdrücklich mit `HARNESS_FAKE=1` gestartet wird.
 
-![Arbeitsoberfläche mit echter lokaler Pseudonymisierung und erfundenen Beispieldaten](assets/arbeitsoberflaeche-material-c.png)
+![Arbeitsoberfläche mit flexiblen Spalten und dem gewählten Slogan](assets/arbeitsoberflaeche-material-c.png)
 
 ## UI prüfen
 

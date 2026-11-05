@@ -43,6 +43,8 @@ Beide:
 
 **Erledigt**
 
+- [x] Gewählte Kopfvariante B2 ohne Rahmen eingebaut: „Klar. Lokal.“ links, „Unter deiner Kontrolle.“ rechts vom Motiv. Mittlere Spalte auf Locs Wunsch allgemein „Vorschau für LLM“. Bestehende Browserprüfung bestanden, Desktop und Mobil visuell geprüft. Nur Oberfläche, Freigabeablauf unverändert; Branch `codex/slogan-ohne-rahmen` (`lxc-ht`, Codex UI).
+
 - [x] PDF laden: Text aus digitalen PDFs lokal im Speicher auslesen und ins Textfeld setzen, per Knopf oder Ziehen; Scans werden gemeldet, nicht gelesen ([PR #30](https://github.com/lxc-ht/LP7/pull/30), `lxc-ht`, Claude). Wartet auf Pauls Review, noch nicht gemergt. Vortragsrechner danach einmal mit Netz starten, damit uv `pypdf` lädt.
 - [x] Layout A umgesetzt: drei flexible Arbeitsbereiche per Hover, Klick und Tastatur; stabil beim Schreiben und Markieren. Äußere Kopfzeile, Schrittleiste und Footer entfernt, kleines Glasmotiv mittig. Browserprüfung mit fünf Breiten, Touch und reduzierter Bewegung sowie Durchlauf mit echtem Kern bestanden. Bestehende Formular-IDs und Freigabeablauf erhalten; IDs der ausdrücklich entfernten Leisten entfallen. Branch `codex/flexible-arbeitsbereiche` (`lxc-ht`, Codex UI).
 
