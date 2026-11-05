@@ -70,6 +70,8 @@ _LABELED_ID = re.compile(
     r"|SV-?(?:Nr\.?|Nummer)|Sozialversicherungsnummer|Versicherten-?(?:Nr\.?|Nummer)"
     r"|Aktenzeichen|Az\.?|Gesch[äa]ftszeichen|Mandanten-?(?:Nr\.?|Nummer)|Patienten-?(?:Nr\.?|Nummer)"
     r"|(?:Personal)?Ausweis(?:-?(?:Nr\.?|Nummer))?|Kundenkonto|Kennzeichen|BLZ|Bankleitzahl|(?:Unser|Ihr)\s+Zeichen"
+    # Bezeichner nach den deutschen Erkennern von Presidio (MIT-Lizenz), siehe README unter „Danksagung“.
+    r"|Reisepass(?:nummer)?|F[üu]hrerschein(?:nummer)?|USt\.?-?Id(?:Nr\.?)?|Umsatzsteuer-?ID"
     r"|(?:Konto|Kunden|Fall|Vertrags|Rechnungs|Policen|Versicherungs|Beleg|Auftrags|Reisepass)-?(?:Nr\.?|Nummer))"
     # Wert: Blöcke aus Großbuchstaben und Ziffern. Ein Punkt am Blockende beendet ihn, sonst käme der nächste Satz mit.
     r"[\s:.#]*(?P<value>[A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w)(?: [A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w))*)"
@@ -90,6 +92,11 @@ _BARE_IDS = [
     # Kfz-Kennzeichen, aber keine Normen und Modelle wie „EU-VO 2016“, „DIN-EN 1090“ oder „VW-ID 3“.
     re.compile(r"(?<![\w\-])(?!(?:EU|VO|DIN|ISO|VDE|VW|BMW)-)[A-ZÄÖÜ]{1,3}-[A-Z]{1,2} \d{1,4}[EH]?(?!\w)"),
 ]
+# Handelsregister: „HRB 12345“, „HRA 4711 B“. Das Kürzel ist eindeutig genug, Muster nach Presidio (MIT-Lizenz).
+_HANDELSREGISTER = re.compile(r"(?<![\w\-])HR[AB]\s?\d{1,6}(?:\s?[A-Z]{1,2}\b)?(?!\w)")
+# USt-IdNr: DE und neun Ziffern, auch mit Trennern. Zählt nur mit gültiger Prüfziffer, wie bei Presidio (MIT-Lizenz).
+_VAT_ID = re.compile(r"(?<![\w\-])DE[\s.\-]?\d{3}[\s.\-]?\d{3}[\s.\-]?\d{3}(?![\w\-]|[.\s]\d)")
+
 # BIC enthält oft keine Ziffer, zählt deshalb nur mit Bezeichner.
 # Geheimnisse: mit Bezeichner nur vor „:“ oder „=“, sonst wäre „das Passwort wurde geändert“ ein Treffer.
 _LABELED_SECRET = re.compile(
@@ -125,6 +132,25 @@ _ADDRESS = re.compile(
     rf"|{_NOT_STREET}[A-ZÄÖÜ][\w\-]*(?:{_PLACE_SUFFIXES}){_HOUSE_NUMBER},?\s+{_POSTCODE_CITY}"
     r")"
 )
+# Adresse ohne Straßenwort: „Am Sande 12“, „An der Kirche 3“, „Im Grund 4“. Ohne Straßenendung sähe das aus wie
+# „Am Montag 14 Termine“. Deshalb zählt es nur mit PLZ dahinter oder einem Kontextwort kurz davor („wohnhaft“, „Anschrift“).
+# Die Idee mit Kontextwörtern stammt aus Presidio (Context Enhancement), der Code ist eigen.
+_PREPOSITION = r"(?:[Aa]m|[Aa]n der|[Aa]uf der|[Aa]uf dem|[Ii]m|[Ii]n der|[Zz]um|[Zz]ur)"
+# Wörter, die nach „am“ oder „im“ fast nie eine Straße sind.
+_NOT_A_STREET_NAME = (
+    r"(?!(?:Jahre?|Monat|Tag|Ende|Anfang|Abschnitt|Absatz|Kapitel|Punkt|Seite|Rahmen|Fall"
+    r"|Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag"
+    r"|Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\b)"
+)
+_ADDRESS_NO_STREET_WORD = re.compile(
+    rf"(?<![\w\-]){_PREPOSITION}\s+{_NOT_A_STREET_NAME}[A-ZÄÖÜ][\w\-]+(?:\s+[A-ZÄÖÜ][\w\-]+)?{_HOUSE_NUMBER}(?![\d.,]\d)"
+    # Danach PLZ und Ort oder ein Satzende. „im Briefkopf 2 mal“ oder „zur Prüfung 3 Wochen“ sind keine Adressen.
+    rf"(?:(?P<city>,?\s+{_POSTCODE_CITY})|(?=[ \t]*(?:[,.;:)\n]|$|(?:in|bei|und|zu)\s)))"
+)
+_ADDRESS_CONTEXT = re.compile(
+    r"(?i:wohnhaft|wohnt|wohnen|Wohnsitz|Anschrift|Adresse|gemeldet|Sitz|Mietobjekt|Mietsache|gelegen)\b[^.!?\n]{0,40}$"
+)
+
 # PLZ und Ort allein. Nur nach einem Trenner oder „in“, sonst wären „es kamen 50000 Gäste“ auch Adressen.
 _POSTCODE_ALONE = re.compile(rf"(?<!\d){_POSTCODE_CITY}")
 _PO_BOX = re.compile(r"(?<!\w)Postfach\s+\d[\d ]*\d")
@@ -166,6 +192,18 @@ def _tax_id_valid(raw: str) -> bool:
         total = (d + product) % 10 or 10
         product = total * 2 % 11
     return (11 - product) % 10 == digits[10]
+
+
+def _vat_id_valid(raw: str) -> bool:
+    """Prüfziffer der deutschen USt-IdNr nach ISO 7064 (MOD 11,10) über acht Ziffern, wie bei Presidio."""
+    digits = [int(c) for c in raw if c.isdigit()]
+    if len(digits) != 9:
+        return False
+    product = 10
+    for d in digits[:8]:
+        total = (d + product) % 10 or 10
+        product = total * 2 % 11
+    return (11 - product) % 10 == digits[8]
 
 
 def _luhn_valid(raw: str) -> bool:
@@ -237,6 +275,11 @@ class RegexDetector:
         for pattern in (_BARE_SECRET, _HANDLE):
             for m in pattern.finditer(text):
                 add(m, "KENNUNG")
+        for m in _HANDELSREGISTER.finditer(text):
+            add(m, "KENNUNG")
+        for m in _VAT_ID.finditer(text):
+            if _vat_id_valid(m.group()):
+                add(m, "KENNUNG")
         for m in _LABELED_CASE_NUMBER.finditer(text):
             add(m, "KENNUNG", "value")
         for m in _BIC.finditer(text):
@@ -246,6 +289,9 @@ class RegexDetector:
                 add(m, "KENNUNG")
         for m in _ADDRESS.finditer(text):
             add(m, "ADRESSE")
+        for m in _ADDRESS_NO_STREET_WORD.finditer(text):
+            if m.group("city") or _ADDRESS_CONTEXT.search(text[max(0, m.start() - 60) : m.start()]):
+                add(m, "ADRESSE")
         for m in _PO_BOX.finditer(text):
             add(m, "ADRESSE")
         for m in _POSTCODE_ALONE.finditer(text):
