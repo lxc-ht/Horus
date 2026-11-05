@@ -18,44 +18,26 @@
   textarea:focus-visible { outline: 3px solid #0076a9; outline-offset: -3px; }
   .pane:focus-visible { outline: 3px solid #0076a9; outline-offset: -3px; }
   #fakeBand { background: #fff8d7; color: #70540a; font-size: 12px; font-weight: 600; text-align: center; padding: 6px 18px; border-bottom: 1px solid #f4e9b4; }
-  header { background: transparent; height: 64px; }
-  .topbar { height: 100%; margin: auto; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; gap: 20px; max-width: 1600px; }
-  .brand { display: flex; align-items: center; gap: 9px; font-size: 26px; font-weight: 750; letter-spacing: -1.5px; }
-  .brand-mark { width: 25px; height: 32px; display: grid; place-items: center; color: var(--ink); }
-  .brand-mark svg { width: 22px; height: 26px; }
-  .brand-divider { width: 1px; height: 20px; background: var(--line); margin: 0 9px 0 16px; }
-  .brand-caption { color: var(--muted); font-weight: 400; letter-spacing: -.1px; font-size: 13px; }
-  .connection { display: flex; align-items: center; color: var(--muted); font-size: 11px; flex-direction: row-reverse; gap: 14px; }
-  .local-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; color: var(--ink); border: 1px solid #e5ebdf; box-shadow: 0 2px 7px #273e1604; border-radius: 30px; font-size: 11px; font-weight: 500; white-space: nowrap; background: #ffffff80; border-color: #ffffffd9; }
-  .dot { height: 7px; width: 7px; border-radius: 50%; background: #2be0a0; box-shadow: 0 0 0 3px #2be0a01a; }
-  .workspace { margin: 0 auto; padding: 0 40px 24px; max-width: 1600px; }
-  .intro { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 24px; text-align: left; padding: 8px 0 14px; }
-  .eyebrow { margin: 0 0 10px; font-size: 10px; font-weight: 600; letter-spacing: 2.2px; color: var(--muted); text-transform: uppercase; }
-  h1 { margin: 0; font-size: 40px; font-weight: 750; line-height: 1.06; letter-spacing: -.045em; }
-  h1 span { white-space: nowrap; }
-  .subtitle { margin: 12px 0 0; color: var(--muted); font-size: 14px; }
-  .hero-art { position: relative; isolation: isolate; display: flex; justify-content: center; align-items: center; gap: 15px; width: 310px; min-height: 116px; padding-bottom: 26px; flex-shrink: 0; }
+  .workspace { margin: 0 auto; padding: 10px 24px 20px; width: 100%; }
+  .intro { display: flex; justify-content: center; flex: none; padding: 0 0 16px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .hero-art { position: relative; isolation: isolate; display: flex; justify-content: center; align-items: center; gap: 12px; width: 220px; min-height: 70px; flex-shrink: 0; }
   .hero-art::before { content: ""; z-index: -2; position: absolute; inset: -15px -18px; background: radial-gradient(ellipse at 68% 30%,#ffe53b99,transparent 45%), radial-gradient(ellipse at 52% 55%,#c6ff3d,transparent 53%), radial-gradient(ellipse at 25% 40%,#00b8ffb3,transparent 55%), radial-gradient(ellipse at 60% 70%,#2be0a0,transparent 60%); filter: blur(15px); mask-image: radial-gradient(ellipse closest-side,#000 40%,transparent); }
   .hero-art::after { content: ""; z-index: -1; position: absolute; inset: -8px 0; background: repeating-linear-gradient(90deg,#fff0 0 39px,#ffffff78 41px,#fff0 46px); mask-image: radial-gradient(ellipse closest-side,#000 55%,transparent); }
   .art-icon { position: relative; z-index: 1; display: grid; place-items: center; background: #ffffff6e; border: 1px solid #ffffffd9; box-shadow: 0 14px 28px -10px #26534e30,inset 0 1px #fff; }
-  .art-icon.small { width: 53px; height: 53px; border-radius: 18px; transform: rotate(-8deg); }
-  .art-icon.large { width: 72px; height: 72px; border-radius: 24px; }
+  .art-icon.small { width: 37px; height: 37px; border-radius: 13px; transform: rotate(-8deg); }
+  .art-icon.large { width: 50px; height: 50px; border-radius: 17px; }
   .art-icon:nth-child(3) { transform: rotate(8deg); }
-  .art-icon .icon { width: 25px; height: 25px; }
-  .art-icon.large .icon { width: 34px; height: 34px; }
-  .art-label { z-index: 1; position: absolute; bottom: 3px; padding: 5px 12px; border-radius: 30px; background: #ffffff99; border: 1px solid #ffffffcc; font-size: 10px; white-space: nowrap; }
-  .workflow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); list-style: none; margin: 0 0 16px; padding: 0; gap: 18px; margin-bottom: 12px; padding-top: 14px; border-top: 1px solid #cddcbf99; }
-  .workflow li { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; padding: 9px 12px; border-radius: 14px; background: #ffffff80; border: 1px solid #e0e9eb; }
-  .step-number { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9px; font-size: 11px; flex-shrink: 0; background: #f1f6f8; border: 0; color: inherit; }
-  .workflow .current { color: var(--ink); font-weight: 600; border-color: transparent; background: linear-gradient(#ffffffec,#ffffffec) padding-box,linear-gradient(135deg,#00b8ff80,#90d9d4,#d6e989) border-box; box-shadow: 0 4px 12px #24465808; }
-  .workflow .complete { color: #276248; }
-  .workflow .complete .step-number { background: #e7f4ed; }
-  .step-line { flex: 1; height: 1px; margin-left: 9px; background: currentColor; opacity: .12; }
-  main { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; height: clamp(500px, calc(100dvh - 505px), 800px); gap: 18px; }
+  .art-icon .icon { width: 19px; height: 19px; }
+  .art-icon.large .icon { width: 26px; height: 26px; }
+  main { display: grid; grid-template-columns: minmax(0,.95fr) minmax(0,1fr) minmax(0,1.25fr); align-items: stretch; gap: 14px; transition: grid-template-columns .25s cubic-bezier(.2,.7,.2,1); }
+  main[data-focus="stepOriginal"] { grid-template-columns: minmax(0,1.7fr) minmax(0,1fr) minmax(0,1fr); }
+  main[data-focus="stepReview"] { grid-template-columns: minmax(0,1fr) minmax(0,1.7fr) minmax(0,1fr); }
+  main[data-focus="stepAnswer"] { grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1.7fr); }
   .work-card { display: flex; flex-direction: column; min-width: 0; min-height: 0; padding: 20px; gap: 10px; background: #fffffff2; border: 1px solid #e0e9eb; border-radius: 22px; box-shadow: 0 12px 32px -25px #223e5226; }
   .work-card[data-active="true"] { background: linear-gradient(#fff,#fff) padding-box,linear-gradient(135deg,#00b8ff80,#90d9d4,#d6e989) border-box; border-color: transparent; box-shadow: 0 16px 35px -25px #267b8d55; }
-  .card-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  h2 { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 600; letter-spacing: -.6px; margin: 0; }
+  .card-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  h2 { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 600; letter-spacing: -.6px; margin: 0; }
   h2 .icon { width: 30px; height: 30px; padding: 6px; border: 1px solid #e4ebee; border-radius: 9px; background: #f5f8f9; }
   .card-subtitle { color: var(--muted); font-size: 12px; margin: -5px 0 0; }
   .editor-wrap { flex: 1; position: relative; display: flex; min-height: 0; }
@@ -71,6 +53,7 @@
   button:disabled { box-shadow: none; cursor: not-allowed; background: #f1f5f7; color: #75828a; border-color: #e0e7eb; }
   #btnAnalyze { flex: 1; }
   #btnRelease.primary:not(:disabled) { background: linear-gradient(#ffffffec,#ffffffec) padding-box,linear-gradient(135deg,#00b8ff,#68d9d8 48%,#d6e989) border-box; border: 2px solid transparent; color: #18272e; box-shadow: 0 10px 24px -14px #267b8d45; }
+  .hint:empty { display: none; }
   .hint { font-size: 11px; color: var(--muted); margin: 0; min-height: 17px; }
   .card-foot { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); margin: 0; min-height: 17px; }
   .status-badge { border-radius: 30px; border: 1px solid #e2ebd8; padding: 4px 9px; font-weight: 500; white-space: nowrap; background: #ffffff90; color: #5c6a72; border-color: #dce5e1; font-size: 11px; }
@@ -113,11 +96,7 @@
   .good { background: var(--green-soft); color: var(--green); font-weight: 600; border-radius: 3px; padding: 0 2px; }
   .bad { background: var(--red-soft); color: var(--red); font-weight: 600; border-radius: 3px; padding: 0 2px; }
   .odd { background: var(--yellow-soft); color: var(--yellow); font-weight: 600; border-radius: 3px; padding: 0 2px; }
-  .summary { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 20px; color: var(--muted); font-size: 11px; padding: 10px 5px 8px; }
   #counter { color: #3d572b; font-variant-numeric: tabular-nums; }
-  footer { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; border-top: 1px solid #edf1e8; color: var(--muted); font-size: 11px; border-color: #cddcbf99; padding: 8px 5px 0; }
-  footer p { margin: 0; max-width: 800px; }
-  .footer-brand { font-weight: 500; white-space: nowrap; color: var(--ink); }
   .icon { width: 18px; height: 18px; flex-shrink: 0; vertical-align: middle; }
   button .locked-icon { display: none; }
   button:disabled .locked-icon { display: inline-block; }
@@ -128,18 +107,16 @@
   .dispatch-status .icon { width: 13px; height: 13px; }
   #copyPanel { gap: 6px; overflow: visible; }
   #copyPanel .note { padding: 7px 10px; line-height: 1.45; }
-  .workflow .complete .step-line { background: #91b650; opacity: .55; }
-  .step-number .icon { width: 24px; height: 24px; }
   .scroll-frame { position: relative; display: flex; flex: 1; min-height: 0; }
   .scroll-frame::after { content: ""; position: absolute; bottom: 0; left: 0; right: 12px; height: 32px; background: linear-gradient(transparent, #fff); pointer-events: none; opacity: 0; transition: opacity .15s; }
   .scroll-frame.has-more::after { opacity: 1; }
   .restored #answerInput { height: 60px; min-height: 60px; }
   .legend:empty { display: none; }
   @media (min-width: 861px) {
-    body { display: flex; flex-direction: column; height: 100dvh; min-height: 740px; }
-    header, #fakeBand { flex: none; }
-    .workspace { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; padding-bottom: 12px; }
-    .intro, .workflow, .summary, footer { flex: none; }
+    body { display: flex; flex-direction: column; height: 100dvh; min-height: 640px; }
+    #fakeBand { flex: none; }
+    .workspace { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; padding-bottom: 20px; }
+    .intro { flex: none; }
     main { flex: 1; min-height: 0; height: auto; }
     #original, #answerInput { resize: none; }
     #copyPanel { flex: none; }
@@ -147,59 +124,19 @@
     #notes { max-height: 24%; }
     #report { flex: 0 1 auto; min-height: 0; max-height: 22%; }
   }
-  @media (min-width: 861px) and (max-height: 900px) {
-    header { height: 58px; }
-    .intro { padding: 3px 0 10px; min-height: 115px; }
-    .eyebrow { display: none; }
-    .hero-art { min-height: 96px; padding-bottom: 20px; }
-    h1 { font-size: clamp(36px,3.2vw,44px); }
-    .work-card { padding: 16px; gap: 8px; }
-    .workflow { padding-top: 10px; margin-bottom: 10px; }
-    .workflow li { padding: 6px 10px; }
-    .summary { padding: 7px 5px 5px; }
-    footer { padding-top: 6px; }
-  }
-  @media (min-width: 861px) and (min-height: 1080px) {
-    header { height: 84px; }
-    .intro { min-height: 190px; padding: 18px 0 24px; }
-    h1 { max-width: 800px; font-size: clamp(48px,4vw,64px); }
-    h1 span { display: block; }
-    .subtitle { display: block; }
-    .hero-art { width: 380px; min-height: 180px; gap: 24px; padding-bottom: 40px; margin-right: 50px; }
-    .art-icon.small { width: 86px; height: 86px; border-radius: 28px; }
-    .art-icon.large { width: 116px; height: 116px; border-radius: 37px; }
-    .art-icon .icon { width: 34px; height: 34px; }
-    .art-icon.large .icon { width: 46px; height: 46px; }
-    .art-label { padding: 9px 17px; font-size: 12px; }
-    .eyebrow { margin-bottom: 18px; }
-    .work-card { padding: 24px; gap: 12px; }
-  }
   @media (min-width: 861px) and (max-width: 1150px) {
-    .topbar { padding: 0 24px; }
     .workspace { padding-left: 24px; padding-right: 24px; }
-    .hero-art { width: 240px; }
-    h1 { max-width: 510px; font-size: 36px; }
     h2 { font-size: 16px; }
     .card-heading { gap: 6px; }
     .work-card { padding: 13px; }
-    main, .workflow { gap: 12px; }
+    main { gap: 12px; }
     button { padding: 7px 10px; }
   }
   @media (max-width: 860px) {
-    header { height: auto; }
-    .topbar { padding: 19px 20px; gap: 10px; flex-wrap: wrap; }
-    .brand-caption { font-size: 11px; }
-    .connection { width: 100%; justify-content: space-between; }
     .workspace { padding: 0 20px 22px; }
-    .intro { flex-direction: column; align-items: flex-start; padding: 24px 0 20px; gap: 25px; }
-    h1 { font-size: clamp(36px,7vw,54px); }
-    h1 span { display: block; }
-    .eyebrow { font-size: 9px; letter-spacing: 1.6px; }
-    .hero-art { align-self: center; width: min(310px,100%); min-height: 140px; }
-    main { grid-template-columns: minmax(0,1fr); height: auto; gap: 18px; }
-    .workflow { gap: 6px; }
-    .workflow li { flex-direction: column; gap: 3px; text-align: center; font-size: 11px; padding: 8px 3px; }
-    .step-line { display: none; }
+    .intro { padding-bottom: 12px; }
+    .hero-art { width: 190px; min-height: 60px; }
+    main, main[data-focus] { grid-template-columns: minmax(0,1fr); height: auto; gap: 14px; }
     .work-card { min-height: 0; padding: 20px; }
     #original, .pane { min-height: 0; font-size: 16px; }
     #answerInput { font-size: 16px; }
@@ -207,8 +144,6 @@
     #answer { min-height: 230px; max-height: 350px; }
     #answerInput { min-height: 85px; }
     #copyPanel { flex-shrink: 0; }
-    .summary { padding: 18px 0 12px; }
-    footer { align-items: start; flex-direction: column; gap: 9px; }
   }
   @media (pointer: coarse) { .chip button { min-width: 44px; min-height: 44px; } }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -216,34 +151,15 @@
 </head>
 <body>
 <div id="fakeBand" role="alert" hidden>Testmodus: Attrappe aktiv. Keine vollständige Erkennung sensibler Angaben.</div>
-<header>
-  <div class="topbar">
-    <div class="brand" aria-label="LP7 Arbeitsbereich">
-      <span class="brand-mark"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4H4v16h3m10-16h3v16h-3M9 9h6m-6 6h6"/></svg></span>
-      LP7<span class="brand-divider" aria-hidden="true"></span><span class="brand-caption">Pseudonymisierung</span>
-    </div>
-    <div class="connection"><span class="local-badge"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="13" rx="2.5"/><path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg><span id="connectionMode" role="status" aria-live="polite">Verbindung wird geprüft …</span></span><span class="local-badge"><span class="dot" aria-hidden="true"></span>Lokal auf deinem Rechner</span></div>
-  </div>
-</header>
 <div class="workspace">
   <div class="intro">
-    <div>
-      <p class="eyebrow">Dein Arbeitsbereich</p>
-      <h1>Dein Text. <span>Deine Freigabe.</span></h1>
-      <p class="subtitle">Lokal pseudonymisieren. Prüfen. Bewusst weitergeben.</p>
-    </div>
+    <h1 class="sr-only">Text pseudonymisieren</h1>
     <div class="hero-art" aria-hidden="true">
       <span class="art-icon small"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3M7 8h10M7 12h7M7 16h10"/></svg></span>
       <span class="art-icon large"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></span>
       <span class="art-icon small"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v4M14 3v5h5M5 3v18h7m0-5h9m-3-3 3 3-3 3"/></svg></span>
-      <span class="art-label">Klar. Lokal. Unter deiner Kontrolle.</span>
     </div>
   </div>
-  <ol class="workflow dash-steps" aria-label="Arbeitsschritte">
-    <li id="stepOriginal" class="current" aria-current="step"><span class="step-number">01</span>Analysieren<span class="step-line" aria-hidden="true"></span></li>
-    <li id="stepReview"><span class="step-number">02</span>Prüfen & freigeben<span class="step-line" aria-hidden="true"></span></li>
-    <li id="stepAnswer"><span class="step-number">03</span>Antwort erhalten</li>
-  </ol>
   <main id="workspace" aria-label="Dokument bearbeiten">
     <section class="work-card" data-step="stepOriginal" aria-labelledby="h-original">
       <div class="card-heading"><h2 id="h-original"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M8 12h8m-8 4h6"/></svg>Dein Original</h2><span class="status-badge">Lokal</span></div>
@@ -260,6 +176,7 @@
       <p class="card-subtitle">Nur diese Fassung kannst du nach Freigabe kopieren.</p>
       <div id="notes" class="stack" aria-live="polite"></div>
       <div class="scroll-frame"><div id="masked" class="pane" tabindex="-1" aria-labelledby="h-masked"></div></div>
+      <p id="counter" class="hint" role="status"></p>
       <div id="legend" class="legend" aria-label="Erkannte Datentypen mit Anzahl"></div>
       <div class="row actions">
         <button id="btnRelease" type="button" class="primary" disabled><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 20 6v6c0 4.5-4 7.8-8 9.5C8 19.8 4 16.5 4 12V6l8-3.5Z M8.5 11.8l2.4 2.4 4.8-4.8"/></svg><svg class="icon locked-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg><span id="releaseLabel">Vorschau freigeben</span></button>
@@ -268,6 +185,7 @@
       </div>
       <p id="dispatchStatus" class="dispatch-status" role="status"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg><span>Kopieren bis zur Freigabe gesperrt</span></p>
       <p id="hint" class="hint" aria-live="polite"></p>
+      <p class="card-foot">Prüfe die gesamte Vorschau. Die Erkennung kann Angaben übersehen.</p>
     </section>
     <section class="work-card" data-step="stepAnswer" aria-labelledby="h-answer">
       <div class="card-heading"><h2 id="h-answer"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v4M14 3v5h5M5 3v18h7m0-5h9m-3-3 3 3-3 3"/></svg>Deine Antwort</h2><span id="answerStatus" class="status-badge" role="status" aria-live="polite">Ausstehend</span></div>
@@ -283,8 +201,6 @@
       <p class="card-foot">Wieder eingesetzte Angaben erscheinen grün.</p>
     </section>
   </main>
-  <div class="summary"><span id="counter" aria-live="polite">Bereit, wenn du es bist.</span><span>Original → Platzhalter → Original</span></div>
-  <footer><p>Die Erkennung kann Angaben übersehen. Prüfe den gesamten Text vor der Freigabe. Auch der Kontext kann Rückschlüsse auf Personen zulassen.</p><span class="footer-brand">LP7 · Hackathon 2026</span></footer>
 </div>
 <div id="typeMenu" role="group" aria-label="Typ für die Markierung wählen" hidden></div>
 <div id="tooltip" role="tooltip" hidden></div>
@@ -292,7 +208,6 @@
 <script>
 const TYPES = ["PERSON", "FIRMA", "ADRESSE", "ORT", "EMAIL", "TELEFON", "IBAN", "DATUM", "KENNUNG"];
 const TYPE_LABELS = ["Person", "Firma", "Adresse", "Ort", "E-Mail", "Telefon", "IBAN", "Datum", "Kennung"];
-const CHECK_ICON = '<svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.7 2.7L16 9.4"/></svg>';
 // Erfunden. Enthält absichtlich Angaben, die die Attrappe nicht erkennt.
 const EXAMPLE = `Kanzlei Sommerfeld & Partner, Aktenzeichen 123/26
 
@@ -302,6 +217,26 @@ Bitte fasse den Sachverhalt kurz zusammen, nenne die Frist für eine Kündigungs
 
 const $ = (id) => document.getElementById(id);
 const state = { result: null, release: null, busy: false, restored: false, error: "", accepted: new Set() };
+
+const workCards = [...$("workspace").querySelectorAll(".work-card")];
+const mouseHover = matchMedia("(hover: hover) and (pointer: fine)");
+
+function expandCard(card) {
+  $("workspace").dataset.focus = card.dataset.step;
+  for (const item of workCards) item.dataset.active = String(item === card);
+}
+
+for (const card of workCards) {
+  card.addEventListener("focusin", () => expandCard(card));
+  card.addEventListener("pointerdown", () => expandCard(card));
+  card.addEventListener("pointerenter", (event) => {
+    if (!mouseHover.matches || event.pointerType !== "mouse") return;
+    // Beim Schreiben und Markieren bleibt der Arbeitsbereich stabil.
+    if (document.activeElement.matches("textarea") || !getSelection().isCollapsed) return;
+    expandCard(card);
+  });
+}
+
 
 async function api(path, body) {
   const options = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
@@ -482,8 +417,8 @@ function render() {
 
   const counter = $("counter");
   counter.textContent = busy ? "Lokale Verarbeitung läuft …" : result
-    ? `${result.replacements.length} sensible Angaben ersetzt · Weitergabe nur durch dich`
-    : "Bereit, wenn du es bist.";
+    ? `${result.replacements.length} Angaben ersetzt`
+    : "";
   $("workspace").setAttribute("aria-busy", String(busy));
   $("releaseStatus").textContent = release ? "Freigegeben" : result ? "Prüfung nötig" : "Gesperrt";
   $("releaseStatus").classList.toggle("ready", Boolean(release));
@@ -491,24 +426,6 @@ function render() {
   $("dispatchStatus").hidden = Boolean(release);
   $("answerStatus").textContent = state.restored ? "Zurückübersetzt" : "Ausstehend";
   $("answerStatus").classList.toggle("ready", state.restored);
-  const activeStep = release ? "stepAnswer" : result ? "stepReview" : "stepOriginal";
-  for (const card of $("workspace").querySelectorAll("[data-step]")) {
-    card.dataset.active = String(card.dataset.step === activeStep);
-  }
-  for (const id of ["stepOriginal", "stepReview", "stepAnswer"]) {
-    const step = $(id);
-    const complete = id === "stepOriginal" && Boolean(result) || id === "stepReview" && Boolean(release) || id === "stepAnswer" && state.restored;
-    const current = id === activeStep && !state.restored;
-    step.classList.toggle("current", current);
-    step.classList.toggle("complete", complete);
-    const marker = step.querySelector(".step-number");
-    marker.innerHTML = complete ? CHECK_ICON : String(["stepOriginal", "stepReview", "stepAnswer"].indexOf(id) + 1).padStart(2, "0");
-    if (complete) marker.setAttribute("aria-label", "Erledigt");
-    else marker.removeAttribute("aria-label");
-    if (current) step.setAttribute("aria-current", "step");
-    else step.removeAttribute("aria-current");
-  }
-
   const showCopy = Boolean(release);
   $("btnExample").disabled = busy;
   $("btnAnalyze").disabled = busy;
@@ -523,7 +440,7 @@ function render() {
   $("copyPanel").hidden = !showCopy;
   $("hint").textContent = release
     ? "Freigegeben. Ändert sich etwas, ist eine neue Freigabe nötig."
-    : result ? "Text markieren, um weitere Angaben zu ersetzen. × nimmt eine Ersetzung zurück." : "Kopieren bleibt bis zu deiner Freigabe gesperrt.";
+    : result ? "Text markieren, um weitere Angaben zu ersetzen. × nimmt eine Ersetzung zurück." : "";
 }
 
 function renderAnswer(restored) {
@@ -575,6 +492,7 @@ $("btnAnalyze").addEventListener("click", () => run(async () => {
   if (!text.trim()) throw new Error("Bitte erst einen Text eingeben.");
   applyResult(await api("/api/analyze", { text }));
   state.accepted.clear();
+  $("masked").focus();
 }));
 
 $("btnRelease").addEventListener("click", () => run(async () => {
@@ -706,11 +624,9 @@ for (const [on, off] of [["mouseover", "mouseout"], ["focusin", "focusout"]]) {
   render();
   try {
     const status = await api("/api/status");
-    $("connectionMode").textContent = status.fake ? "Testmodus" : "Kopiermodus";
     $("fakeBand").hidden = !status.fake;
   } catch (e) {
     state.error = e.message;
-    $("connectionMode").textContent = "Verbindung unterbrochen";
   }
   render();
 })();
