@@ -42,11 +42,11 @@ class Detector(Protocol):
 _EMAIL = re.compile(r"(?<![\w.%+-])[\w.%+-]+@[\w.-]+\.[^\W\d_]{2,}(?![\w-])")
 
 # IBAN in Blöcken (mit oder ohne Leerzeichen), allgemein: 2 Buchstaben, 2 Ziffern, bis 30 Zeichen.
-_IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?:[ \-.]?[A-Z0-9]{4}){2,7}(?:[ \-.]?[A-Z0-9]{1,3})?\b", re.IGNORECASE | re.ASCII)
+_IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?:[\s\-.]?[A-Z0-9]{4}){2,7}(?:[\s\-.]?[A-Z0-9]{1,3})?\b", re.IGNORECASE | re.ASCII)
 # Deutsche IBAN: genau 20 Ziffern, also auch mit ungewöhnlicher Gruppierung sicher zu erkennen.
 # Auch über Zeilenumbrüche, wie sie beim Kopieren aus PDFs entstehen.
 _IBAN_DE = re.compile(r"(?<![A-Za-z0-9])[Dd][Ee][\s\-.]{0,2}\d{2}(?:[\s\-.]{0,2}\d){18}(?!\d)")
-_IBAN_SEPARATORS = re.compile(r"[ \-.]")
+_IBAN_SEPARATORS = re.compile(r"[\s\-.]")
 
 # Telefonnummern: +Ländervorwahl / 0049 / führende 0, Trennzeichen Leerzeichen, - oder /.
 _PHONE = re.compile(
@@ -56,6 +56,8 @@ _PHONE = re.compile(
     r"(?![\w])"
 )
 # Mit Bezeichner davor ist jedes Format eine Telefonnummer, auch ohne Vorwahl oder in Einzelziffern.
+# Mit Punkten getrennt sehen auch Beträge wie Telefonnummern aus: „+100.000“, „+1.250.000“, „0123.45“.
+_AMOUNT_NOT_PHONE = re.compile(r"\+?[1-9]\d{0,2}(?:\.\d{3})+|\d+\.\d{1,2}")
 _LABELED_PHONE = re.compile(
     r"(?<!\w)(?i:Tel(?:efon)?(?:-?(?:Nr\.?|nummer))?|Mobil(?:nummer)?|Handy(?:nummer)?|Fax)[\s:.]*"
     # Ein Umbruch darf drinstehen. Zieht das die nächste Zeile mit, bleibt es maskiert und kommt unverändert zurück.
@@ -67,7 +69,7 @@ _LABELED_ID = re.compile(
     r"(?<!\w)(?i:Steuer-?ID|(?:Steuer)?identifikationsnummer|IdNr\.?|Steuernummer|St\.?-?Nr\.?"
     r"|SV-?(?:Nr\.?|Nummer)|Sozialversicherungsnummer|Versicherten-?(?:Nr\.?|Nummer)"
     r"|Aktenzeichen|Az\.?|Gesch[äa]ftszeichen|Mandanten-?(?:Nr\.?|Nummer)|Patienten-?(?:Nr\.?|Nummer)"
-    r"|Personalausweis-?(?:Nr\.?|Nummer)|Kennzeichen|BLZ|Bankleitzahl|(?:Unser|Ihr)\s+Zeichen"
+    r"|(?:Personal)?Ausweis(?:-?(?:Nr\.?|Nummer))?|Kundenkonto|Kennzeichen|BLZ|Bankleitzahl|(?:Unser|Ihr)\s+Zeichen"
     r"|(?:Konto|Kunden|Fall|Vertrags|Rechnungs|Policen|Versicherungs|Beleg|Auftrags|Reisepass)-?(?:Nr\.?|Nummer))"
     # Wert: Blöcke aus Großbuchstaben und Ziffern. Ein Punkt am Blockende beendet ihn, sonst käme der nächste Satz mit.
     r"[\s:.#]*(?P<value>[A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w)(?: [A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w))*)"
@@ -85,7 +87,8 @@ _BARE_IDS = [
     re.compile(r"(?<![\w/])(?:\d{1,3}|[IVX]+) [A-Z][A-Za-z]{0,2} \d{1,6}/\d{2,4}\b"),  # Aktenzeichen 3 O 123/26
     re.compile(r"(?<![\w@.])(?:https?://|www\.)[^\s<>\"']+"),                # URL, kann Patienten- oder Fallnummern enthalten
     re.compile(r"(?<![\d.])(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?![\d.]\d)"),  # IP-Adresse
-    re.compile(r"(?<![\w\-])[A-ZÄÖÜ]{1,3}-[A-Z]{1,2} \d{1,4}[EH]?(?!\w)"),   # Kfz-Kennzeichen
+    # Kfz-Kennzeichen, aber keine Normen und Modelle wie „EU-VO 2016“, „DIN-EN 1090“ oder „VW-ID 3“.
+    re.compile(r"(?<![\w\-])(?!(?:EU|VO|DIN|ISO|VDE|VW|BMW)-)[A-ZÄÖÜ]{1,3}-[A-Z]{1,2} \d{1,4}[EH]?(?!\w)"),
 ]
 # BIC enthält oft keine Ziffer, zählt deshalb nur mit Bezeichner.
 # Geheimnisse: mit Bezeichner nur vor „:“ oder „=“, sonst wäre „das Passwort wurde geändert“ ein Treffer.
@@ -94,6 +97,10 @@ _LABELED_SECRET = re.compile(
 )
 _BARE_SECRET = re.compile(r"(?<![\w\-])(?:sk-|ghp_|gho_|xox[bp]-|AKIA)[A-Za-z0-9_\-]{16,}")
 _HANDLE = re.compile(r"(?<![\w.@])@[^\W\d_][\w.]{2,}\w")
+# Aktenzeichen in beliebiger Schreibweise, aber nur mit Bezeichner. Ohne ihn wäre „3 o 123/26“ nicht von Text zu unterscheiden.
+_LABELED_CASE_NUMBER = re.compile(
+    r"(?<!\w)(?:Aktenzeichen|Az\.?)[\s:.]*(?P<value>(?:\d{1,3}|[IVX]+) [A-Z]{1,3} \d{1,6}/\d{2,4})(?!\w)", re.IGNORECASE
+)
 _BIC = re.compile(r"(?<!\w)(?i:BIC|SWIFT(?:-Code)?)[\s:]*(?P<value>[A-Z]{6}[A-Z0-9]{2}(?:[A-Z0-9]{3})?)(?!\w)")
 # Kartennummern zählen nur mit gültiger Prüfziffer (Luhn), sonst wäre jede lange Zahl eine Karte.
 _CARD = re.compile(r"(?<![\d/.,\-])(?:\d{4}[ \-]?\d{4}[ \-]?\d{4}[ \-]?\d{1,4}|\d{4}[ \-]?\d{6}[ \-]?\d{5})(?!\d)")
@@ -230,6 +237,8 @@ class RegexDetector:
         for pattern in (_BARE_SECRET, _HANDLE):
             for m in pattern.finditer(text):
                 add(m, "KENNUNG")
+        for m in _LABELED_CASE_NUMBER.finditer(text):
+            add(m, "KENNUNG", "value")
         for m in _BIC.finditer(text):
             add(m, "KENNUNG", "value")
         for m in _CARD.finditer(text):
@@ -250,7 +259,7 @@ class RegexDetector:
         for m in _LABELED_PHONE.finditer(text):
             add(m, "TELEFON", "value")
         for m in _PHONE.finditer(text):
-            if 6 <= sum(c.isdigit() for c in m.group()) <= 15:
+            if 6 <= sum(c.isdigit() for c in m.group()) <= 15 and not _AMOUNT_NOT_PHONE.fullmatch(m.group()):
                 add(m, "TELEFON")
         for m in _DATE.finditer(text):
             add(m, "DATUM")

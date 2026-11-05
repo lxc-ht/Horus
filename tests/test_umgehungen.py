@@ -6,6 +6,7 @@ import unicodedata
 import pytest
 
 from harness import api
+from conftest import FakeDetector
 from harness.detect import RegexDetector, _chunks
 
 
@@ -184,3 +185,64 @@ def test_line_break_in_value_restores_exactly():
     result = api.analyze(text)
     assert "3704" not in result.masked_text
     assert api.restore(result.session_id, result.masked_text).text == text
+
+
+# --- Dritte Runde: Übermaskierung und letzte Lecks ----------------------------
+
+@pytest.mark.parametrize("text", [
+    "Nach EU-VO 2016 und DIN-EN 1090 ist das zulässig.",
+    "Die VO-EU 679 gilt, ebenso ISO-TS 2700.",
+    "Das Modell VW-ID 3 und der BMW-X 5 stehen im Hof.",
+    "Die Miete stieg um +100.000 Euro, der Gewinn um +1.250.000 Euro.",
+    "Der Saldo liegt bei 012.50 Euro und 0123.45 Euro.",
+])
+def test_legal_and_money_terms_are_not_masked(text):
+    assert _masked(text) == text
+
+
+@pytest.mark.parametrize("text, typ, value", [
+    ("Fahrzeug KS-AB 1234 gesehen", "KENNUNG", "KS-AB 1234"),
+    ("Tel. +49.561.7712093", "TELEFON", "+49.561.7712093"),
+    ("Durchwahl 030.123.456 anrufen", "TELEFON", "030.123.456"),
+    ("Kundenkonto 88213-44 offen", "KENNUNG", "88213-44"),
+    ("Ausweis L01X00T47 vorgelegt", "KENNUNG", "L01X00T47"),
+    ("Ausweisnummer L01X00T47 vorgelegt", "KENNUNG", "L01X00T47"),
+    ("unser az 3 o 123/26", "KENNUNG", "3 o 123/26"),
+    ("Az: 3 o 123/26", "KENNUNG", "3 o 123/26"),
+    ("IBAN GB82 WEST 1234\n5698 7654 32", "IBAN", "GB82 WEST 1234\n5698 7654 32"),
+])
+def test_remaining_format_is_found(text, typ, value):
+    assert (typ, value) in {(f.typ, f.text) for f in RegexDetector().detect(text)}
+
+
+def _with_person(name):
+    api.set_detectors([RegexDetector(), FakeDetector({name: "PERSON"})])
+
+
+def test_short_surname_alone_is_masked():
+    _with_person("Anna Wu")
+    assert _masked("Anna Wu ist Mandantin. Wu hat gekündigt.") == "[PERSON_1] ist Mandantin. [PERSON_1] hat gekündigt."
+
+
+def test_short_surname_is_case_sensitive():
+    _with_person("Anna Im")
+    assert _masked("Anna Im kommt. Sie ist im Haus. IM Haus.") == "[PERSON_1] kommt. Sie ist im Haus. IM Haus."
+
+
+def test_short_surname_of_two_persons_stays_and_warns():
+    api.set_detectors([RegexDetector(), FakeDetector({"Anna Wu": "PERSON", "Max Wu": "PERSON"})])
+    result = api.analyze("Anna Wu und Max Wu kamen. Wu hat gekündigt.")
+    assert "Wu hat gekündigt" in result.masked_text
+    assert any("„Wu“" in w for w in result.warnings)
+
+
+def test_removed_person_keeps_short_surname_open():
+    _with_person("Anna Wu")
+    result = api.analyze("Anna Wu kam. Wu hat gekündigt.")
+    assert api.remove(result.session_id, "[PERSON_1]").masked_text == "Anna Wu kam. Wu hat gekündigt."
+
+
+def test_short_surname_is_reported_as_uncertain_when_restored():
+    _with_person("Anna Wu")
+    result = api.analyze("Wu hat gekündigt. Anna Wu kam.")
+    assert any(u.text == "Wu" for u in result.uncertain)
