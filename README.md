@@ -29,8 +29,7 @@ Kern (`Phantom-create-1`):
 
 Web (`lxc-ht`):
 
-- [ ] Zählertext ändern. „0 davon verlassen den Rechner“ gilt nur für erkannte Angaben. Vorschlag steht in `web/BACKLOG.md`.
-- [ ] „Kopieren“ gegen den echten Kern einmal klicken.
+- [ ] [PR #3](https://github.com/lxc-ht/LP7/pull/3) mergen: enthält den neuen Zählertext. Gegen den echten Kern geprüft, bei 1280 x 800 ist aber Scrollen nötig.
 - [ ] Nach PR #4: `KENNUNG` in `TYPES` und Chip-Farbe `.t-KENNUNG` in `web/static/index.html` ergänzen.
 
 Beide:
@@ -48,6 +47,7 @@ Beide:
 - [x] Oberfläche im Browser gegen den echten Kern geprüft: Analysieren, Markieren, Zurücknehmen, Freigeben, Rückübersetzen.
 - [x] Nachnamen allein werden mitmaskiert, wenn sie eindeutig zu einer Person gehören (722c4ff).
 - [x] Pitch-Deck (9 Folien) liegt bei Paul, Folie 8 wartet noch auf die Messung.
+- [x] „Kopieren“ gegen den echten Kern geklickt: In der Zwischenablage stehen nur Platzhalter.
 
 **Demo starten**
 
