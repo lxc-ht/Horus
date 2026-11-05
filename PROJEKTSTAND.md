@@ -15,7 +15,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- [ ] PDF laden: Text aus digitalen PDFs lokal auslesen und ins Textfeld setzen, Scans ausdrücklich nicht. Endpunkt `/api/pdf`, Knopf und Ablegen in `index.html`, eigener PR, Review durch Paul (`lxc-ht`, Claude).
 
 
 
@@ -44,6 +43,7 @@ Beide:
 
 **Erledigt**
 
+- [x] PDF laden: Text aus digitalen PDFs lokal im Speicher auslesen und ins Textfeld setzen, per Knopf oder Ziehen; Scans werden gemeldet, nicht gelesen ([PR #30](https://github.com/lxc-ht/LP7/pull/30), `lxc-ht`, Claude). Wartet auf Pauls Review, noch nicht gemergt. Vortragsrechner danach einmal mit Netz starten, damit uv `pypdf` lädt.
 - [x] Layout A umgesetzt: drei flexible Arbeitsbereiche per Hover, Klick und Tastatur; stabil beim Schreiben und Markieren. Äußere Kopfzeile, Schrittleiste und Footer entfernt, kleines Glasmotiv mittig. Browserprüfung mit fünf Breiten, Touch und reduzierter Bewegung sowie Durchlauf mit echtem Kern bestanden. Bestehende Formular-IDs und Freigabeablauf erhalten; IDs der ausdrücklich entfernten Leisten entfallen. Branch `codex/flexible-arbeitsbereiche` (`lxc-ht`, Codex UI).
 
 - [x] Aus Presidio übernommen: Adressen ohne Straßenwort („Am Sande 12“) mit PLZ oder Kontextwort, HRB/HRA, USt-IdNr mit Prüfziffer, Reisepass und Führerschein ([PR #28](https://github.com/lxc-ht/LP7/pull/28)). Demo einmal mit „wohnhaft Am Sande 12, 21335 Lüneburg“ durchspielen.
