@@ -44,7 +44,8 @@ _EMAIL = re.compile(r"(?<![\w.%+-])[\w.%+-]+@[\w.-]+\.[^\W\d_]{2,}(?![\w-])")
 # IBAN in Blöcken (mit oder ohne Leerzeichen), allgemein: 2 Buchstaben, 2 Ziffern, bis 30 Zeichen.
 _IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?:[ \-.]?[A-Z0-9]{4}){2,7}(?:[ \-.]?[A-Z0-9]{1,3})?\b", re.IGNORECASE | re.ASCII)
 # Deutsche IBAN: genau 20 Ziffern, also auch mit ungewöhnlicher Gruppierung sicher zu erkennen.
-_IBAN_DE = re.compile(r"(?<![A-Za-z0-9])[Dd][Ee][ \-.]?\d{2}(?:[ \-.]?\d){18}(?!\d)")
+# Auch über Zeilenumbrüche, wie sie beim Kopieren aus PDFs entstehen.
+_IBAN_DE = re.compile(r"(?<![A-Za-z0-9])[Dd][Ee][\s\-.]{0,2}\d{2}(?:[\s\-.]{0,2}\d){18}(?!\d)")
 _IBAN_SEPARATORS = re.compile(r"[ \-.]")
 
 # Telefonnummern: +Ländervorwahl / 0049 / führende 0, Trennzeichen Leerzeichen, - oder /.
@@ -57,7 +58,8 @@ _PHONE = re.compile(
 # Mit Bezeichner davor ist jedes Format eine Telefonnummer, auch ohne Vorwahl oder in Einzelziffern.
 _LABELED_PHONE = re.compile(
     r"(?<!\w)(?i:Tel(?:efon)?(?:-?(?:Nr\.?|nummer))?|Mobil(?:nummer)?|Handy(?:nummer)?|Fax)[\s:.]*"
-    r"(?P<value>\+?\(?\d(?:[ \-–/.()]{0,2}\d){5,14})(?!\d)"
+    # Ein Umbruch darf drinstehen. Zieht das die nächste Zeile mit, bleibt es maskiert und kommt unverändert zurück.
+    r"(?P<value>\+?\(?\d(?:[\s\-–/.()]{0,2}\d){5,14})(?!\d)"
 )
 
 # Kennungen mit Bezeichner davor: Der Bezeichner verrät den Typ, der Wert darf fast jedes Format haben.
@@ -86,6 +88,12 @@ _BARE_IDS = [
     re.compile(r"(?<![\w\-])[A-ZÄÖÜ]{1,3}-[A-Z]{1,2} \d{1,4}[EH]?(?!\w)"),   # Kfz-Kennzeichen
 ]
 # BIC enthält oft keine Ziffer, zählt deshalb nur mit Bezeichner.
+# Geheimnisse: mit Bezeichner nur vor „:“ oder „=“, sonst wäre „das Passwort wurde geändert“ ein Treffer.
+_LABELED_SECRET = re.compile(
+    r"(?<!\w)(?i:Passwort|Kennwort|Password|PIN|TAN|API-?(?:Key|Schlüssel)|Token|Secret)\s*[:=]\s*(?P<value>\S+)"
+)
+_BARE_SECRET = re.compile(r"(?<![\w\-])(?:sk-|ghp_|gho_|xox[bp]-|AKIA)[A-Za-z0-9_\-]{16,}")
+_HANDLE = re.compile(r"(?<![\w.@])@[^\W\d_][\w.]{2,}\w")
 _BIC = re.compile(r"(?<!\w)(?i:BIC|SWIFT(?:-Code)?)[\s:]*(?P<value>[A-Z]{6}[A-Z0-9]{2}(?:[A-Z0-9]{3})?)(?!\w)")
 # Kartennummern zählen nur mit gültiger Prüfziffer (Luhn), sonst wäre jede lange Zahl eine Karte.
 _CARD = re.compile(r"(?<![\d/.,\-])(?:\d{4}[ \-]?\d{4}[ \-]?\d{4}[ \-]?\d{1,4}|\d{4}[ \-]?\d{6}[ \-]?\d{5})(?!\d)")
@@ -130,11 +138,11 @@ _DATE = re.compile(
     r"\b(?:"
     r"\d{1,2}\.\d{1,2}\.(?:\d{4}|\d{2})"            # 14.03.1979, 1.3.79
     r"|\d{4}-\d{2}-\d{2}"                           # 1979-03-14
-    rf"|\d{{1,2}}\. ?(?:{_MONTHS})\b(?: \d{{4}})?"  # 14. März 1979, 14. März
-    rf"|(?:{_MONTHS}) \d{{4}}"                      # März 1979
+    rf"|\d{{1,2}}\. ?(?:{_MONTHS})\b(?:\s\d{{4}})?"  # 14. März 1979, 14. März
+    rf"|(?:{_MONTHS})\s\d{{4}}"                     # März 1979
     r"|\d{1,2}[/\-]\d{1,2}[/\-]\d{4}"               # 03/14/1979, 14-03-1979
     r"|\d{1,2}\. \d{1,2}\. \d{4}"                   # 14. 03. 1979
-    rf"|\d{{1,2}}\.? ?(?:{_MONTHS}|{_MONTHS_SHORT})\.? \d{{4}}"  # 14 März 1979, 14. Mrz. 1979
+    rf"|\d{{1,2}}\.?\s?(?:{_MONTHS}|{_MONTHS_SHORT})\.?\s\d{{4}}"  # 14 März 1979, 14. Mrz. 1979
     # Ohne Jahr nur zweistellig, sonst wird jede Gliederung wie „3.1.“ zum Datum.
     r"|(?:0[1-9]|[12]\d|3[01])\.(?:0[1-9]|1[0-2])\."  # 14.03.
     r")(?!\d)"
@@ -215,6 +223,11 @@ class RegexDetector:
             if _tax_id_valid(m.group()):
                 add(m, "KENNUNG")
         for pattern in _BARE_IDS:
+            for m in pattern.finditer(text):
+                add(m, "KENNUNG")
+        for m in _LABELED_SECRET.finditer(text):
+            add(m, "KENNUNG", "value")
+        for pattern in (_BARE_SECRET, _HANDLE):
             for m in pattern.finditer(text):
                 add(m, "KENNUNG")
         for m in _BIC.finditer(text):
