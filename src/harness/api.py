@@ -284,6 +284,22 @@ def send(rel: Release) -> str:
     return cloud.ask(rel.text)
 
 
+def forget(session_id: str) -> None:
+    """Erweiterung: Sitzung samt Zuordnung sofort löschen, nicht erst beim Beenden.
+
+    Danach lässt sich nichts mehr zurückübersetzen, und alle Freigaben der Sitzung sind ungültig.
+    Unbekannte Sitzung → KeyError mit fertigem Satz.
+    """
+    with _lock:
+        _session(session_id)
+        del _sessions[session_id]
+        vault.delete_sessions([session_id])
+        log.info("forget: Sitzung %s gelöscht", session_id[:8])
+
+
+__all__ += ["forget"]
+
+
 def restore(session_id: str, answer: str) -> RestoreResult:
     with _lock:
         s = _session(session_id)

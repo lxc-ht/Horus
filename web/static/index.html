@@ -67,6 +67,7 @@
   .note { font-size: 11px; line-height: 1.65; border-radius: 10px; padding: 10px 12px; margin: 0; }
   .warn { background: var(--yellow-soft); color: var(--yellow); border: 1px solid #f5e9b5; }
   .error { background: var(--red-soft); color: var(--red); border: 1px solid #f3d7d0; }
+  .done { background: #e3f8df; color: #28613c; border: 1px solid #c8e7bd; }
   .stack { display: flex; flex-direction: column; gap: 7px; max-height: 170px; overflow-y: auto; flex-shrink: 0; }
   .stack:empty { display: none; }
   .chip { display: inline-flex; align-items: center; gap: 1px; padding: 0 2px 0 5px; margin: 0; min-height: 27px; vertical-align: baseline; font: 500 12px/1.5 ui-monospace, "SF Mono", Menlo, monospace; user-select: none; -webkit-user-select: none; white-space: nowrap; color: #152616; background: var(--chip); cursor: default; border: 1px solid #1820240a; border-radius: 7px; }
@@ -216,6 +217,7 @@
       </div>
       <div id="answer" class="pane" aria-labelledby="h-answer" aria-live="polite"></div>
       <div id="report" class="stack" aria-live="polite"></div>
+      <div id="forgetRow" class="row" hidden><button id="btnForget" type="button" title="Löscht die Zuordnung von Platzhaltern zu Originalen auf diesem Rechner. Danach lässt sich nichts mehr zurückübersetzen."><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v6m4-6v6"/></svg>Zuordnung jetzt löschen</button></div>
       <p class="card-foot">Wieder eingesetzte Angaben erscheinen grün.</p>
     </section>
   </main>
@@ -470,6 +472,8 @@ function render() {
   $("btnCopy").className = release ? "primary" : "";
   $("btnRestore").disabled = busy;
   $("copyPanel").hidden = !showCopy;
+  $("forgetRow").hidden = !(result && state.restored);
+  $("btnForget").disabled = busy;
   $("hint").textContent = release
     ? "Freigegeben. Ändert sich etwas, ist eine neue Freigabe nötig."
     : result ? "Text markieren, um weitere Angaben zu ersetzen. × nimmt eine Ersetzung zurück." : "";
@@ -643,6 +647,17 @@ async function copyText(text) {
 
 $("btnRestore").addEventListener("click", () => run(async () => {
   await restoreAnswer($("answerInput").value);
+}));
+
+// Zuordnung sofort löschen statt erst beim Beenden. Die zurückübersetzte Antwort bleibt stehen.
+$("btnForget").addEventListener("click", () => run(async () => {
+  await api("/api/forget", { session_id: state.result.session_id });
+  state.result = null;
+  state.release = null;
+  state.accepted.clear();
+  $("copied").textContent = "";
+  $("answerInput").value = "";
+  $("report").append(note("Zuordnung gelöscht. Diese Platzhalter lassen sich nicht mehr zurückübersetzen.", "done"));
 }));
 
 // Markieren mit der Maus

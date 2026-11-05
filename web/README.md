@@ -22,6 +22,10 @@ Layout A ist direkt in `web/static/index.html` eingebaut: drei flexible Spalten 
 
 „Datei laden“ oder eine Datei auf das Feld „Dein Original“ ziehen setzt ihren Text ins Feld. Das geht mit digitalen PDFs, Word-Dateien (.docx) und E-Mails (.eml). Scans erkennt LP7 nicht und meldet das, ebenso alte .doc- und Outlook-.msg-Dateien. Bei Word kommen Kopf- und Fußzeilen und Fußnoten mit, gelöschter Text aus „Änderungen nachverfolgen“ nicht. Bei E-Mails kommen Absender, Empfänger, Datum und Betreff mit, Anhänge nicht. Die Datei geht nur vom Browser an den lokalen Server auf 127.0.0.1, wird dort im Speicher gelesen und nirgends gespeichert oder protokolliert. Analysiert wird erst, wenn du selbst auf „Text analysieren“ klickst; eine vorherige Analyse und Freigabe verfallen beim Laden, ebenso bei „Beispiel laden“ und bei jeder Änderung am Text. Kann eine Datei nicht gelesen werden, steht die Meldung direkt unter „Dein Original“.
 
+## Zuordnung löschen
+
+Nach dem Zurückübersetzen löscht „Zuordnung jetzt löschen“ die Zuordnung von Platzhaltern zu Originalen auf diesem Rechner sofort, nicht erst beim Beenden. Die SQLite-Datei überschreibt gelöschte Werte (`secure_delete`). Die zurückübersetzte Antwort bleibt sichtbar, Vorschau und Freigabe sind danach leer und gesperrt.
+
 ## UI prüfen
 
 Die Oberfläche lädt keine externen Fonts, Skripte oder Bilder. Die drei Arbeitsschritte passen sich an Desktop und Handy an. Die Freigabe bleibt vor dem Kopieren zwingend. Die Weboberfläche arbeitet im Kopiermodus: Text lokal analysieren, Vorschau prüfen und freigeben, die Fassung selbst nach Claude kopieren und dessen Antwort zur lokalen Rückübersetzung einfügen. Es gibt keinen automatischen Versand.

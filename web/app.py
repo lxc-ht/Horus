@@ -144,6 +144,13 @@ def restore(body: RestoreBody) -> dict:
     return asdict(call(core.restore, body.session_id, body.answer))
 
 
+@app.post("/api/forget")
+def forget(body: SessionBody) -> dict:
+    # Zuordnung sofort löschen. Danach kann diese Sitzung nichts mehr zurückübersetzen.
+    call(core.forget, body.session_id)
+    return {"ok": True}
+
+
 class PdfError(Exception):
     pass
 

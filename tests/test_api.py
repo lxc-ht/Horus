@@ -470,3 +470,21 @@ def test_bare_placeholder_with_genitive_is_restored_and_reported():
     assert bare.text == "Anna Müllers Antrag"
     assert any("ohne Klammern" in warning for warning in bare.warnings)
     assert api.restore(session, "person 1s Antrag").changed == ["person 1"]
+
+
+# --- Zuordnung löschen ----------------------------------------------------------
+
+def test_forget_deletes_mapping_and_session():
+    from harness import vault
+    result = api.analyze(SAMPLE)
+    rel = api.release(result.session_id)
+    assert vault.mappings(result.session_id)
+    api.forget(result.session_id)
+    assert vault.mappings(result.session_id, active_only=False) == []
+    with pytest.raises(KeyError, match="nicht mehr bekannt"):
+        api.restore(result.session_id, "[PERSON_1]")
+    with pytest.raises(KeyError):
+        api.forget(result.session_id)
+    # Die alte Freigabe gilt nicht mehr.
+    with pytest.raises(api.ReleaseMismatchError):
+        api.send(rel)
