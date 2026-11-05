@@ -19,7 +19,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- Erkennungslücken im Kern schließen: Namen in langen Absätzen ohne Satzende, E-Mails mit Umlaut, Namensvarianten wie Genitiv und ue/ss (Branch `kern/erkennung-luecken`, `lxc-ht`).
+- Erkennungslücken im Kern (lange Absätze, E-Mails mit Umlaut, Namensvarianten): [PR #8](https://github.com/lxc-ht/LP7/pull/8) wartet auf den Merge (`lxc-ht`).
 - Nichts.
 
 **Nächste Aufgaben**
