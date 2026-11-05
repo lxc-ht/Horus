@@ -7,6 +7,7 @@
 - `RestoreResult.warnings` wiederholt, was schon in `unknown`, `changed` und `missing` steht. Die Oberfläche filtert das heraus. Bitte dort nur zusätzliche Hinweise liefern.
 - Die Oberfläche markiert Text nur zwischen zwei Platzhaltern. `add_manual` sollte ablehnen, wenn der Begriff im maskierten Text nicht vorkommt.
 - `replacements` sollte jedes einzelne Vorkommen enthalten, denn daraus entstehen die Chips und der Zähler.
+- Adresse ohne Straßenwort bleibt stehen: In „wohnhaft Am Sande 12, 21335 Lüneburg“ wird nur „21335 Lüneburg“ ersetzt, „Am Sande 12“ geht mit raus (Stand `dcf069b`, gefunden von Paul/Claudian am 05.11.). Gleiches Muster: Am Markt, An der Kirche, Im Grund.
 
 ## Für später
 
