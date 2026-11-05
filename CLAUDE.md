@@ -13,6 +13,14 @@ Daraus folgt, im Code verankert:
 3. Zuordnungstabelle, Originaltexte und `.env` gehören nie in Git, nie in Logs und nie in den API-Aufruf. Logs enthalten nur Platzhalter, Typen und Zählungen.
 4. Die Rückübersetzung rät nie. Was sie nicht eindeutig zuordnen kann, meldet sie.
 
+## Abstimmung im Team
+
+Zwei Menschen arbeiten hier mit je einem eigenen Agenten. Die Agenten sprechen nicht miteinander, der gemeinsame Stand steht in `README.md` unter „Projektstand“.
+
+- Vor jeder Arbeit: `git pull`, dann den Projektstand lesen. Was dort unter „In Arbeit“ steht, gehört jemand anderem.
+- Beim Start und nach Abschluss einer Aufgabe den Projektstand aktualisieren und pushen, auch ohne eigene Aufforderung. Reine Änderungen am Projektstand dürfen direkt auf `main`, sonst sieht der andere Agent sie nicht.
+- Nichts Geheimes und keine echten Personendaten in den Projektstand schreiben.
+
 ## Aufteilung
 
 - `web/` gehört dem Web-Teil (Branch `web`). Hier nichts anlegen oder ändern.
