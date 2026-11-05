@@ -12,9 +12,15 @@ Mit Attrappe:
 
 Danach http://127.0.0.1:8000 öffnen. Das erste Analysieren lädt das Modell und dauert länger, also vor der Demo einmal auslösen.
 
+## Arbeitsoberfläche
+
+Material C ist direkt in `web/static/index.html` eingebaut: helle Arbeitsflächen, dezenter Farbverlauf, Farbrand am aktuellen Schritt und größere Texte. Die Legende erklärt erkannte Datentypen und markierte unsichere Stellen. Die Oberfläche verwendet den echten Kern, sofern sie nicht ausdrücklich mit `HARNESS_FAKE=1` gestartet wird.
+
+![Arbeitsoberfläche mit echter lokaler Pseudonymisierung und erfundenen Beispieldaten](assets/arbeitsoberflaeche-material-c.png)
+
 ## UI prüfen
 
-Die Oberfläche lädt keine externen Fonts, Skripte oder Bilder. Die drei Arbeitsschritte passen sich an Desktop und Handy an. Die Freigabe bleibt vor Versand oder Kopieren zwingend.
+Die Oberfläche lädt keine externen Fonts, Skripte oder Bilder. Die drei Arbeitsschritte passen sich an Desktop und Handy an. Die Freigabe bleibt vor dem Kopieren zwingend. Die Weboberfläche arbeitet im Kopiermodus: Text lokal analysieren, Vorschau prüfen und freigeben, die Fassung selbst nach Claude kopieren und dessen Antwort zur lokalen Rückübersetzung einfügen. Es gibt keinen automatischen Versand.
 
 Server bewusst mit der Attrappe starten:
 
@@ -25,7 +31,7 @@ In einem zweiten Terminal die Browserprüfung ausführen. Playwright ist nur fü
     uv run --no-project --with playwright playwright install chromium --only-shell
     uv run --no-project --with playwright python -m web.test_ui
 
-Die Prüfung nutzt erfundene Daten. Der API-Versand wird im Browser simuliert, es geht keine Anfrage an Claude. Sie prüft Sperrzustände, Kopieren, Rückübersetzung, Freigabeverlust nach einer Änderung und vier Bildschirmbreiten. Für einen anderen lokalen Port kann die URL als Argument übergeben werden.
+Die Prüfung nutzt erfundene Daten mit der lokalen Attrappe, es geht keine Anfrage an Claude. Sie prüft Sperrzustände, Kopieren, Rückübersetzung, Freigabeverlust nach einer Änderung, den aktuellen Arbeitsbereich, die Unsicher Legende und fünf Bildschirmbreiten. Für einen anderen lokalen Port kann die URL als Argument übergeben werden.
 
 ## UI Kit
 
