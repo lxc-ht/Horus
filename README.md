@@ -23,7 +23,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- Layout A in der echten Arbeitsoberfläche: drei per Hover, Klick und Tastatur flexible Spalten, obere Leisten und äußeren Footer entfernen, Glasmotiv mittig; nur `web/`, Branch `codex/flexible-arbeitsbereiche` (`lxc-ht`, Codex UI).
 
 
 
@@ -50,6 +49,8 @@ Beide:
   - Bekannte Grenzen aus derselben Prüfung: Stadt „Essen“ blieb in einem längeren Satz stehen, „Kundenkonto 88213-44“ und „Ausweis L01X00T47“ ebenso, „im Winter“ wurde bei einer Person „Rosa Winter“ zum Namen. „Die einzige Kinderärztin im Ort“ findet keine Erkennung.
 
 **Erledigt**
+
+- [x] Layout A umgesetzt: drei flexible Arbeitsbereiche per Hover, Klick und Tastatur; stabil beim Schreiben und Markieren. Äußere Kopfzeile, Schrittleiste und Footer entfernt, kleines Glasmotiv mittig. Browserprüfung mit fünf Breiten, Touch und reduzierter Bewegung sowie Durchlauf mit echtem Kern bestanden. Bestehende Formular-IDs und Freigabeablauf erhalten; IDs der ausdrücklich entfernten Leisten entfallen. Branch `codex/flexible-arbeitsbereiche` (`lxc-ht`, Codex UI).
 
 - [x] Übermaskierung aus PR #22 behoben (`EU-VO 2016`, `+100.000 Euro`), letzte Lecks geschlossen: kurze Nachnamen, Aktenzeichen klein, Ausweis, Kundenkonto ([PR #27](https://github.com/lxc-ht/LP7/pull/27)).
 - [x] Material C in der echten Pseudonymisierungsoberfläche umgesetzt: helle Karten, Farbrand am aktuellen Bereich, größere Texte und Icons, Kopiermodus Texte und Unsicher Legende. Element-IDs erhalten. Webtests, Browserprüfung mit fünf Breiten und echter Durchlauf mit lokalem GLiNER (Analyse, Freigabe, Kopieren, Rückübersetzung, erneute Sperre) bestanden; kein Claude Versand. Branch `codex/arbeitsoberflaeche-material-c` (`lxc-ht`, Codex UI).
