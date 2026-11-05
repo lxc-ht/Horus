@@ -20,6 +20,8 @@ from __future__ import annotations
 
 import atexit
 import logging
+import signal
+import sys
 import threading
 from collections import Counter
 from dataclasses import dataclass, field
@@ -42,6 +44,7 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 WARN_TERM_NOT_FOUND = "„{term}“ kommt im Text nicht vor, es wurde nichts maskiert."
+WARN_TERM_PARTLY_MASKED = "„{term}“ überschneidet sich mit einer anderen Ersetzung und ist nicht vollständig maskiert. Nimm diese erst zurück."
 
 
 @dataclass
@@ -57,6 +60,13 @@ _detectors: list[Detector] | None = None
 
 # Ohne den Prozess sind die Sitzungen weg, also auch ihre Zuordnung löschen. Nach einem Absturz greift vault.SESSION_TTL.
 atexit.register(lambda: vault.delete_sessions(list(_sessions)))
+
+# SIGTERM und ein geschlossenes Terminal (SIGHUP) beenden Python sonst ohne atexit. uvicorn ruft diesen Handler nach seinem Shutdown auf.
+if threading.current_thread() is threading.main_thread():
+    for _name in ("SIGTERM", "SIGHUP"):
+        _signal = getattr(signal, _name, None)   # SIGHUP gibt es unter Windows nicht
+        if _signal is not None and signal.getsignal(_signal) == signal.SIG_DFL:
+            signal.signal(_signal, lambda signum, _frame: sys.exit(128 + signum))
 
 
 def set_detectors(detectors: list[Detector] | None) -> None:
@@ -118,6 +128,15 @@ def analyze(text: str) -> MaskResult:
         return _result(session_id)
 
 
+def _fully_masked(spans: list[Span], start: int, end: int) -> bool:
+    """Deckt spans den Bereich start bis end lückenlos ab?"""
+    position = start
+    for span in sorted(spans, key=lambda x: x.start):
+        if span.start <= position < span.end:
+            position = span.end
+    return position >= end
+
+
 def add_manual(session_id: str, term: str, typ: str) -> MaskResult:
     """Jedes Vorkommen von term zusätzlich maskieren."""
     typ = typ.strip().upper()
@@ -136,7 +155,10 @@ def add_manual(session_id: str, term: str, typ: str) -> MaskResult:
         s.spans = mask.propagate(s.original_text, s.spans, _all_mappings(session_id))
         s.issued.clear()   # jede Änderung macht bisherige Freigaben ungültig
         _log_counts(f"add_manual {placeholder}", session_id, s)
-        return _result(session_id)
+        partly = any(
+            not _fully_masked(s.spans, m.start(), m.end()) for m in mask.occurrence_pattern(term).finditer(s.original_text)
+        )
+        return _result(session_id, [WARN_TERM_PARTLY_MASKED.format(term=term)] if partly else None)
 
 
 def remove(session_id: str, placeholder: str) -> MaskResult:
