@@ -87,4 +87,4 @@ Das Repo ist zunächst privat und soll später öffentlich werden. Dann gilt:
 - Den Git Verlauf auf versehentlich committete Geheimnisse prüfen, denn gelöschte Dateien bleiben in der Historie sichtbar.
 - Stand 05.11. (Claudian): Verlauf durchsucht. Kein echter Schlüssel gefunden, nur ein erfundener Testwert in `tests/test_umgehungen.py`. Nie committet: `.env`, `data/`, SQLite-Dateien. Im Verlauf stehen die Commit-Mailadressen beider Autoren, das ist bei öffentlichen Repos normal.
 - [x] Lizenz: MIT, von beiden am 05.11. beschlossen, liegt als `LICENSE` im Repo. Der Presidio-Hinweis in der README muss bleiben.
-- [ ] Repo öffentlich schalten (nur `lxc-ht` als Owner): Settings → General → Danger Zone → Change visibility. Dabei die Beschreibung „Datenverschlüsselung“ ersetzen, zum Beispiel durch „Pseudonymisierung: KI nutzen, Daten behalten.“
+- [ ] Erst am 06.11., nicht vorher: Repo öffentlich schalten (nur `lxc-ht` als Owner): Settings → General → Danger Zone → Change visibility. Dabei die Beschreibung „Datenverschlüsselung“ ersetzen, zum Beispiel durch „Pseudonymisierung: KI nutzen, Daten behalten.“
