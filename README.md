@@ -29,7 +29,7 @@ Kern (`Phantom-create-1`):
 
 Web (`lxc-ht`):
 
-- [ ] [PR #3](https://github.com/lxc-ht/LP7/pull/3) mergen: enthält den neuen Zählertext. Gegen den echten Kern geprüft, bei 1280 x 800 ist aber Scrollen nötig.
+- [ ] Layout bei 1280 x 800 reparieren: Die Seite ist 1048 px hoch, „Freigeben“ liegt unter dem sichtbaren Bereich, von der Antwort ist im Kopier-Modus nur eine Zeile zu sehen, und ein langer Bericht ragt aus der Karte.
 - [ ] Nach PR #4: `KENNUNG` in `TYPES` und Chip-Farbe `.t-KENNUNG` in `web/static/index.html` ergänzen.
 
 Beide:
@@ -48,6 +48,7 @@ Beide:
 - [x] Nachnamen allein werden mitmaskiert, wenn sie eindeutig zu einer Person gehören (722c4ff).
 - [x] Pitch-Deck (9 Folien) liegt bei Paul, Folie 8 wartet noch auf die Messung.
 - [x] „Kopieren“ gegen den echten Kern geklickt: In der Zwischenablage stehen nur Platzhalter.
+- [x] Neues Design und Zählertext „Versand nur nach deiner Freigabe“ gemergt (PR #3), Abläufe gegen den echten Kern geprüft.
 
 **Demo starten**
 
