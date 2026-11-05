@@ -24,7 +24,7 @@ Layout A ist direkt in `web/static/index.html` eingebaut: drei flexible Spalten 
 
 ## UI prüfen
 
-Die Oberfläche lädt keine externen Fonts, Skripte oder Bilder. Die drei Arbeitsschritte passen sich an Desktop und Handy an. Die Freigabe bleibt vor dem Kopieren zwingend. Die Weboberfläche arbeitet im Kopiermodus: Text lokal analysieren, Vorschau prüfen und freigeben, die Fassung selbst nach Claude kopieren und dessen Antwort zur lokalen Rückübersetzung einfügen. Es gibt keinen automatischen Versand.
+Die Oberfläche lädt keine externen Fonts, Skripte oder Bilder. Die drei Arbeitsschritte passen sich an Desktop und Handy an. Die Freigabe bleibt vor dem Kopieren zwingend. Die Weboberfläche arbeitet im Kopiermodus: Text lokal analysieren, Vorschau prüfen und freigeben, die Fassung selbst nach Claude kopieren und dessen Antwort zur lokalen Rückübersetzung einfügen. Es gibt keinen automatischen Versand. Nach der Freigabe kopiert „Kopieren und Claude öffnen“ die freigegebene Fassung und öffnet claude.ai in einem neuen Tab. Einfügen und Absenden bleibt Sache des Menschen; die Seite selbst lädt weiterhin nichts von außen.
 
 Server bewusst mit der Attrappe starten:
 
