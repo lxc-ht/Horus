@@ -50,6 +50,9 @@ DOCX_INVALID = "Das ist keine lesbare Word-Datei (.docx)."
 DOCX_OLD = "Diese Word-Datei ist im alten Format (.doc) oder mit einem Passwort geschützt. Speichere sie in Word ohne Passwort als .docx und lade sie erneut."
 DOCX_EMPTY = "In dieser Word-Datei steht kein Text."
 EML_INVALID = "Das ist keine lesbare E-Mail-Datei (.eml)."
+# Längere Texte halten die Analyse über eine halbe Minute auf, die Demo wirkt dann eingefroren.
+TEXT_MAX_CHARS = 100_000
+TEXT_TOO_LONG = "Der Text hat {n} Zeichen. LP7 analysiert höchstens 100.000 Zeichen auf einmal, etwa 30 Seiten. Teile ihn bitte auf."
 # Entpackt höchstens so viel. Eine kleine ZIP-Datei kann sonst Gigabytes an XML enthalten.
 DOCX_MAX_XML = 50 * 1024 * 1024
 
@@ -120,6 +123,8 @@ def status() -> dict:
 
 @app.post("/api/analyze")
 def analyze(body: AnalyzeBody) -> dict:
+    if len(body.text) > TEXT_MAX_CHARS:
+        raise CoreError({"error": TEXT_TOO_LONG.format(n=f"{len(body.text):,}".replace(",", "."))})
     return asdict(call(core.analyze, body.text))
 
 
