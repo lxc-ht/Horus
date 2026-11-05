@@ -74,6 +74,11 @@ document.querySelectorAll('.sample-action').forEach((button) => {
   button.addEventListener('click', () => { $('componentFeedback').textContent = button.dataset.message; });
 });
 
+const example = {
+  original: 'Erika Musterfrau schreibt an Max Mustermann. Bitte formuliere eine kurze Rückfrage.',
+  masked: '<span class="data-chip person">[PERSON_1]</span> schreibt an <span class="data-chip person">[PERSON_2]</span>. Bitte formuliere eine kurze Rückfrage.',
+  answer: 'Erika Musterfrau hat eine Rückfrage an Max Mustermann.',
+};
 const designs = [ ['glass', 'Liquid Glass', 'Leicht & vertraut'], ['lime', 'Lime Soda', 'Frisch & ausdrucksstark'], ['pure', 'Pure White', 'Ruhig & reduziert'] ];
 $('demoGrid').innerHTML = designs.map(([id, label, detail]) => `
   <article class="demo" data-design="${id}" data-stage="original" aria-label="${label} Demo">
@@ -100,9 +105,7 @@ function renderDemo(demo) {
   demo.querySelector('.demo-heading').innerHTML = icon(step) + (output ? 'Deine Ausgabe' : original ? 'Dein Original' : 'Vorschau für Claude');
   demo.querySelector('.demo-status').textContent = output ? 'Fertig' : released ? 'Freigegeben' : original ? 'Lokal' : 'Prüfung nötig';
   demo.querySelector('.demo-text').innerHTML = output
-    ? 'Erika Musterfrau hat eine Rückfrage an Max Mustermann.'
-    : original ? 'Erika Musterfrau schreibt an Max Mustermann. Bitte formuliere eine kurze Rückfrage.'
-    : '<span class="data-chip person">[PERSON_1]</span> schreibt an <span class="data-chip person">[PERSON_2]</span>. Bitte formuliere eine kurze Rückfrage.';
+    ? example.answer : original ? example.original : example.masked;
   demo.querySelector('.demo-help').textContent = output ? 'Beispielantwort. Die Originale wurden wieder eingesetzt.' : released ? 'Die geprüfte Fassung ist freigegeben. Ausgabe jetzt ausprobieren.' : original ? 'Starte die Beispielsanalyse. Dein Text bleibt lokal.' : 'Prüfe den gesamten Text. Erst die Freigabe aktiviert die Ausgabe.';
   const next = demo.querySelector('.demo-next');
   next.innerHTML = icon(original ? 'analyze' : output ? 'reset' : 'release') + (original ? 'Analysieren' : output ? 'Neu starten' : released ? 'Freigegeben' : 'Freigeben');
@@ -130,3 +133,66 @@ document.querySelectorAll('.demo').forEach((demo) => {
   });
   renderDemo(demo);
 });
+
+const dashboard = $('dashboardDemo');
+const removed = new Set();
+let dashboardStage = 'original';
+$('dashOriginal').value = example.original;
+
+function renderDashboard(message) {
+  const original = dashboardStage === 'original';
+  const released = dashboardStage === 'released';
+  const output = dashboardStage === 'output';
+  dashboard.dataset.stage = dashboardStage;
+  for (const step of dashboard.querySelectorAll('[data-dash-step]')) {
+    if (step.dataset.dashStep === (original ? 'original' : output ? 'output' : 'preview')) step.setAttribute('aria-current', 'step');
+    else step.removeAttribute('aria-current');
+  }
+  const person = (index, name) => removed.has(index) ? name : `<span class="data-chip person">[PERSON_${index}]<button type="button" data-person="${index}" aria-label="PERSON_${index} zurücknehmen">${icon('close')}</button></span>`;
+  $('dashPreview').innerHTML = original ? '<span class="dash-empty">Nach der Analyse siehst du hier die Fassung mit Platzhaltern.</span>' : `${person(1, 'Erika Musterfrau')} schreibt an ${person(2, 'Max Mustermann')}. Bitte formuliere eine kurze Rückfrage.`;
+  $('dashStatus').textContent = original ? 'Gesperrt' : released || output ? 'Freigegeben' : 'Prüfung nötig';
+  $('dashStatus').className = 'badge ' + (original ? 'neutral' : released || output ? 'success' : 'warning');
+  $('dashRelease').disabled = original || released || output;
+  $('dashOutput').disabled = !released;
+  $('dashAnswer').textContent = output ? example.answer : 'Nach deiner Freigabe kannst du die Ausgabe simulieren.';
+  $('dashAnswer').classList.toggle('dash-empty', !output);
+  $('dashAnswerStatus').textContent = output ? 'Fertig' : 'Ausstehend';
+  $('dashAnswerStatus').className = 'badge ' + (output ? 'success' : 'neutral');
+  $('dashNotice').textContent = message;
+}
+
+$('dashAnalyze').addEventListener('click', () => {
+  removed.clear();
+  dashboardStage = 'preview';
+  renderDashboard('Zwei Angaben im Beispiel ersetzt. Prüfe die Vorschau und gib sie ausdrücklich frei.');
+});
+$('dashRelease').addEventListener('click', () => {
+  if (dashboardStage !== 'preview') return;
+  dashboardStage = 'released';
+  renderDashboard('Vorschau freigegeben. Die simulierte Ausgabe ist jetzt verfügbar.');
+});
+$('dashOutput').addEventListener('click', () => {
+  if (dashboardStage !== 'released') return;
+  dashboardStage = 'output';
+  renderDashboard('Beispielantwort bereit. Keine Anfrage an Claude gesendet.');
+});
+$('dashPreview').addEventListener('click', (event) => {
+  const button = event.target.closest('[data-person]');
+  if (!button) return;
+  removed.add(Number(button.dataset.person));
+  dashboardStage = 'preview';
+  renderDashboard('Ersetzung zurückgenommen. Freigabe und Ausgabe verworfen. Prüfe den Text erneut.');
+  $('dashRelease').focus();
+});
+$('dashReset').addEventListener('click', () => {
+  removed.clear();
+  dashboardStage = 'original';
+  renderDashboard('Bereit für die Beispielsanalyse. Alle Abläufe werden lokal simuliert.');
+});
+document.querySelectorAll('.dashboard-controls [data-layout]').forEach((button) => {
+  button.addEventListener('click', () => {
+    dashboard.dataset.layout = button.dataset.layout;
+    document.querySelectorAll('.dashboard-controls [data-layout]').forEach((peer) => peer.setAttribute('aria-pressed', String(peer === button)));
+  });
+});
+renderDashboard('Bereit für die Beispielsanalyse. Alle Abläufe werden lokal simuliert.');

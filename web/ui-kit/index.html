@@ -7,7 +7,7 @@
 <title>LP7 · UI Kit</title>
 <link rel="stylesheet" href="kit.css">
 </head>
-<body data-look="glass">
+<body data-look="lime">
 <svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <symbol id="i-analyze" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3M7 8h10M7 12h7M7 16h10"/></symbol>
   <symbol id="i-preview" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
@@ -40,7 +40,7 @@
       <div><p class="eyebrow">WENIGER RAUSCHEN. MEHR KLARHEIT.</p><h1 id="title">Ein klarer Ablauf.<br>Ein leichtes Gefühl.</h1><p class="lead">Die Bausteine für deinen lokalen KI Arbeitsbereich.</p></div>
       <div class="hero-art" aria-hidden="true"><span class="art-icon small"><svg class="icon"><use href="#i-analyze"/></svg></span><span class="art-icon large"><svg class="icon"><use href="#i-preview"/></svg></span><span class="art-icon small"><svg class="icon"><use href="#i-output"/></svg></span><span class="art-label">Klar. Lokal. Unter deiner Kontrolle.</span></div>
     </section>
-    <div class="look-bar"><span>Drei Looks. Eine Designsprache.</span><div class="segmented" role="group" aria-label="Designrichtung"><button type="button" data-look="glass" aria-pressed="true">Liquid Glass</button><button type="button" data-look="lime" aria-pressed="false">Lime Soda</button><button type="button" data-look="pure" aria-pressed="false">Pure White</button></div></div>
+    <div class="look-bar"><span>Lime Soda. Deine Designsprache.</span><div class="segmented" role="group" aria-label="Designrichtung"><button type="button" data-look="glass" aria-pressed="false">Liquid Glass</button><button type="button" data-look="lime" aria-pressed="true">Lime Soda</button><button type="button" data-look="pure" aria-pressed="false">Pure White</button></div></div>
 
     <section id="icons" class="section" aria-labelledby="icons-title">
       <div class="section-heading"><div><p class="eyebrow">01 / ICONS</p><h2 id="icons-title">Kleine Zeichen. Klare Bedeutung.</h2></div><p>18 Icons · 24 px · runde Konturen</p></div>
@@ -67,6 +67,21 @@
     <section id="demos" class="section" aria-labelledby="demos-title">
       <div class="section-heading"><div><p class="eyebrow">03 / LIVE DEMOS</p><h2 id="demos-title">Drei Richtungen zum Ausprobieren.</h2></div><p>Erfundener Beispieltext. Kein Versand.</p></div>
       <div class="demo-grid" id="demoGrid"></div>
+    </section>
+    <section id="dashboard" class="section" aria-labelledby="dashboard-title">
+      <div class="section-heading"><div><p class="eyebrow">04 / DASHBOARD</p><h2 id="dashboard-title">Das Motiv wird zum Arbeitsbereich.</h2></div><p>Zwei Layouts, ein gemeinsamer Ablauf.</p></div>
+      <div class="dashboard-controls"><span>Layout vergleichen</span><div class="segmented" role="group" aria-label="Dashboard Layout"><button type="button" data-layout="banner" aria-pressed="true">Banner im Kopfbereich</button><button type="button" data-layout="flow" aria-pressed="false">Glas Ablaufleiste</button></div></div>
+      <div id="dashboardDemo" class="dashboard" data-layout="banner" data-stage="original">
+        <div class="demo-topbar"><span class="demo-mark"><svg class="icon" aria-hidden="true"><use href="#i-mask"/></svg>LP7<span class="dash-local">Design Demo · lokal</span></span><button type="button" class="button secondary" id="dashReset"><svg class="icon" aria-hidden="true"><use href="#i-reset"/></svg>Neu starten</button></div>
+        <div class="dash-intro"><div><h3>KI nutzen. Daten behalten.</h3><p>Original, geprüfte Vorschau und Antwort in einem Arbeitsbereich.</p></div><div class="dash-banner hero-art" aria-hidden="true"><span class="art-icon small"><svg class="icon"><use href="#i-analyze"/></svg></span><span class="art-icon large"><svg class="icon"><use href="#i-preview"/></svg></span><span class="art-icon small"><svg class="icon"><use href="#i-output"/></svg></span><span class="art-label">Klar. Lokal. Unter deiner Kontrolle.</span></div></div>
+        <ol class="dash-steps" aria-label="Dashboard Arbeitsschritte"><li data-dash-step="original"><span class="dash-step-icon"><svg class="icon" aria-hidden="true"><use href="#i-analyze"/></svg></span>Text vorbereiten</li><li data-dash-step="preview"><span class="dash-step-icon"><svg class="icon" aria-hidden="true"><use href="#i-preview"/></svg></span>Prüfen & freigeben</li><li data-dash-step="output"><span class="dash-step-icon"><svg class="icon" aria-hidden="true"><use href="#i-output"/></svg></span>Antwort erhalten</li></ol>
+        <div class="dash-panels">
+          <section class="dash-card" aria-labelledby="dashOriginalTitle"><div class="dash-card-heading"><h4 id="dashOriginalTitle"><svg class="icon" aria-hidden="true"><use href="#i-original"/></svg>Dein Original</h4><span class="badge neutral">Beispiel</span></div><p class="dash-caption" id="dashOriginalHelp">Erfundener Text zum Ausprobieren.</p><textarea id="dashOriginal" readonly aria-labelledby="dashOriginalTitle" aria-describedby="dashOriginalHelp"></textarea><button type="button" class="button primary" id="dashAnalyze"><svg class="icon" aria-hidden="true"><use href="#i-analyze"/></svg>Analysieren</button><p class="dash-foot">Beispieldaten. Keine echte Erkennung.</p></section>
+          <section class="dash-card dash-review" aria-labelledby="dashPreviewTitle"><div class="dash-card-heading"><h4 id="dashPreviewTitle"><svg class="icon" aria-hidden="true"><use href="#i-preview"/></svg>Vorschau</h4><span id="dashStatus" class="badge neutral">Gesperrt</span></div><p class="dash-caption">Prüfe die gesamte Fassung vor der Freigabe.</p><div id="dashPreview" class="dash-text"></div><button type="button" class="button accent" id="dashRelease" disabled><svg class="icon" aria-hidden="true"><use href="#i-release"/></svg>Freigeben</button><p class="dash-foot">× nimmt eine Ersetzung zurück.</p></section>
+          <section class="dash-card" aria-labelledby="dashAnswerTitle"><div class="dash-card-heading"><h4 id="dashAnswerTitle"><svg class="icon" aria-hidden="true"><use href="#i-output"/></svg>Deine Ausgabe</h4><span id="dashAnswerStatus" class="badge neutral">Ausstehend</span></div><p class="dash-caption">Die Beispielantwort erscheint nach der Freigabe.</p><div id="dashAnswer" class="dash-text"></div><button type="button" class="button primary" id="dashOutput" disabled><svg class="icon" aria-hidden="true"><use href="#i-output"/></svg>Ausgabe simulieren</button><p class="dash-foot">Es wird keine Anfrage an Claude gesendet.</p></section>
+        </div>
+        <p id="dashNotice" class="dash-notice" role="status"></p>
+      </div>
     </section>
     <footer><span>LP7 · Interface Kit</span><span>Eigenständige Designstudie. Keine Verbindung zu Claude.</span><a href="icons.zip" download>Alle 18 SVG Icons laden <span aria-hidden="true">↗</span></a></footer>
   </main>
