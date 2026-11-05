@@ -459,7 +459,7 @@ def test_lowercase_exact_name_part_stays_masked():
 
 
 def test_long_s_in_value_does_not_crash():
-    _persons("Hanſs Berg")
+    _persons("Hanss Berg")   # canonical() macht aus „ſ“ ein „s“, bevor der Detektor den Text sieht
     assert api.analyze("Hanſs Berg klagt.").masked_text == "[PERSON_1] klagt."
 
 
