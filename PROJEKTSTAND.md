@@ -15,7 +15,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- [ ] Word (.docx) und E-Mail (.eml) laden wie PDF: Text lokal im Speicher auslesen und ins Textfeld setzen, ohne neue Abhängigkeit. Eigener PR auf PR #30 (`lxc-ht`, Claude).
 
 
 
@@ -44,6 +43,7 @@ Beide:
 
 **Erledigt**
 
+- [x] Word (.docx) und E-Mail (.eml) laden wie PDF, ohne neue Abhängigkeit; Knopf heißt jetzt „Datei laden“ ([PR #32](https://github.com/lxc-ht/LP7/pull/32), baut auf #30 auf, `lxc-ht`, Claude). Wartet auf Pauls Review, erst nach #30 mergen.
 - [x] Gewählte Kopfvariante B2 ohne Rahmen eingebaut: „Klar. Lokal.“ links, „Unter deiner Kontrolle.“ rechts vom Motiv. Mittlere Spalte auf Locs Wunsch allgemein „Vorschau für LLM“. Bestehende Browserprüfung bestanden, Desktop und Mobil visuell geprüft. Nur Oberfläche, Freigabeablauf unverändert; Branch `codex/slogan-ohne-rahmen` (`lxc-ht`, Codex UI).
 
 - [x] PDF laden: Text aus digitalen PDFs lokal im Speicher auslesen und ins Textfeld setzen, per Knopf oder Ziehen; Scans werden gemeldet, nicht gelesen ([PR #30](https://github.com/lxc-ht/LP7/pull/30), `lxc-ht`, Claude). Wartet auf Pauls Review, noch nicht gemergt. Vortragsrechner danach einmal mit Netz starten, damit uv `pypdf` lädt.
