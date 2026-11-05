@@ -39,7 +39,7 @@ class Detector(Protocol):
 
 # --- Regex -----------------------------------------------------------------
 
-_EMAIL = re.compile(r"(?<![\w.+-])[\w.%+-]+@[\w.-]+\.[^\W\d_]{2,}(?![\w-])")
+_EMAIL = re.compile(r"(?<![\w.%+-])[\w.%+-]+@[\w.-]+\.[^\W\d_]{2,}(?![\w-])")
 
 # IBAN in Blöcken (mit oder ohne Leerzeichen), allgemein: 2 Buchstaben, 2 Ziffern, bis 30 Zeichen.
 _IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,3})?\b")
@@ -255,7 +255,7 @@ def _split_long(offset: int, chunk: str, max_chars: int, overlap: int = 100) -> 
         if cut == -1:
             cut = start + max_chars
         pieces.append((offset + start, chunk[start:cut]))
-        start = chunk.find(" ", cut - overlap, cut) + 1 or cut - overlap
+        start = cut - overlap
     pieces.append((offset + start, chunk[start:]))
     return pieces
 

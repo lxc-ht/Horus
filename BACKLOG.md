@@ -39,7 +39,9 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Reisepassnummern werden nicht erkannt, Kfz-Kennzeichen und Personalausweisnummern nur mit Bezeichner davor.
 - „34127 Kassel“ wird als ADRESSE maskiert, „Kassel“ allein im Fließtext findet nur das Modell.
 - Nicht erkannt: IP-Adressen, Datum ohne Jahr („am 14.03.“), Monat und Jahr („im März 1979“), IBAN in Kleinbuchstaben (nur der Ziffernteil wird als TELEFON maskiert).
-- Schreibweisen und Genitiv-s maskieren eher zu viel: Bei einer Person namens „Das“ träfe es auch „dass“. Sicher, verfälscht aber die Antwort.
+- Schreibweisen und Genitiv-s gelten nur für großgeschriebene ganze Wörter. Am Satzanfang wird bei „Anna Link“ auch „Links“ maskiert, bei Herrn Koenig auch „Der König“. Sicher, verfälscht aber die Antwort.
+- Kleingeschriebene Schreibweisen („weiß“ bei „Hans Weiss“) bleiben im Text, die Warnung nennt sie. Der Leck-Check prüft bewusst nur die exakte Schreibweise, sonst könnte „ich weiß es“ jede Freigabe blockieren.
+- Text in NFD-Form wird schlechter erkannt: Von „jürgen@beispiel.de“ bleibt „jü“ stehen, „Anna Müller“ wird nur teilweise maskiert. Vor dem Erkennen auf NFC normalisieren.
 
 ## Später
 

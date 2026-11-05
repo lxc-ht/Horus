@@ -399,3 +399,56 @@ def test_ambiguous_genitive_warns():
     result = api.analyze("Anna Müller und Bernd Müller. Müllers Antrag.")
     assert "Müllers" in result.masked_text
     assert any("Müller" in warning for warning in result.warnings)
+
+
+def test_persons_differing_only_in_spelling_stay_ambiguous():
+    _persons("Anna Müller", "Bernd Mueller")
+    result = api.analyze("Anna Müller und Bernd Mueller. Mueller zahlt.")
+    assert result.masked_text == "[PERSON_1] und [PERSON_2]. Mueller zahlt."
+    assert any("[PERSON_1] oder [PERSON_2]" in warning for warning in result.warnings)
+
+
+def test_removing_one_of_two_spellings_does_not_mix_persons():
+    _persons("Anna Müller", "Bernd Mueller")
+    result = api.analyze("Anna Müller und Bernd Mueller.")
+    assert api.remove(result.session_id, "[PERSON_1]").masked_text == "Anna Müller und [PERSON_2]."
+
+
+def test_spelling_variant_never_matches_inside_a_word():
+    _persons("Mae", "Sue")
+    result = api.analyze("Mae und Sue klagen im März in Süddeutschland.")
+    assert result.masked_text == "[PERSON_1] und [PERSON_2] klagen im März in Süddeutschland."
+
+
+def test_lowercase_genitive_form_is_not_masked_but_warned():
+    _persons("Anna Link")
+    result = api.analyze("Anna Link soll unten links unterschreiben.")
+    assert result.masked_text == "[PERSON_1] soll unten links unterschreiben."
+    assert any("„link“" in warning for warning in result.warnings)
+
+
+def test_lowercase_spelling_variant_is_not_masked_but_warned():
+    _persons("Hans Weiss")
+    result = api.analyze("Hans Weiss sagt, ich weiß es nicht.")
+    assert result.masked_text == "[PERSON_1] sagt, ich weiß es nicht."
+    assert any("weiß" in warning for warning in result.warnings)
+
+
+def test_lowercase_exact_name_part_stays_masked():
+    _persons("Anna Müller")
+    result = api.analyze("Anna Müller klagt, müller zahlt.")
+    assert result.masked_text == "[PERSON_1] klagt, [PERSON_1] zahlt."
+
+
+def test_long_s_in_value_does_not_crash():
+    _persons("Hanſs Berg")
+    assert api.analyze("Hanſs Berg klagt.").masked_text == "[PERSON_1] klagt."
+
+
+def test_bare_placeholder_with_genitive_is_restored_and_reported():
+    _persons("Anna Müller")
+    session = api.analyze("Anna Müller klagt.").session_id
+    bare = api.restore(session, "PERSON_1s Antrag")
+    assert bare.text == "Anna Müllers Antrag"
+    assert any("ohne Klammern" in warning for warning in bare.warnings)
+    assert api.restore(session, "person 1s Antrag").changed == ["person 1"]
