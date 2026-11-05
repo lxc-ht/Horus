@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KI nutzen. Daten behalten.</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #1c2026; --muted: #5d6673; --line: #e2e5ea; --paper: #fff; --soft: #f6f7f9;
+    --accent: #1f4fd8; --accent-ink: #fff;
+    --red: #b3261e; --red-soft: #fdecea; --yellow: #7a5900; --yellow-soft: #fff6d6;
+    --green: #17663a; --green-soft: #dcf5e4;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex; flex-direction: column; background: var(--paper); color: var(--ink);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  [hidden] { display: none !important; }
+  #fakeBand {
+    background: var(--red); color: #fff; font-weight: 700; text-align: center; padding: 4px 16px;
+  }
+  header {
+    display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+    gap: 4px 24px; padding: 14px 24px 10px;
+  }
+  h1 { font-size: 20px; margin: 0; letter-spacing: -.01em; }
+  #counter { color: var(--muted); font-variant-numeric: tabular-nums; }
+  main {
+    flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px; padding: 0 24px 16px;
+  }
+  section { display: flex; flex-direction: column; gap: 10px; min-height: 0; min-width: 0; }
+  h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0; }
+  textarea, .pane {
+    width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 12px;
+    font: inherit; color: inherit; background: var(--paper);
+  }
+  textarea { resize: none; }
+  textarea:focus-visible, button:focus-visible, .pane:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  #original { flex: 1; min-height: 0; }
+  .pane { flex: 1; min-height: 0; overflow-y: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .empty { color: var(--muted); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button {
+    font: inherit; border-radius: 8px; border: 1px solid var(--line); background: var(--paper);
+    color: var(--ink); padding: 6px 14px; cursor: pointer;
+  }
+  button:hover:not(:disabled) { background: var(--soft); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
+  button.primary:hover:not(:disabled) { background: #1a43b8; }
+  button:disabled { background: var(--soft); border-color: var(--line); color: #7c8490; cursor: not-allowed; }
+  .hint { font-size: 13px; color: var(--muted); margin: 0; }
+  .note { font-size: 13px; border-radius: 6px; padding: 6px 10px; margin: 0; }
+  .warn { background: var(--yellow-soft); color: var(--yellow); }
+  .error { background: var(--red-soft); color: var(--red); }
+  .stack { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; max-height: 30%; overflow-y: auto; }
+  .stack:empty { display: none; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 2px; border-radius: 5px; padding: 0 2px 0 6px;
+    font-size: 13px; font-weight: 600; user-select: none; -webkit-user-select: none;
+    white-space: nowrap; color: #1c2026; background: var(--chip); cursor: default;
+  }
+  .chip button {
+    border: 0; background: transparent; color: inherit; padding: 0 4px; line-height: 1.4;
+    font-size: 12px; border-radius: 4px;
+  }
+  .chip button:hover:not(:disabled) { background: rgba(0, 0, 0, .12); }
+  .t-PERSON { --chip: #cfe0ff; } .t-FIRMA { --chip: #e4d6fb; } .t-ADRESSE { --chip: #fbdcc4; }
+  .t-ORT { --chip: #cdeef0; } .t-EMAIL { --chip: #f9d5e5; } .t-TELEFON { --chip: #e3ecb9; }
+  .t-IBAN { --chip: #f6e2a1; } .t-DATUM { --chip: #dcdfe5; }
+  #tooltip {
+    position: fixed; z-index: 20; background: var(--ink); color: #fff; font-size: 13px;
+    padding: 3px 8px; border-radius: 5px; pointer-events: none; max-width: 320px;
+  }
+  #typeMenu {
+    position: fixed; z-index: 10; display: flex; flex-wrap: wrap; gap: 4px; width: 280px; padding: 6px;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 8px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .14);
+  }
+  #typeMenu button { padding: 1px 8px; font-size: 12px; font-weight: 600; border: 0; background: var(--chip); color: #1c2026; }
+  #typeMenu button:hover:not(:disabled) { background: var(--chip); filter: brightness(.93); }
+  #answerInput { height: 96px; flex-shrink: 0; }
+  label { font-size: 13px; color: var(--muted); }
+  .good { background: var(--green-soft); color: var(--green); font-weight: 600; border-radius: 3px; padding: 0 2px; }
+  .bad { background: var(--red-soft); color: var(--red); font-weight: 600; border-radius: 3px; padding: 0 2px; }
+  .odd { background: var(--yellow-soft); color: var(--yellow); font-weight: 600; border-radius: 3px; padding: 0 2px; }
+  @media (max-width: 860px) {
+    html, body { height: auto; }
+    header { padding: 12px 16px 8px; }
+    main { grid-template-columns: minmax(0, 1fr); padding: 0 16px 16px; }
+    #original, .pane { min-height: 220px; flex: none; }
+  }
+</style>
+</head>
+<body>
+<div id="fakeBand" role="alert" hidden>ATTRAPPE — kein echter Kern</div>
+<header>
+  <h1>KI nutzen. Daten behalten.</h1>
+  <div id="counter" aria-live="polite" hidden></div>
+</header>
+<main>
+  <section aria-labelledby="h-original">
+    <h2 id="h-original">Original — bleibt auf diesem Rechner</h2>
+    <textarea id="original" aria-labelledby="h-original"></textarea>
+    <div class="row">
+      <button id="btnExample" type="button">Beispiel laden</button>
+      <button id="btnAnalyze" type="button" class="primary">Analysieren</button>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-masked">
+    <h2 id="h-masked">Das geht an Claude</h2>
+    <div id="notes" class="stack"></div>
+    <div id="masked" class="pane" tabindex="-1"></div>
+    <div class="row">
+      <button id="btnRelease" type="button" class="primary">Freigeben</button>
+      <button id="btnSend" type="button">An Claude senden</button>
+      <button id="btnCopy" type="button" hidden>Kopieren</button>
+      <span id="copied" class="hint" role="status"></span>
+    </div>
+    <p id="hint" class="hint"></p>
+  </section>
+
+  <section aria-labelledby="h-answer">
+    <h2 id="h-answer">Antwort — lokal zurückübersetzt</h2>
+    <div id="copyPanel" class="stack" style="max-height:none" hidden>
+      <p class="note warn">Kein API-Key — kopiere den Text in Claude und füge die Antwort hier ein.</p>
+      <label for="answerInput">Antwort von Claude hier einfügen</label>
+      <textarea id="answerInput"></textarea>
+      <div class="row"><button id="btnRestore" type="button" class="primary">Zurückübersetzen</button></div>
+    </div>
+    <div id="answer" class="pane"></div>
+    <div id="report" class="stack"></div>
+  </section>
+</main>
+<div id="typeMenu" role="group" aria-label="Typ für die Markierung wählen" hidden></div>
+<div id="tooltip" role="tooltip" hidden></div>
+
+<script>
+const TYPES = ["PERSON", "FIRMA", "ADRESSE", "ORT", "EMAIL", "TELEFON", "IBAN", "DATUM"];
+// Erfunden. Enthält absichtlich Angaben, die die Attrappe nicht erkennt.
+const EXAMPLE = `Kanzlei Sommerfeld & Partner, Aktenzeichen 123/26
+
+Unsere Mandantin Erika Musterfrau (erika.musterfrau@example.org, Tel. 040 5550123), wohnhaft Musterweg 12, 21335 Lüneburg, wurde am 14.03.2026 von der Nordlicht Bau GmbH gekündigt. Ihr Vorgesetzter Max Mustermann begründet das mit Auftragsmangel. Frau Musterfrau zweifelt daran, weil kurz zuvor neue Stellen ausgeschrieben wurden. Das letzte Gehalt ging auf die IBAN DE00 1234 5678 9012 3456 78.
+
+Bitte fasse den Sachverhalt kurz zusammen, nenne die Frist für eine Kündigungsschutzklage und entwirf ein kurzes Schreiben an Max Mustermann. Übernimm alle Platzhalter in eckigen Klammern unverändert.`;
+
+const $ = (id) => document.getElementById(id);
+const state = { result: null, release: null, apiKey: false, copyMode: false, busy: false, error: "" };
+
+async function api(path, body) {
+  const options = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
+  const response = await fetch(path, options);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const failure = new Error(data.error || "Der Server hat die Anfrage abgelehnt.");
+    failure.copyMode = data.copy_mode === true;
+    throw failure;
+  }
+  return data;
+}
+
+// Sperrt alle Knöpfe während einer Anfrage, sonst könnten sich Freigabe und Änderung überholen.
+async function run(action) {
+  if (state.busy) return;
+  state.busy = true;
+  state.error = "";
+  render();
+  try {
+    await action();
+  } catch (e) {
+    state.error = e.message;
+    if (e.copyMode) state.copyMode = true;
+  } finally {
+    state.busy = false;
+    render();
+  }
+}
+
+function clearAnswer() {
+  $("answer").replaceChildren();
+  $("report").replaceChildren();
+  $("answerInput").value = "";
+}
+
+function applyResult(result) {
+  state.result = result;
+  state.release = null;
+  $("copied").textContent = "";
+  clearAnswer();
+}
+
+function renderMasked() {
+  const box = $("masked");
+  box.replaceChildren();
+  const result = state.result;
+  if (!result) {
+    box.append(emptyNote("Hier erscheint der maskierte Text."));
+    return;
+  }
+  let position = 0;
+  for (const r of result.replacements) {
+    box.append(document.createTextNode(result.masked_text.slice(position, r.start)));
+    box.append(chip(r));
+    position = r.end;
+  }
+  box.append(document.createTextNode(result.masked_text.slice(position)));
+}
+
+function chip(r) {
+  const el = document.createElement("span");
+  el.className = "chip t-" + r.typ;
+  el.dataset.original = r.original;
+  el.append(r.placeholder);
+  const close = document.createElement("button");
+  close.type = "button";
+  close.textContent = "✕";
+  close.disabled = state.busy;
+  close.setAttribute("aria-label", `${r.placeholder} zurücknehmen, Original: ${r.original}`);
+  close.addEventListener("click", () => run(async () => {
+    hideTooltip();
+    applyResult(await api("/api/mask/remove", { session_id: state.result.session_id, placeholder: r.placeholder }));
+    $("masked").focus();
+  }));
+  el.append(close);
+  return el;
+}
+
+function emptyNote(text) {
+  const el = document.createElement("span");
+  el.className = "empty";
+  el.textContent = text;
+  return el;
+}
+
+function note(text, kind) {
+  const el = document.createElement("p");
+  el.className = "note " + kind;
+  el.textContent = text;
+  return el;
+}
+
+function render() {
+  const { result, release, busy, error, copyMode } = state;
+  renderMasked();
+  if (!$("answer").childNodes.length) $("answer").append(emptyNote("Hier erscheint die Antwort mit den echten Angaben."));
+
+  const notes = [];
+  if (error) notes.push(note(error, "error"));
+  if (result) result.warnings.forEach((w) => notes.push(note(w, "warn")));
+  $("notes").replaceChildren(...notes);
+
+  const counter = $("counter");
+  counter.hidden = !result;
+  if (result) counter.textContent = `${result.replacements.length} sensible Angaben ersetzt · 0 davon verlassen den Rechner`;
+
+  const showCopy = Boolean(release) && copyMode;
+  $("btnExample").disabled = busy;
+  $("btnAnalyze").disabled = busy;
+  $("btnRelease").disabled = busy || !result || Boolean(release);
+  $("btnSend").hidden = showCopy;
+  $("btnSend").disabled = busy || !release;
+  $("btnSend").className = release ? "primary" : "";
+  $("btnCopy").hidden = !showCopy;
+  $("btnCopy").disabled = busy;
+  $("btnRestore").disabled = busy;
+  $("copyPanel").hidden = !showCopy;
+  $("hint").textContent = release
+    ? "Freigegeben. Ändert sich etwas, ist eine neue Freigabe nötig."
+    : "Erst prüfen und freigeben.";
+}
+
+function renderAnswer(restored) {
+  const box = $("answer");
+  box.replaceChildren();
+  const originals = [...new Set(state.result.replacements.map((r) => r.original))];
+  const marks = new Map();
+  originals.forEach((o) => marks.set(o, "good"));
+  restored.changed.forEach((c) => marks.set(c, "odd"));
+  restored.unknown.forEach((u) => marks.set(u, "bad"));
+
+  const keys = [...marks.keys()].filter(Boolean).sort((a, b) => b.length - a.length);
+  let position = 0;
+  if (keys.length) {
+    const pattern = new RegExp(keys.map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "g");
+    for (const match of restored.text.matchAll(pattern)) {
+      box.append(document.createTextNode(restored.text.slice(position, match.index)));
+      const mark = document.createElement("mark");
+      mark.className = marks.get(match[0]);
+      mark.textContent = match[0];
+      box.append(mark);
+      position = match.index + match[0].length;
+    }
+  }
+  box.append(document.createTextNode(restored.text.slice(position)));
+
+  const report = [];
+  const add = (label, items, kind) => {
+    if (items.length) report.push(note(`${label}: ${items.join(", ")}`, kind));
+  };
+  add("Unbekannt, nicht ersetzt", restored.unknown, "error");
+  add("Möglicherweise verändert", restored.changed, "warn");
+  add("Nicht in der Antwort", restored.missing, "warn");
+  restored.warnings.forEach((w) => report.push(note(w, "warn")));
+  $("report").replaceChildren(...report);
+}
+
+async function restoreAnswer(answer) {
+  renderAnswer(await api("/api/restore", { session_id: state.result.session_id, answer }));
+}
+
+$("btnExample").addEventListener("click", () => { $("original").value = EXAMPLE; });
+
+$("btnAnalyze").addEventListener("click", () => run(async () => {
+  const text = $("original").value;
+  if (!text.trim()) throw new Error("Bitte erst einen Text eingeben.");
+  applyResult(await api("/api/analyze", { text }));
+}));
+
+$("btnRelease").addEventListener("click", () => run(async () => {
+  state.release = null;
+  state.release = await api("/api/release", { session_id: state.result.session_id });
+}));
+
+$("btnSend").addEventListener("click", () => run(async () => {
+  $("answer").replaceChildren(emptyNote("Claude antwortet …"));
+  try {
+    const { answer } = await api("/api/send", { session_id: state.result.session_id });
+    await restoreAnswer(answer);
+  } catch (e) {
+    $("answer").replaceChildren();
+    throw e;
+  }
+}));
+
+$("btnCopy").addEventListener("click", () => run(async () => {
+  // Kopiert wird der Text vom Server, also genau die gespeicherte Freigabe.
+  await copyText(state.release.text);
+  $("copied").textContent = "Kopiert.";
+}));
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    // Manche Browser sperren die Zwischenablage. Die Demo darf daran nicht hängen bleiben.
+    const area = document.createElement("textarea");
+    area.value = text;
+    document.body.append(area);
+    area.select();
+    const copied = document.execCommand("copy");
+    area.remove();
+    if (!copied) throw new Error("Kopieren hat nicht geklappt. Bitte erlaube den Zugriff auf die Zwischenablage.");
+  }
+}
+
+$("btnRestore").addEventListener("click", () => run(async () => {
+  await restoreAnswer($("answerInput").value);
+}));
+
+// Markieren mit der Maus
+const menu = $("typeMenu");
+let selectedTerm = "";
+
+for (const typ of TYPES) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "t-" + typ;
+  button.textContent = typ;
+  button.addEventListener("mousedown", (e) => e.preventDefault());
+  button.addEventListener("click", () => {
+    const term = selectedTerm;
+    hideMenu();
+    run(async () => {
+      applyResult(await api("/api/mask/add", { session_id: state.result.session_id, term, typ }));
+    });
+  });
+  menu.append(button);
+}
+
+function hideMenu() {
+  menu.hidden = true;
+  selectedTerm = "";
+}
+
+$("masked").addEventListener("mouseup", () => {
+  // Erst nach dem Mausereignis ist die Auswahl des Browsers aktuell.
+  setTimeout(() => {
+    const selection = window.getSelection();
+    if (!state.result || state.busy || !selection.rangeCount || selection.isCollapsed) return;
+    const term = selection.toString().trim();
+    if (!term) return;
+    const range = selection.getRangeAt(0);
+    const insideOneText = range.startContainer === range.endContainer
+      && range.startContainer.nodeType === Node.TEXT_NODE
+      && range.startContainer.parentNode === $("masked");
+    if (!insideOneText) {
+      state.error = "Bitte nur Text zwischen zwei Platzhaltern markieren.";
+      selection.removeAllRanges();
+      render();
+      return;
+    }
+    selectedTerm = term;
+    menu.hidden = false;
+    const box = range.getBoundingClientRect();
+    menu.style.left = Math.max(8, Math.min(box.left, innerWidth - menu.offsetWidth - 8)) + "px";
+    const below = box.bottom + 6;
+    menu.style.top = (below + menu.offsetHeight < innerHeight ? below : Math.max(8, box.top - menu.offsetHeight - 6)) + "px";
+  });
+});
+
+document.addEventListener("mousedown", (e) => { if (!menu.contains(e.target)) hideMenu(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { hideMenu(); hideTooltip(); } });
+
+// Tooltip liegt außerhalb der scrollenden Spalte, sonst schneidet sie ihn ab.
+const tooltip = $("tooltip");
+
+function showTooltip(target) {
+  tooltip.textContent = target.dataset.original;
+  tooltip.hidden = false;
+  const box = target.getBoundingClientRect();
+  tooltip.style.left = Math.max(8, Math.min(box.left, innerWidth - tooltip.offsetWidth - 8)) + "px";
+  tooltip.style.top = Math.max(8, box.top - tooltip.offsetHeight - 6) + "px";
+}
+
+function hideTooltip() {
+  tooltip.hidden = true;
+}
+
+for (const [on, off] of [["mouseover", "mouseout"], ["focusin", "focusout"]]) {
+  $("masked").addEventListener(on, (e) => {
+    const target = e.target.closest(".chip");
+    if (target) showTooltip(target);
+  });
+  $("masked").addEventListener(off, hideTooltip);
+}
+
+(async () => {
+  render();
+  try {
+    const status = await api("/api/status");
+    state.apiKey = status.api_key;
+    state.copyMode = !status.api_key;
+    $("fakeBand").hidden = !status.fake;
+  } catch (e) {
+    state.error = e.message;
+  }
+  render();
+})();
+</script>
+</body>
+</html>
