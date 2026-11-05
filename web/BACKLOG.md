@@ -12,6 +12,7 @@
 ## Für später
 
 - Der Zähler "0 davon verlassen den Rechner" gilt nur für erkannte Angaben. Eine übersehene Angabe geht nach der Freigabe mit raus. Vorschlag: "{n} sensible Angaben ersetzt · Versand nur nach deiner Freigabe". Der Text steht wörtlich im Auftrag, deshalb ist er noch nicht geändert.
-- PDF und Word Upload.
+- Word Upload (.docx). PDF laden gibt es seit dem PR „PDF laden“, Scans (OCR) weiterhin nicht.
+- „Beispiel laden“ und Eintippen im Feld „Dein Original“ setzen Analyse und Freigabe nicht zurück. Nach einer Änderung bleibt die alte Fassung kopierbar, bis man erneut analysiert. „PDF laden“ setzt beides zurück; das gleiche Verhalten für die anderen Wege wäre konsequent.
 - Markieren per Tastatur, bisher geht es nur mit der Maus.
 - Freigaben liegen im Speicher des Servers und werden nie aufgeräumt. Für die Demo reicht das.

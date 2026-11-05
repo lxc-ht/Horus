@@ -18,6 +18,10 @@ Layout A ist direkt in `web/static/index.html` eingebaut: drei flexible Spalten 
 
 ![Arbeitsoberfläche mit echter lokaler Pseudonymisierung und erfundenen Beispieldaten](assets/arbeitsoberflaeche-material-c.png)
 
+## PDF laden
+
+„PDF laden“ oder eine PDF auf das Feld „Dein Original“ ziehen setzt ihren Text ins Feld. Das geht nur mit digitalen PDFs, in denen der Text als Text steckt. Scans erkennt LP7 nicht und meldet das. Die Datei geht nur vom Browser an den lokalen Server auf 127.0.0.1, wird dort mit `pypdf` im Speicher gelesen und nirgends gespeichert oder protokolliert. Analysiert wird erst, wenn du selbst auf „Text analysieren“ klickst; eine vorherige Analyse und Freigabe verfallen beim Laden.
+
 ## UI prüfen
 
 Die Oberfläche lädt keine externen Fonts, Skripte oder Bilder. Die drei Arbeitsschritte passen sich an Desktop und Handy an. Die Freigabe bleibt vor dem Kopieren zwingend. Die Weboberfläche arbeitet im Kopiermodus: Text lokal analysieren, Vorschau prüfen und freigeben, die Fassung selbst nach Claude kopieren und dessen Antwort zur lokalen Rückübersetzung einfügen. Es gibt keinen automatischen Versand.
