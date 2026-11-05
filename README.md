@@ -23,6 +23,8 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- Material C und Dashboard Gestaltung in die echte Pseudonymisierungsoberfläche übertragen, Kopiermodus Texte und Unsicher Legende korrigieren; nur `web/`, Element-IDs bleiben erhalten, Branch `codex/arbeitsoberflaeche-material-c` (`lxc-ht`, Codex UI).
+
 - Übermaskierung aus PR #22 beheben (`EU-VO 2016`, `+100.000 Euro`) und letzte Lecks schließen (kurze Nachnamen, Aktenzeichen klein, Ausweis, Kundenkonto), nur `src/harness` und `tests`, Branch `kern/umgehungen-3` (`lxc-ht`).
 
 **Nächste Aufgaben**
