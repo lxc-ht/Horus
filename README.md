@@ -21,7 +21,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- Start per Doppelklick (`LP7 starten.command`), Branch `start-doppelklick` (`Phantom-create-1`).
+- Start per Doppelklick (`LP7 starten.command`): [PR #20](https://github.com/lxc-ht/LP7/pull/20) wartet auf den Merge (`Phantom-create-1`).
 - Umgehungen des Kerns schließen (Token-Grenze des Modells, Unicode, Platzhalter-Kollision, Formate), nur `src/harness` und `tests`, Branch `kern/umgehungen`, baut auf PR #12 auf (`lxc-ht`).
 - Datumsformate, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung: [PR #12](https://github.com/lxc-ht/LP7/pull/12) wartet auf den Merge (`lxc-ht`).
 
@@ -39,6 +39,7 @@ Beide:
 
 **Erledigt**
 
+- [x] Start per Doppelklick mit `LP7 starten.command` umgesetzt und geprüft, Browser öffnet sich automatisch, Server bleibt auf diesem Rechner (PR #20, `Phantom-create-1`).
 - [x] Repo angelegt, beide haben Schreibrechte.
 - [x] Kern gebaut: Erkennung, Maskierung, Freigabe, Senden, Rückübersetzung, CLI.
 - [x] Weboberfläche gebaut und auf `main` gemergt.
