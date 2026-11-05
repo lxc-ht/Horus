@@ -93,6 +93,10 @@ uv run --with-requirements web/requirements.txt uvicorn web.app:app --host 127.0
 
 Danach http://127.0.0.1:8000 öffnen.
 
+## Danksagung
+
+Einige deutsche Erkennungsmuster (Handelsregister, USt-IdNr mit Prüfziffer, Bezeichner für Reisepass, Führerschein und Arztnummern) und die Idee, unsichere Muster über Kontextwörter abzusichern, stammen aus [Microsoft Presidio](https://github.com/data-privacy-stack/presidio), MIT-Lizenz, Copyright (c) Presidio Contributors.
+
 ## Vor dem Veröffentlichen
 
 Das Repo ist zunächst privat und soll später öffentlich werden. Dann gilt:

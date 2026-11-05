@@ -46,6 +46,7 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Die Regex für ADRESSE, KENNUNG und PERSON hinter einer Anrede sucht bewusst breit und kann Falschtreffer liefern („Frau Kettelhut Unterlagen“). Sie lassen sich in der Prüfung zurücknehmen.
 - Das Modell meldet auch Falschtreffer, die die Regex nicht verursacht: „Der Bundesgerichtshof 12“ wird zu FIRMA.
 - Mehrdeutige Straßenendungen wie „Reeperbahn 12“ erkennt die Regex nur mit „Am …“ davor oder PLZ dahinter, sonst bleibt nur das Modell.
+- Adressen ohne Straßenwort („Am Sande 12“, „An der Kirche 3“) zählen nur mit PLZ dahinter oder einem Kontextwort wie „wohnhaft“ oder „Anschrift:“ kurz davor, und nur, wenn nach der Hausnummer der Satz oder die Zeile endet. „Wir treffen uns Am Sande 12.“ bleibt deshalb stehen.
 - Eine nackte Zahl wird nie zur KENNUNG: Eine elfstellige Zahl zählt ohne Bezeichner nur mit gültiger Prüfziffer der Steuer-ID (ISO 7064 MOD 11,10), eine Steuernummer nur nach „Steuernummer“, „St.-Nr.“ oder „StNr“. Eine Steuernummer ohne Bezeichner mit führender 0 („022/815/08150“) wird trotzdem maskiert, aber als TELEFON.
 - „34127 Kassel“ wird als ADRESSE maskiert, „Kassel“ allein im Fließtext findet nur das Modell.
 - Nicht erkannt: IP-Adressen und einstellige Daten ohne Jahr („am 1.3.“), weil sie von Gliederungen wie „3.1.“ nicht zu unterscheiden sind. Zweistellige Gliederungen wie „12.10.“ gelten dagegen als Datum.
@@ -54,6 +55,7 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 
 ## Später
 
+- Aus dem Vergleich mit Presidio (MIT-Lizenz), noch nicht übernommen: Positivliste für Begriffe, die nie maskiert werden sollen (z. B. „Landgericht Lüneburg“), Prüfziffern für Personalausweis und Reisepass ohne Bezeichner (ICAO 9303), MAC-Adressen, UUIDs, Krypto-Adressen, und eine Erklärung je Fundstelle, welches Muster und welches Kontextwort gegriffen hat.
 - PDF, Word, OCR als Eingabe (Achtung: Lecks über Metadaten).
 - Zweiter Detektor, z. B. lokales LLM über Ollama – die Detektor-Schnittstelle in `detect.py` ist dafür vorbereitet.
 - Varianten derselben Person mit Tippfehlern, Spitznamen oder ohne Umlaut („Muller“) erkennen. Genitiv-s und die Schreibweisen ä/ae, ö/oe, ü/ue, ß/ss werden schon mitmaskiert.

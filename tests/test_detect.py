@@ -265,3 +265,34 @@ def test_chunks_keep_long_name_whole_without_spaces_around_it():
     for padding in range(250, 280):
         text = "ab;" * padding + "Anna Maria Weidenfeld;" + "ab;" * 400
         assert any("Anna Maria Weidenfeld" in chunk for _, chunk in _chunks(text)), padding
+
+
+# --- Übernommen aus dem Vergleich mit Presidio --------------------------------
+
+def test_address_without_street_word_with_postcode_or_context():
+    assert ("ADRESSE", "Am Sande 12, 21335 Lüneburg") in _found("wohnhaft Am Sande 12, 21335 Lüneburg")
+    assert ("ADRESSE", "am Sande 12, 21335 Lüneburg") in _found("wohnhaft am Sande 12, 21335 Lüneburg")
+    assert ("ADRESSE", "Am Sande 12\n21335 Lüneburg") in _found("Herrn Max Muster\nAm Sande 12\n21335 Lüneburg")
+    for text, value in [("Anschrift: Im Grund 4", "Im Grund 4"), ("Sie wohnt An der Kirche 3 in Lüneburg.", "An der Kirche 3"),
+                        ("Die Mandantin wohnt am Alten Markt 3.", "am Alten Markt 3"), ("Zustellanschrift: Zur Linde 2", "Zur Linde 2")]:
+        assert ("ADRESSE", value) in _found(text), text
+
+
+def test_address_without_street_word_does_not_hit_prose():
+    for text in ["Am Montag 14 Termine.", "Die Wohnung hat im Durchschnitt 3 Zimmer.", "Das Objekt wurde zur Prüfung 3 Wochen gesperrt.",
+                 "Die Mietsache ist am Ende 2 Jahre alt.", "Wohnung: Im Erdgeschoss 2 Zimmer", "Anschrift im Briefkopf 2 mal falsch",
+                 "Die Mietsache wurde zur Verfügung 2026 gestellt.", "Objekt Nr. 3, gelegen im Ortsteil Ochtmissen 4 km entfernt",
+                 "Am Sande 12 Personen."]:
+        assert not any(t == "ADRESSE" for t, _ in _found(text)), text
+
+
+def test_german_ids_from_presidio():
+    for text, value in [("unter HRB 12345 eingetragen", "HRB 12345"), ("HRA 4711 B beim AG", "HRA 4711 B"),
+                        ("Unsere USt-IdNr lautet DE 136 695 976.", "DE 136 695 976"), ("USt-IdNr. DE136695976", "DE136695976"),
+                        ("Führerschein B072RRE2I55", "B072RRE2I55"), ("Reisepass C01X00T47", "C01X00T47"), ("LANR 123456601", "123456601")]:
+        assert ("KENNUNG", value) in _found(text), text
+
+
+def test_vat_id_needs_valid_checksum_without_label():
+    assert not any(t == "KENNUNG" for t, _ in _found("Vorgang DE 136 695 977 erledigt"))
+    assert not any(t == "KENNUNG" for t, _ in _found("Der Reisepass ist abgelaufen."))
