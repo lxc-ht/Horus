@@ -64,6 +64,10 @@ Beide:
 
 **Demo starten**
 
+Auf dem Mac: Doppelklick auf `LP7 starten.command`. Der Browser öffnet sich, das Terminalfenster bleibt offen, solange LP7 läuft.
+
+Oder im Terminal:
+
 ```bash
 uv sync
 uv run --with-requirements web/requirements.txt uvicorn web.app:app --host 127.0.0.1 --port 8000
