@@ -15,7 +15,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- [ ] „Beispiel laden“ und Eintippen setzen Analyse und Freigabe zurück, Fehler beim Datei laden stehen unter „Dein Original“. Ein kleiner PR, Review durch Paul (`lxc-ht`, Claude).
 
 
 
@@ -44,6 +43,7 @@ Beide:
 
 **Erledigt**
 
+- [x] „Beispiel laden“ und Eintippen setzen Analyse und Freigabe zurück, Fehler beim Datei laden stehen unter „Dein Original“ ([PR #33](https://github.com/lxc-ht/LP7/pull/33), `lxc-ht`, Claude). Wartet auf Pauls Review.
 - [x] Word (.docx) und E-Mail (.eml) laden wie PDF, ohne neue Abhängigkeit; Knopf heißt jetzt „Datei laden“ ([PR #32](https://github.com/lxc-ht/LP7/pull/32), baut auf #30 auf, `lxc-ht`, Claude). Gemergt am 05.11. Demo einmal mit einer Word-Datei und einer E-Mail durchspielen.
 - [x] Gewählte Kopfvariante B2 ohne Rahmen eingebaut: „Klar. Lokal.“ links, „Unter deiner Kontrolle.“ rechts vom Motiv. Mittlere Spalte auf Locs Wunsch allgemein „Vorschau für LLM“. Bestehende Browserprüfung bestanden, Desktop und Mobil visuell geprüft. Nur Oberfläche, Freigabeablauf unverändert; Branch `codex/slogan-ohne-rahmen` (`lxc-ht`, Codex UI).
 
