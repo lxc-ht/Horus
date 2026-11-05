@@ -30,7 +30,11 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Für die Eindeutigkeit eines Namensteils zählen nur Personen. Steckt derselbe Teil in einer Firma („Kettelhut & Brenner Tischlerei GmbH“), wird ein allein stehendes „Kettelhut“ trotzdem der Person zugeordnet, auch wenn die Firma gemeint ist.
 - Der Bindestrich gilt als Wortgrenze: Aus „Musterfrau-Stiftung“ wird „[PERSON_1]-Stiftung“.
 - Erkennt der Detektor einen Nachnamen allein als eigene Person („Weidenfeld“ neben „Jonas Weidenfeld“), gibt es zwei Platzhalter für dieselbe Person. Der Teil ist dann mehrdeutig und wird nicht dem vollen Namen zugeordnet. Gleiches gilt, wenn der Mensch den Nachnamen per `add_manual` als PERSON ergänzt.
-- Die Regex für ADRESSE, KENNUNG und PERSON hinter einer Anrede sucht bewusst breit und kann Falschtreffer liefern („Frau Kettelhut Unterlagen“, eine beliebige elfstellige Zahl). Sie lassen sich in der Prüfung zurücknehmen.
+- Die Regex für ADRESSE, KENNUNG und PERSON hinter einer Anrede sucht bewusst breit und kann Falschtreffer liefern („Frau Kettelhut Unterlagen“). Sie lassen sich in der Prüfung zurücknehmen.
+- Eine nackte Zahl wird nie zur KENNUNG: Eine elfstellige Zahl zählt ohne Bezeichner nur mit gültiger Prüfziffer der Steuer-ID (ISO 7064 MOD 11,10), eine Steuernummer nur nach „Steuernummer“, „St.-Nr.“ oder „StNr“. Eine Steuernummer ohne Bezeichner mit führender 0 („022/815/08150“) wird trotzdem maskiert, aber als TELEFON.
+- KENNUNG kennt als Bezeichner bisher nur Mandanten- und Patientennummer. Es fehlen Kunden-, Fall-, Vertrags-, Versicherungs-, Rechnungs- und Policennummer sowie „Unser Zeichen“ / „Ihr Zeichen“.
+- Die Beispieltexte in `examples/` enthalten noch keine Kennnummern (Aktenzeichen, Mandantennummer, Krankenversichertennummer, Steuer-ID). Für die Demo wären sie der sichtbarste Beleg.
+- Reisepassnummern werden nicht erkannt, Kfz-Kennzeichen und Personalausweisnummern nur mit Bezeichner davor.
 - „34127 Kassel“ wird als ADRESSE maskiert, „Kassel“ allein im Fließtext findet nur das Modell.
 - Nicht erkannt: IP-Adressen, Datum ohne Jahr („am 14.03.“), Monat und Jahr („im März 1979“), IBAN in Kleinbuchstaben (nur der Ziffernteil wird als TELEFON maskiert).
 

@@ -54,7 +54,7 @@ _PHONE = re.compile(
 
 # Kennungen mit Bezeichner davor: Der Bezeichner verrät den Typ, der Wert darf fast jedes Format haben.
 _LABELED_ID = re.compile(
-    r"(?<!\w)(?i:Steuer-?ID|Steueridentifikationsnummer|IdNr\.?|Steuernummer|St\.?-?Nr\.?"
+    r"(?<!\w)(?i:Steuer-?ID|(?:Steuer)?identifikationsnummer|IdNr\.?|Steuernummer|St\.?-?Nr\.?"
     r"|SV-?(?:Nr\.?|Nummer)|Sozialversicherungsnummer|Versicherten-?(?:Nr\.?|Nummer)"
     r"|Aktenzeichen|Az\.?|Gesch[äa]ftszeichen|Mandanten-?(?:Nr\.?|Nummer)|Patienten-?(?:Nr\.?|Nummer)"
     r"|Personalausweis-?(?:Nr\.?|Nummer)|Kennzeichen)"
@@ -62,11 +62,13 @@ _LABELED_ID = re.compile(
     r"[\s:.#]*(?P<value>[A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w)(?: [A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w))*)"
 )
 
-# Kennungen, deren Format auch ohne Bezeichner eindeutig genug ist.
+# Steuer-ID ohne Bezeichner, 11 Stellen. Zählt nur mit gültiger Prüfziffer, sonst wäre jede lange Zahl eine Kennung.
+# Steuernummern sind ohne Bezeichner nicht von Rechnungs- oder Aktennummern zu unterscheiden, sie kommen nur über _LABELED_ID.
+_TAX_ID = re.compile(r"(?<![\d/.,])[1-9]\d(?: ?\d{3}){3}(?![\d/.,]\d)")
+
+# Kennungen, deren Format auch ohne Bezeichner eindeutig genug ist. Jedes Muster enthält Buchstaben oder Schrägstrich-Struktur,
+# eine nackte Zahl allein ist nie eine Kennung.
 _BARE_IDS = [
-    re.compile(r"(?<![\d/.,])[1-9]\d(?: ?\d{3}){3}(?![\d/.,]\d)"),           # Steuer-ID, 11 Stellen
-    re.compile(r"(?<![\d/])\d{2,3}/\d{3,4}/\d{4,5}(?![\d/])"),               # Steuernummer 22/815/08150
-    re.compile(r"(?<![\d/])\d{5}/\d{5}(?![\d/])"),                           # Steuernummer 93815/08152
     re.compile(r"\b\d{2} ?\d{6} ?[A-Z] ?\d{3}\b"),                           # SV-Nummer
     re.compile(r"\b[A-Z]\d{9}\b"),                                           # Krankenversichertennummer
     re.compile(r"(?<![\w/])(?:\d{1,3}|[IVX]+) [A-Z][A-Za-z]{0,2} \d{1,6}/\d{2,4}\b"),  # Aktenzeichen 3 O 123/26
@@ -109,6 +111,18 @@ _DATE = re.compile(
 )
 
 
+def _tax_id_valid(raw: str) -> bool:
+    """Prüfziffer der Steuer-ID nach ISO 7064 (MOD 11,10)."""
+    digits = [int(c) for c in raw if c.isdigit()]
+    if len(digits) != 11:
+        return False
+    product = 10
+    for d in digits[:10]:
+        total = (d + product) % 10 or 10
+        product = total * 2 % 11
+    return (11 - product) % 10 == digits[10]
+
+
 def _iban_valid(raw: str) -> bool:
     """Prüfsumme nach ISO 13616 (mod 97)."""
     s = raw.replace(" ", "")
@@ -134,6 +148,9 @@ class RegexDetector:
         for m in _LABELED_ID.finditer(text):
             if any(c.isdigit() for c in m.group("value")):
                 add(m, "KENNUNG", "value")
+        for m in _TAX_ID.finditer(text):
+            if _tax_id_valid(m.group()):
+                add(m, "KENNUNG")
         for pattern in _BARE_IDS:
             for m in pattern.finditer(text):
                 add(m, "KENNUNG")

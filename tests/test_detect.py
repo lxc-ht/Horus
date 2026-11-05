@@ -55,7 +55,7 @@ def test_merge_trims_punctuation():
 
 
 def test_ids_without_label():
-    for value in ["12 345 678 901", "12345678901", "22/815/08150", "93815/08152", "12 150385 M 123", "A123456789",
+    for value in ["52 749 130 680", "73105862491", "12 150385 M 123", "A123456789",
                   "3 O 123/26", "VIII ZR 45/24", "https://praxis.example/patient/4711", "www.praxis.example/fall/12"]:
         assert ("KENNUNG", value) in _found(f"siehe {value} bitte"), value
 
@@ -119,3 +119,27 @@ def test_labeled_id_stops_at_sentence_end():
     for text in ["Az. 3 O 123/26. Rückfragen bitte.", "Az. 3 O 123/26. 2 Termine folgen.", "Az. 3 O 123/26 Rückfragen bitte."]:
         ids = [v for t, v in _found(text) if t == "KENNUNG"]
         assert ids == ["3 O 123/26"], (text, ids)
+
+
+def test_tax_id_without_label_needs_valid_checksum():
+    assert ("KENNUNG", "52 749 130 680") in _found("ID 52 749 130 680 liegt vor")
+    for value in ["52 749 130 681", "12345678901"]:
+        assert _found(f"Bitte {value} prüfen.") == set(), value
+
+
+def test_tax_id_with_label_needs_no_checksum():
+    for text in ["Steuer-ID: 52 749 130 681", "Steuer-IdNr. 52749130681", "IdNr 52749130681", "Identifikationsnummer 52 749 130 681"]:
+        assert [v for t, v in _found(text) if t == "KENNUNG"] == [text.split(maxsplit=1)[1].lstrip(": ")], text
+
+
+def test_steuernummer_needs_label():
+    for text in ["Steuernummer 22/815/08150", "St.-Nr. 93815/08152", "StNr: 123/456/78901", "stnr 12/345/67890"]:
+        assert [v for t, v in _found(text) if t == "KENNUNG"] == [text.split()[-1]], text
+    for value in ["12/345/67890", "93815/08152"]:
+        assert not any(t == "KENNUNG" for t, _ in _found(f"Vorgang {value} erledigt")), value
+
+
+def test_legal_references_amounts_and_years_stay():
+    text = ("Die Kündigung gemäß § 573 Abs. 2 BGB ist unwirksam. Die Werkbank kostete 6.800 Euro, "
+            "verarbeitet nach Art. 6 DSGVO. Im Jahr 2025 kamen 12.345,67 EUR hinzu, siehe auch §§ 535, 536 BGB.")
+    assert _found(text) == set()

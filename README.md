@@ -19,7 +19,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- KENNUNG strenger: Steuer-ID nur mit gültiger Prüfziffer oder Kontextwort, Steuernummer nur nach Kontextwort, Negativtests für Paragrafen, Beträge, Jahreszahlen (`Phantom-create-1`).
+- Nichts.
 
 **Nächste Aufgaben**
 
@@ -49,6 +49,7 @@ Beide:
 - [x] Pitch-Deck (9 Folien) liegt bei Paul, Folie 8 wartet noch auf die Messung.
 - [x] „Kopieren“ gegen den echten Kern geklickt: In der Zwischenablage stehen nur Platzhalter.
 - [x] Regex-Erkennung für Kennungen, Adressen und Anreden, Löschen der Zuordnung (PR #4, `lxc-ht`).
+- [x] KENNUNG strenger: Steuer-ID ohne Bezeichner nur mit gültiger Prüfziffer, Steuernummer nur nach Bezeichner. Paragrafen, Beträge und Jahreszahlen bleiben stehen (`Phantom-create-1`).
 - [x] Neues Design und Zählertext „Versand nur nach deiner Freigabe“ gemergt (PR #3), Abläufe gegen den echten Kern geprüft.
 
 **Demo starten**

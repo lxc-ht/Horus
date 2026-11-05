@@ -347,3 +347,16 @@ def test_logs_and_stdout_contain_no_originals(caplog, capsys, monkeypatch):
     assert out.out == "" and out.err == ""
     for value in ORIGINALS + ["Weidenfeld"]:
         assert value not in caplog.text
+
+
+def test_round_trip_with_ids():
+    text = ("Az.: 3 O 123/26, Mandantennummer M-4711. Steuer-ID 52 749 130 681, St.-Nr. 22/815/08150, "
+            "Versichertennummer A123456789. Erneut Az. 3 O 123/26 nach § 573 Abs. 2 BGB über 6.800 Euro.")
+    result = api.analyze(text)
+    assert "Az.: [KENNUNG_1]" in result.masked_text and "Az. [KENNUNG_1]" in result.masked_text
+    for value in ["3 O 123/26", "M-4711", "52 749 130 681", "22/815/08150", "A123456789"]:
+        assert value not in result.masked_text
+    assert "§ 573 Abs. 2 BGB über 6.800 Euro" in result.masked_text
+    restored = api.restore(result.session_id, result.masked_text)
+    assert restored.text == text
+    assert restored.unknown == restored.changed == restored.missing == []
