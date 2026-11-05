@@ -179,11 +179,11 @@
     <section class="work-card" data-step="stepOriginal" aria-labelledby="h-original">
       <div class="card-heading"><h2 id="h-original"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M8 12h8m-8 4h6"/></svg>Dein Original</h2><span class="status-badge">Lokal</span></div>
       <p class="card-subtitle" id="originalHelp">Bleibt auf diesem Rechner.</p>
-      <div class="editor-wrap scroll-frame"><textarea id="original" aria-labelledby="h-original" aria-describedby="originalHelp" spellcheck="false" placeholder="Füge hier deinen Text ein …&#10;&#10;Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.&#10;&#10;Noch keinen Text zur Hand? Starte mit unserem erfundenen Kanzleibeispiel.&#10;&#10;Oder zieh eine PDF hierher."></textarea></div>
+      <div class="editor-wrap scroll-frame"><textarea id="original" aria-labelledby="h-original" aria-describedby="originalHelp" spellcheck="false" placeholder="Füge hier deinen Text ein …&#10;&#10;Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.&#10;&#10;Noch keinen Text zur Hand? Starte mit unserem erfundenen Kanzleibeispiel.&#10;&#10;Oder zieh eine PDF, Word-Datei oder E-Mail hierher."></textarea></div>
       <div class="row actions">
         <button id="btnExample" type="button"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M8 12h8m-8 4h6"/></svg>Beispiel laden</button>
-        <button id="btnPdf" type="button"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M12 18v-7m-3 3 3-3 3 3"/></svg>PDF laden</button>
-        <input id="pdfInput" type="file" accept="application/pdf" hidden>
+        <button id="btnPdf" type="button"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M12 18v-7m-3 3 3-3 3 3"/></svg>Datei laden</button>
+        <input id="pdfInput" type="file" accept=".pdf,application/pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.eml,message/rfc822" hidden>
         <button id="btnAnalyze" type="button" class="primary"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3M7 8h10M7 12h7M7 16h10"/></svg><span id="analyzeLabel">Text analysieren</span></button>
       </div>
       <p class="card-foot">Erkennung und Ersetzung erfolgen lokal.</p>
@@ -265,9 +265,9 @@ async function api(path, body) {
   return data;
 }
 
-// Eigene Funktion, weil api() JSON sendet. Die PDF geht als rohe Bytes nur an diesen lokalen Server.
-async function apiPdf(file) {
-  const response = await fetch("/api/pdf", { method: "POST", headers: { "Content-Type": "application/pdf" }, body: await file.arrayBuffer() });
+// Eigene Funktion, weil api() JSON sendet. Die Datei geht als rohe Bytes nur an diesen lokalen Server.
+async function apiFile(path, file) {
+  const response = await fetch(path, { method: "POST", headers: { "Content-Type": file.type || "application/octet-stream" }, body: await file.arrayBuffer() });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     throw new Error(data.error || "Der Server hat die Anfrage abgelehnt.");
@@ -515,7 +515,17 @@ async function restoreAnswer(answer) {
 
 $("btnExample").addEventListener("click", () => { $("original").value = EXAMPLE; });
 
-const NOT_PDF = "Das ist keine lesbare PDF-Datei.";
+// Nach Endung, nicht nur nach MIME-Typ: Viele Systeme melden für .eml und .docx keinen Typ.
+const FILE_KINDS = [
+  { path: "/api/pdf", ext: /\.pdf$/i, type: "application/pdf" },
+  { path: "/api/docx", ext: /\.docx$/i, type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
+  { path: "/api/eml", ext: /\.eml$/i, type: "message/rfc822" },
+];
+const FILE_HINTS = [
+  { ext: /\.doc$/i, error: "Ältere Word-Dateien (.doc) kann LP7 nicht lesen. Speichere sie in Word als .docx und lade sie erneut." },
+  { ext: /\.msg$/i, error: "Outlook-Dateien (.msg) kann LP7 noch nicht lesen. Speichere die E-Mail als .eml oder kopiere ihren Text hierher." },
+];
+const NOT_SUPPORTED = "Diese Datei kann LP7 nicht lesen. Möglich sind PDF, Word (.docx) und E-Mail (.eml).";
 
 // Ein neuer Text macht Analyse und Freigabe des alten wertlos, sonst ließe sich die alte Fassung kopieren.
 function loadOriginal(text) {
@@ -530,12 +540,14 @@ function loadOriginal(text) {
 }
 
 // Nur Text ins Feld setzen. Analysieren und Freigeben bleibt Sache des Menschen.
-function loadPdf(file) {
+function loadFile(file) {
   return run(async () => {
     if (!file) return;
-    const isPdf = file.type === "application/pdf" || /\.pdf$/i.test(file.name);
-    if (!isPdf) throw new Error(NOT_PDF);
-    loadOriginal((await apiPdf(file)).text);
+    const hint = FILE_HINTS.find((h) => h.ext.test(file.name));
+    if (hint) throw new Error(hint.error);
+    const kind = FILE_KINDS.find((k) => k.ext.test(file.name)) || FILE_KINDS.find((k) => k.type === file.type);
+    if (!kind) throw new Error(NOT_SUPPORTED);
+    loadOriginal((await apiFile(kind.path, file)).text);
   });
 }
 
@@ -544,7 +556,7 @@ $("pdfInput").addEventListener("change", async () => {
   const file = $("pdfInput").files[0];
   // Leeren, damit dieselbe Datei ein zweites Mal ein change-Ereignis auslöst.
   $("pdfInput").value = "";
-  await loadPdf(file);
+  await loadFile(file);
 });
 
 const hasFiles = (e) => [...(e.dataTransfer?.types || [])].includes("Files");
@@ -560,7 +572,7 @@ $("original").addEventListener("drop", (e) => {
   if (!hasFiles(e)) return;
   // Sonst öffnet der Browser die Datei oder setzt ihren Pfad als Text ein.
   e.preventDefault();
-  loadPdf(e.dataTransfer.files[0]);
+  loadFile(e.dataTransfer.files[0]);
 });
 // Daneben abgelegte Dateien soll der Browser nicht öffnen, die Seite mit dem Original bliebe sonst nicht stehen.
 for (const type of ["dragover", "drop"]) {

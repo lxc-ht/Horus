@@ -12,7 +12,8 @@
 ## Für später
 
 - Der Zähler "0 davon verlassen den Rechner" gilt nur für erkannte Angaben. Eine übersehene Angabe geht nach der Freigabe mit raus. Vorschlag: "{n} sensible Angaben ersetzt · Versand nur nach deiner Freigabe". Der Text steht wörtlich im Auftrag, deshalb ist er noch nicht geändert.
-- Word Upload (.docx). PDF laden gibt es seit dem PR „PDF laden“, Scans (OCR) weiterhin nicht.
+- Datei laden kann PDF, .docx und .eml. Offen: Scans (OCR), Outlook .msg (bräuchte eine zusätzliche Bibliothek), Anhänge einer E-Mail, alte .doc-Dateien.
+- Word-Tabellen: Jede Zelle wird eine eigene Zeile. Zellen einer Zeile mit Tabulator verbinden, dann bleibt „IBAN“ neben dem Wert.
 - „Beispiel laden“ und Eintippen im Feld „Dein Original“ setzen Analyse und Freigabe nicht zurück. Nach einer Änderung bleibt die alte Fassung kopierbar, bis man erneut analysiert. „PDF laden“ setzt beides zurück; das gleiche Verhalten für die anderen Wege wäre konsequent.
 - Markieren per Tastatur, bisher geht es nur mit der Maus.
 - Freigaben liegen im Speicher des Servers und werden nie aufgeräumt. Für die Demo reicht das.

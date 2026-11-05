@@ -4,6 +4,8 @@ import importlib.util
 import io
 import json
 import os
+import zipfile
+from email.message import EmailMessage
 import subprocess
 import sys
 
@@ -127,8 +129,104 @@ def check_pdf() -> None:
     assert status == 403 and "text" not in data
 
 
+W_NS = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
+
+
+def docx(body: str, **parts: str) -> bytes:
+    # Kleinste Word-Datei von Hand: ZIP mit word/document.xml, weitere Teile wie header1 optional.
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("[Content_Types].xml", "<Types/>")
+        archive.writestr("word/document.xml", f"<w:document {W_NS}><w:body>{body}</w:body></w:document>")
+        for name, xml in parts.items():
+            archive.writestr(f"word/{name}.xml", f"<w:hdr {W_NS}>{xml}</w:hdr>")
+    return buffer.getvalue()
+
+
+def para(*runs: str) -> str:
+    return "<w:p>" + "".join(f"<w:r>{r}</w:r>" for r in runs) + "</w:p>"
+
+
+def check_docx() -> None:
+    body = (
+        para("<w:t>Erika Musterfrau</w:t>", "<w:t xml:space=\"preserve\"> wohnt in Lüneburg.</w:t>")
+        + para("<w:t>Az.</w:t><w:tab/><w:t>123/26</w:t>")
+        + "<w:p><w:del><w:r><w:delText>Gestrichen</w:delText></w:r></w:del><w:r><w:t>Max Mustermann</w:t></w:r></w:p>"
+        + "<w:tbl><w:tr><w:tc>" + para("<w:t>Zelle eins</w:t>") + "</w:tc></w:tr></w:tbl>"
+        + para("<w:t>Außen</w:t>", "<w:pict><w:txbxContent>" + para("<w:t>Im Textfeld</w:t>") + "</w:txbxContent></w:pict>")
+    )
+    status, data = post("/api/docx", docx(body, header1=para("<w:t>Kanzlei Sommerfeld</w:t>"), header2=para("<w:t>Kanzlei Sommerfeld</w:t>")))
+    assert status == 200, data
+    assert data["text"] == (
+        "Kanzlei Sommerfeld\n\n"
+        "Erika Musterfrau wohnt in Lüneburg.\nAz.\t123/26\nMax Mustermann\nZelle eins\nIm Textfeld\nAußen"
+    ), data["text"]
+
+    assert post("/api/docx", docx(para("<w:t> </w:t>"))) == (422, {"error": server.DOCX_EMPTY})
+    assert post("/api/docx", b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" + b"0" * 100) == (422, {"error": server.DOCX_OLD})
+    assert post("/api/docx", b"Das ist keine Word-Datei.") == (422, {"error": server.DOCX_INVALID})
+    other_zip = io.BytesIO()
+    with zipfile.ZipFile(other_zip, "w") as archive:
+        archive.writestr("notiz.txt", "Erika Musterfrau")
+    assert post("/api/docx", other_zip.getvalue()) == (422, {"error": server.DOCX_INVALID})
+    broken = docx("<w:p><w:r><w:t>offen")
+    assert post("/api/docx", broken) == (422, {"error": server.DOCX_INVALID})
+    # Externe Entitäten werden nicht aufgelöst, die Datei gilt als unlesbar.
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("word/document.xml", '<!DOCTYPE d [<!ENTITY e SYSTEM "file:///etc/passwd">]>'
+                         f'<w:document {W_NS}><w:body><w:p><w:r><w:t>&e;</w:t></w:r></w:p></w:body></w:document>')
+    status, data = post("/api/docx", buffer.getvalue())
+    assert status == 422 and "root" not in json.dumps(data)
+    assert post("/api/docx", b"PK" + b"0" * server.PDF_MAX_BYTES) == (413, {"error": server.FILE_TOO_LARGE})
+    assert post("/api/docx", docx(para("<w:t>Erika Musterfrau</w:t>")), host="angreifer.example")[0] == 403
+
+
+def eml(html: bool = False) -> bytes:
+    message = EmailMessage()
+    message["From"] = "Erika Musterfrau <erika@example.org>"
+    message["To"] = "Kanzlei Sommerfeld <post@kanzlei.example>"
+    message["Subject"] = "Kündigung durch Nordlicht Bau"
+    message["Date"] = "Thu, 05 Nov 2026 10:00:00 +0100"
+    message.set_content("Guten Tag,\nmir wurde am 14.03.2026 gekündigt.\n")
+    if html:
+        message.add_alternative(
+            "<html><head><style>p{}</style></head><body><p>Guten Tag,</p><p>mir wurde <b>gekündigt</b>.</p>"
+            "<script>alert(1)</script></body></html>", subtype="html")
+        message.make_mixed()
+        message.add_attachment(b"%PDF-1.4", maintype="application", subtype="pdf", filename="anhang.pdf")
+    return message.as_bytes()
+
+
+def check_eml() -> None:
+    status, data = post("/api/eml", eml())
+    assert status == 200, data
+    assert data["text"].startswith("Von: Erika Musterfrau <erika@example.org>\nAn: Kanzlei Sommerfeld <post@kanzlei.example>\n")
+    assert "Betreff: Kündigung durch Nordlicht Bau" in data["text"]
+    assert data["text"].endswith("\n\nGuten Tag,\nmir wurde am 14.03.2026 gekündigt.")
+
+    # Bei Text und HTML gewinnt der Text, Anhänge bleiben draußen.
+    status, data = post("/api/eml", eml(html=True))
+    assert status == 200 and "14.03.2026" in data["text"] and "PDF" not in data["text"]
+
+    only_html = EmailMessage()
+    only_html["From"] = "erika@example.org"
+    only_html["Subject"] = "Nur HTML"
+    only_html.set_content("<p>Guten Tag,</p><p>mir wurde <b>gek&uuml;ndigt</b>.</p><script>alert(1)</script>", subtype="html")
+    status, data = post("/api/eml", only_html.as_bytes())
+    assert status == 200, data
+    assert data["text"].endswith("\n\nGuten Tag,\n\nmir wurde gekündigt.") and "alert" not in data["text"], data["text"]
+
+    assert post("/api/eml", b"Das ist nur ein Text, keine E-Mail.") == (422, {"error": server.EML_INVALID})
+    assert post("/api/eml", b"") == (422, {"error": server.EML_INVALID})
+    assert post("/api/eml", b"0" * (server.PDF_MAX_BYTES + 1)) == (413, {"error": server.FILE_TOO_LARGE})
+    assert post("/api/eml", eml(), host="angreifer.example")[0] == 403
+
+
 def main() -> None:
     check_pdf()
+    check_docx()
+    check_eml()
 
     result = server.analyze(server.AnalyzeBody(text=TEXT))
     sid = result["session_id"]
