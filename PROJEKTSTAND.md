@@ -15,6 +15,8 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- [ ] Gewählte Kopfvariante B2 ohne Rahmen: „Klar. Lokal.“ links und „Unter deiner Kontrolle.“ rechts vom Glasmotiv, ausschließlich Kopf-CSS und Kopf-Markup in `web/static/index.html`, Branch `codex/slogan-ohne-rahmen` (`lxc-ht`, Codex UI).
+
 - [ ] PDF laden: Text aus digitalen PDFs lokal auslesen und ins Textfeld setzen, Scans ausdrücklich nicht. Endpunkt `/api/pdf`, Knopf und Ablegen in `index.html`, eigener PR, Review durch Paul (`lxc-ht`, Claude).
 
 
