@@ -34,7 +34,6 @@ Kern (`Phantom-create-1`):
 
 Beide:
 
-- [ ] Klären, ob das Projekt in unserem Hackathon-Track eingereicht werden darf.
 - [ ] Demo auf dem Vortragsrechner durchspielen und das Modell vorher einmal laden.
 - [ ] Pitch vorbereiten, auch für diese Fragen: Warum kein lokales Modell? Was, wenn der Kontext die Person verrät? Was ist mit der DSGVO?
 
@@ -59,6 +58,7 @@ Beide:
 - [x] Review-Fix zu PR #8: Namensteile mehrdeutig, Schreibweisen nur als großgeschriebenes Wort (PR #11).
 - [x] Rückübersetzung warnt bei Platzhaltern, die nur für einen Namensteil standen, unbekannte Sitzung meldet einen fertigen Satz (PR #16).
 - [x] Entscheidung: ohne API-Key. Weitergabe nur durch Kopieren, unsichere Stellen werden in der Prüfung markiert (PR #17).
+- [x] Hackathon-Track geklärt: Einreichen geht klar.
 
 **Demo starten**
 
