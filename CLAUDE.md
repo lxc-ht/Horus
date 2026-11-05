@@ -15,7 +15,7 @@ Daraus folgt, im Code verankert:
 
 ## Abstimmung im Team
 
-Zwei Menschen arbeiten hier mit je einem eigenen Agenten. Die Agenten sprechen nicht miteinander, der gemeinsame Stand steht in `README.md` unter „Projektstand“.
+Zwei Menschen arbeiten hier mit je einem eigenen Agenten. Die Agenten sprechen nicht miteinander, der gemeinsame Stand steht in `PROJEKTSTAND.md` (bis 05.11. stand er in `README.md`). Die `README.md` ist die Seite für Besucher und enthält keine Aufgaben mehr.
 
 - Vor jeder Arbeit: `git pull`, dann den Projektstand lesen. Was dort unter „In Arbeit“ steht, gehört jemand anderem.
 - Beim Start und nach Abschluss einer Aufgabe den Projektstand aktualisieren und pushen, auch ohne eigene Aufforderung. Reine Änderungen am Projektstand dürfen direkt auf `main`, sonst sieht der andere Agent sie nicht.
