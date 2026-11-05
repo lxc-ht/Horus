@@ -115,6 +115,9 @@
   .scroll-frame::after { content: ""; position: absolute; bottom: 0; left: 0; right: 12px; height: 32px; background: linear-gradient(transparent, #fff); pointer-events: none; opacity: 0; transition: opacity .15s; }
   .scroll-frame.has-more::after { opacity: 1; }
   .restored #answerInput { height: 60px; min-height: 60px; }
+  /* Nach dem Zurückübersetzen bekommt die Antwort den Platz; Hinweis und Eingabe kommen per Knopf zurück. */
+  #copyPanel.collapsed > :not(#btnNewAnswer) { display: none; }
+  #btnNewAnswer { align-self: flex-start; }
   .legend:empty { display: none; }
   @media (min-width: 861px) {
     body { display: flex; flex-direction: column; height: 100dvh; min-height: 640px; }
@@ -213,6 +216,7 @@
         <label for="answerInput">Antwort von Claude</label>
         <textarea rows="3" id="answerInput" placeholder="Antwort mit Platzhaltern einfügen …" spellcheck="false"></textarea>
         <div class="row"><button id="btnRestore" type="button" class="primary"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h11a5 5 0 0 1 0 10h-3M8 5 4 9l4 4M6 19h2"/></svg>Lokal zurückübersetzen</button></div>
+        <button id="btnNewAnswer" type="button" hidden><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Andere Antwort einfügen</button>
       </div>
       <div id="answer" class="pane" aria-labelledby="h-answer" aria-live="polite"></div>
       <div id="report" class="stack" aria-live="polite"></div>
@@ -234,7 +238,7 @@ Unsere Mandantin Erika Musterfrau (erika.musterfrau@example.org, Tel. 040 555012
 Bitte fasse den Sachverhalt kurz zusammen, nenne die Frist für eine Kündigungsschutzklage und entwirf ein kurzes Schreiben an Max Mustermann. Übernimm alle Platzhalter in eckigen Klammern unverändert.`;
 
 const $ = (id) => document.getElementById(id);
-const state = { result: null, release: null, busy: false, restored: false, error: "", fileError: "", accepted: new Set() };
+const state = { result: null, release: null, busy: false, restored: false, answerOpen: false, error: "", fileError: "", accepted: new Set() };
 
 const workCards = [...$("workspace").querySelectorAll(".work-card")];
 const mouseHover = matchMedia("(hover: hover) and (pointer: fine)");
@@ -470,6 +474,9 @@ function render() {
   $("btnCopy").className = release ? "primary" : "";
   $("btnRestore").disabled = busy;
   $("copyPanel").hidden = !showCopy;
+  const collapsed = state.restored && !state.answerOpen;
+  $("copyPanel").classList.toggle("collapsed", collapsed);
+  $("btnNewAnswer").hidden = !collapsed;
   $("hint").textContent = release
     ? "Freigegeben. Ändert sich etwas, ist eine neue Freigabe nötig."
     : result ? "Text markieren, um weitere Angaben zu ersetzen. × nimmt eine Ersetzung zurück." : "";
@@ -477,6 +484,7 @@ function render() {
 
 function renderAnswer(restored) {
   state.restored = true;
+  state.answerOpen = false;
   const box = $("answer");
   box.replaceChildren();
   const originals = [...new Set(state.result.replacements.map((r) => r.original))];
@@ -644,6 +652,13 @@ async function copyText(text) {
 $("btnRestore").addEventListener("click", () => run(async () => {
   await restoreAnswer($("answerInput").value);
 }));
+
+$("btnNewAnswer").addEventListener("click", () => {
+  state.answerOpen = true;
+  render();
+  $("answerInput").focus();
+  $("answerInput").select();
+});
 
 // Markieren mit der Maus
 const menu = $("typeMenu");
