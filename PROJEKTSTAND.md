@@ -18,6 +18,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 **In Arbeit**
 
 - Installation im README frisch messen (leerer Klon, leere Caches, Cloud-Linux), nur README „Installation“, PROJEKTSTAND, BACKLOG; Branch `claude/project-thread-tllmvu` (`lxc-ht`, Claude).
+- Überschrift „Your Data Is Yours“ mit Horus-Auge und Papierton, nur Kopfzeile `.intro` und Seitenhintergrund in `web/static/index.html`; Branch `claude/project-thread-63us4k`, PR ohne Merge, Paul prüft (`lxc-ht`, Claude).
 
 
 
