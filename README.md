@@ -19,7 +19,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- Noch nichts eingetragen.
+- Regex-Erkennung für Kennungen, Adressen und Anreden, Löschen der Zuordnung: [PR #4](https://github.com/lxc-ht/LP7/pull/4) wartet auf Review (`lxc-ht`).
 
 **Nächste Aufgaben**
 
@@ -31,6 +31,7 @@ Web (`lxc-ht`):
 
 - [ ] Zählertext ändern. „0 davon verlassen den Rechner“ gilt nur für erkannte Angaben. Vorschlag steht in `web/BACKLOG.md`.
 - [ ] „Kopieren“ gegen den echten Kern einmal klicken.
+- [ ] Nach PR #4: `KENNUNG` in `TYPES` und Chip-Farbe `.t-KENNUNG` in `web/static/index.html` ergänzen.
 
 Beide:
 
