@@ -19,6 +19,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- Review-Fix zu PR #8: [PR #11](https://github.com/lxc-ht/LP7/pull/11) wartet auf den Merge (`lxc-ht`).
 - Datum ohne Jahr, Monat und Jahr, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung. Nur `detect.py` und `vault.py` (Branch `kern/datum-iban-rechte`, `lxc-ht`).
 
 **Nächste Aufgaben**
