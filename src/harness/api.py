@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import atexit
 import logging
+import re
 import signal
 import sys
 import threading
@@ -45,6 +46,15 @@ log = logging.getLogger(__name__)
 
 WARN_TERM_NOT_FOUND = "„{term}“ kommt im Text nicht vor, es wurde nichts maskiert."
 WARN_TERM_PARTLY_MASKED = "„{term}“ überschneidet sich mit einer anderen Ersetzung und ist nicht vollständig maskiert. Nimm diese erst zurück."
+WARN_PART_RESTORED = "{platzhalter} stand im gesendeten Text auch allein für „{teil}“, eingesetzt ist überall „{wert}“. Bitte diese Stellen prüfen."
+UNKNOWN_SESSION = "Diese Sitzung ist nicht mehr bekannt, etwa nach einem Neustart. Bitte den Text neu analysieren."
+
+# Nach einer Anrede ist der Nachname sicher ein Name, „Frau Erika Musterfrau“ stimmt dann auch.
+_AFTER_SALUTATION = re.compile(r"(?:Herrn?|Frau|Dr\.|Prof\.)\s+$")
+
+
+class _UnknownSession(KeyError):
+    __str__ = Exception.__str__   # KeyError setzt die Meldung sonst in Anführungszeichen
 
 
 @dataclass
@@ -86,7 +96,7 @@ def _session(session_id: str) -> _Session:
     try:
         return _sessions[session_id]
     except KeyError:
-        raise KeyError(f"Unbekannte Sitzung: {session_id}") from None
+        raise _UnknownSession(UNKNOWN_SESSION) from None
 
 
 def _masked(session_id: str, s: _Session) -> tuple[str, list[Replacement], list[vault.Mapping]]:
@@ -222,6 +232,16 @@ def restore(session_id: str, answer: str) -> RestoreResult:
     originals = {m.placeholder: m.original for m in mappings}
     sent = list(dict.fromkeys(gate.PLACEHOLDER_RE.findall(masked)))
     result = _restore.restore(answer, originals, sent)
+    # Ein Platzhalter kennt nur den vollen Wert. Stand er für einen Namensteil, kann das Eingesetzte falsch sein („Antrag“).
+    parts = {
+        (span.placeholder, s.original_text[span.start : span.end])
+        for span in s.spans
+        if span.name_part and span.placeholder[1:-1] in answer   # auch ohne Klammern wird ersetzt
+        and not _AFTER_SALUTATION.search(s.original_text[: span.start])
+    }
+    result.warnings += [
+        WARN_PART_RESTORED.format(platzhalter=p, teil=teil, wert=originals[p]) for p, teil in sorted(parts)
+    ]
     log.info(
         "restore: Sitzung %s, unbekannt %s, verändert %d, fehlend %s",
         session_id[:8], result.unknown, len(result.changed), result.missing,
