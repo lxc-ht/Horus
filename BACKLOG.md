@@ -36,7 +36,6 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Mehrdeutige Straßenendungen wie „Reeperbahn 12“ erkennt die Regex nur mit „Am …“ davor oder PLZ dahinter, sonst bleibt nur das Modell.
 - Eine nackte Zahl wird nie zur KENNUNG: Eine elfstellige Zahl zählt ohne Bezeichner nur mit gültiger Prüfziffer der Steuer-ID (ISO 7064 MOD 11,10), eine Steuernummer nur nach „Steuernummer“, „St.-Nr.“ oder „StNr“. Eine Steuernummer ohne Bezeichner mit führender 0 („022/815/08150“) wird trotzdem maskiert, aber als TELEFON.
 - KENNUNG kennt als Bezeichner bisher nur Mandanten- und Patientennummer. Es fehlen Kunden-, Fall-, Vertrags-, Versicherungs-, Rechnungs- und Policennummer sowie „Unser Zeichen“ / „Ihr Zeichen“.
-- Die Beispieltexte in `examples/` enthalten noch keine Kennnummern (Aktenzeichen, Mandantennummer, Krankenversichertennummer, Steuer-ID). Für die Demo wären sie der sichtbarste Beleg.
 - Reisepassnummern werden nicht erkannt, Kfz-Kennzeichen und Personalausweisnummern nur mit Bezeichner davor.
 - „34127 Kassel“ wird als ADRESSE maskiert, „Kassel“ allein im Fließtext findet nur das Modell.
 - Nicht erkannt: IP-Adressen, Datum ohne Jahr („am 14.03.“), Monat und Jahr („im März 1979“), IBAN in Kleinbuchstaben (nur der Ziffernteil wird als TELEFON maskiert).

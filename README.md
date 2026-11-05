@@ -19,7 +19,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- Erfundene Kennungen in den drei Beispieltexten, Durchlauf mit GLiNER (`Phantom-create-1`).
 - `KENNUNG` in der Oberfläche: [PR #7](https://github.com/lxc-ht/LP7/pull/7) wartet auf den Merge (`lxc-ht`).
 
 **Nächste Aufgaben**
@@ -53,6 +52,7 @@ Beide:
 - [x] Neues Design und Zählertext „Versand nur nach deiner Freigabe“ gemergt (PR #3), Abläufe gegen den echten Kern geprüft.
 - [x] Layout passt auf dem Laptop ohne Scrollen auf den Bildschirm (PR #5). Auf einem echten Beamer noch nicht geprüft.
 - [x] Namen in jeder Schrift vollständig maskiert, weniger Falschtreffer bei ADRESSE und Anrede, abgeschnittene Antworten gekennzeichnet (PR #6).
+- [x] Erfundene Kennungen in allen drei Beispieltexten (Aktenzeichen, Mandanten-, Versicherten-, Patientennummer, Steuer-ID, Steuernummer). Durchlauf mit GLiNER: alle maskiert, Rückübersetzung löst alle Platzhalter auf (`Phantom-create-1`).
 
 **Demo starten**
 
