@@ -21,11 +21,12 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Neuer Typ `KENNUNG` in `TYPES`: Steuer-ID, Steuernummer, SV-Nummer, Versichertennummer, Aktenzeichen, Mandanten- und Patientennummer, URL.
 - `send()`: Stoppt Claude wegen `max_tokens`, liefert es den Teil plus `cloud.TRUNCATED_NOTE` am Ende. Die Signatur bleibt ein String.
 
+- `MaskResult.uncertain` meldet zusätzlich Zusammenhang, der eine Person ohne Namen verrät (Typ-Vorschlag PERSON, Text bleibt unverändert).
 - `MaskResult.uncertain` – Liste von `Uncertain` (Text, Typ, Position im maskierten Text, `masked`, Grund als fertiger deutscher Satz). Stellen, die der Mensch ansehen soll: Modell unter der Schwelle, nicht ersetzte Nummern, knappe Modelltreffer, Namensteile ohne Anrede. Der Text ändert sich dadurch nicht. Bestehende Felder bleiben.
 
 ## Bekannte Schwächen
 
-- Umgehungstest gegen die Demo, noch offen: kyrillische Doppelgänger in IBANs („DЕ89“ mit kyrillischem Е, nur der Rest wird maskiert), Quasi-Identifikatoren aus dem Kontext („der Bürgermeister von …“).
+- Umgehungstest gegen die Demo, noch offen: kyrillische Doppelgänger in IBANs („DЕ89“ mit kyrillischem Е, nur der Rest wird maskiert), Quasi-Identifikatoren aus dem Kontext („der Bürgermeister von …“): Eine kurze Regel zeigt „die einzige Kinderärztin im Ort“ und Ämter wie „Bürgermeister von Hasenwinkel“ als unsichere Stelle, ersetzt aber nichts. Alles andere („die Nachbarin mit dem roten Porsche“) bleibt Sache der Prüfung.
 - Eine Antwort von Claude kann Links oder Markdown-Bilder enthalten, in denen nach der Rückübersetzung echte Werte stehen („![x](https://…?a=[IBAN_1])“). Die Oberfläche zeigt das nur als Text. Riskant wird es erst, wenn jemand den Text in ein Programm kopiert, das Markdown oder HTML darstellt.
 - Zweibuchstabige Namensteile („Wu“, „Do“) werden in genau dieser Schreibweise mitmaskiert. Bei einer Person „Tran Do“ wird auch die Abkürzung „Do“ für Donnerstag zum Namen. Die Prüfung zeigt solche Stellen als unsicher.
 - Die Ausnahmen beim Kfz-Kennzeichen sind eine kurze Liste (EU, VO, DIN, ISO, VDE, VW, BMW). Andere Normen wie „ABC-DE 12“ werden maskiert, echte Kennzeichen aus Dinslaken („DIN-AB 123“) nicht.
