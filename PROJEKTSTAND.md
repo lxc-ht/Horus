@@ -43,7 +43,7 @@ Beide:
 
 **Erledigt**
 
-- [x] Word (.docx) und E-Mail (.eml) laden wie PDF, ohne neue Abhängigkeit; Knopf heißt jetzt „Datei laden“ ([PR #32](https://github.com/lxc-ht/LP7/pull/32), baut auf #30 auf, `lxc-ht`, Claude). Wartet auf Pauls Review; #30 ist gemergt, Basis ist jetzt `main`.
+- [x] Word (.docx) und E-Mail (.eml) laden wie PDF, ohne neue Abhängigkeit; Knopf heißt jetzt „Datei laden“ ([PR #32](https://github.com/lxc-ht/LP7/pull/32), baut auf #30 auf, `lxc-ht`, Claude). Gemergt am 05.11. Demo einmal mit einer Word-Datei und einer E-Mail durchspielen.
 - [x] Gewählte Kopfvariante B2 ohne Rahmen eingebaut: „Klar. Lokal.“ links, „Unter deiner Kontrolle.“ rechts vom Motiv. Mittlere Spalte auf Locs Wunsch allgemein „Vorschau für LLM“. Bestehende Browserprüfung bestanden, Desktop und Mobil visuell geprüft. Nur Oberfläche, Freigabeablauf unverändert; Branch `codex/slogan-ohne-rahmen` (`lxc-ht`, Codex UI).
 
 - [x] PDF laden: Text aus digitalen PDFs lokal im Speicher auslesen und ins Textfeld setzen, per Knopf oder Ziehen; Scans werden gemeldet, nicht gelesen ([PR #30](https://github.com/lxc-ht/LP7/pull/30), `lxc-ht`, Claude). Gemergt am 05.11. Vortragsrechner einmal mit Netz starten, damit uv `pypdf` lädt.
