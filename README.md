@@ -19,7 +19,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- Datum ohne Jahr, Monat und Jahr, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung. Nur `detect.py` und `vault.py` (Branch `kern/datum-iban-rechte`, `lxc-ht`).
+- **Vor dem Pitch mergen:** Fehler aus PR #8 (falsche Person bei `Müller` und `Mueller`), Datumsformate, IBAN, Dateirechte: [PR #12](https://github.com/lxc-ht/LP7/pull/12) wartet auf den Merge (`lxc-ht`).
 
 **Nächste Aufgaben**
 
