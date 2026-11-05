@@ -140,6 +140,36 @@
     .summary { padding: 22px 0 18px; }
     footer { align-items: start; flex-direction: column; gap: 9px; }
   }
+  /* Die drei Spalten sind der Moment für die Jury: Auf dem Laptop passt alles ohne Scrollen auf den Schirm. */
+  @media (min-width: 861px) {
+    body { display: flex; flex-direction: column; height: 100dvh; min-height: 600px; }
+    header { flex: none; }
+    .workspace { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; padding-bottom: 10px; }
+    .intro, .workflow, .summary, footer { flex: none; }
+    main { flex: 1; min-height: 0; height: auto; }
+    #original, #answerInput { resize: none; }
+    #copyPanel { flex: none; }
+    #answer { min-height: 72px; }
+    #report { flex: 0 1 auto; min-height: 0; max-height: 28%; }
+  }
+  @media (min-width: 861px) and (max-height: 1200px) {
+    header { height: 54px; }
+    .intro { min-height: 0; margin: 0 -12px 8px; padding: 6px 20px 10px; }
+    .intro::before { inset: -12px 0; }
+    .intro::after { inset: -8px 0; }
+    .eyebrow, .subtitle, .privacy-card { display: none; }
+    h1 { font-size: clamp(26px, 3vw, 38px); }
+    .workflow { margin-bottom: 8px; }
+    .work-card { padding: 14px 18px; gap: 8px; }
+    .card-subtitle { margin: -6px 0 0; }
+    textarea, .pane { padding: 10px 0; line-height: 1.7; }
+    button { min-height: 36px; padding: 7px 14px; }
+    #copyPanel { gap: 5px; }
+    #copyPanel .note { padding: 6px 10px; line-height: 1.45; }
+    #answerInput { height: 58px; padding: 7px 10px; }
+    .summary { padding: 8px 5px 6px; }
+    footer { padding: 6px 5px 0; }
+  }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
