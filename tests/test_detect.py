@@ -31,6 +31,39 @@ def test_dates():
     assert {("DATUM", "14.03.1979"), ("DATUM", "1.4.25"), ("DATUM", "2026-09-02"), ("DATUM", "5. Juli 1984")} <= found
 
 
+def _dates(text):
+    return [f.text for f in detect_all(text, [RegexDetector()]) if f.typ == "DATUM"]
+
+
+def test_date_without_year():
+    assert _dates("Termin am 14.03. und am 5. Juli bitte.") == ["14.03", "5. Juli"]
+
+
+def test_month_and_year():
+    assert _dates("geboren im März 1979 in Kassel") == ["März 1979"]
+
+
+def test_date_with_slashes():
+    assert _dates("geboren 03/14/1979 in Kassel") == ["03/14/1979"]
+
+
+def test_full_date_stays_one_finding():
+    assert _dates("geboren am 14. März 1979 und am 14.03.1979") == ["14. März 1979", "14.03.1979"]
+
+
+def test_section_numbers_and_versions_are_not_dates():
+    assert _dates("Abschnitt 3.1. und Kapitel 12.4. in Version 10.12.3 von 2019, Mai ohne Jahr") == []
+
+
+def test_iban_in_lowercase():
+    assert ("IBAN", "de89 3704 0044 0532 0130 00") in _found("Konto de89 3704 0044 0532 0130 00 bitte")
+    assert ("IBAN", "gb82 west 1234 5698 7654 32") in _found("Konto gb82 west 1234 5698 7654 32 bitte")
+
+
+def test_lowercase_text_with_invalid_checksum_is_no_iban():
+    assert not any(t == "IBAN" for t, _ in _found("Kennung gb00 west 1234 5698 7654 32 bitte"))
+
+
 def test_postcode_is_not_a_phone():
     assert not any(t == "TELEFON" for t, _ in _found("34127 Kassel"))
 
