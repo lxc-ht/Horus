@@ -19,6 +19,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- Erfundene Kennungen in den drei Beispieltexten, Durchlauf mit GLiNER (`Phantom-create-1`).
 - `KENNUNG` in der Oberfläche: [PR #](https://github.com/lxc-ht/LP7/pull/) wartet auf den Merge (`lxc-ht`).
 
 **Nächste Aufgaben**
