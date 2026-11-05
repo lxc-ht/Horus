@@ -2,6 +2,8 @@
 
 Pseudonymisierungs-Harness: KI nutzen, ohne personenbezogene Daten aus der Hand zu geben.
 
+![LP7: Analysieren, Vorschau und Ausgabe. Klar. Lokal. Unter deiner Kontrolle.](web/assets/lp7-banner.png)
+
 **UI Kit:** [Icons, Komponenten und drei klickbare Design Demos](web/ui-kit/README.md). Der vollständige Quellcode liegt unter `web/ui-kit/` und kann gemeinsam weiterentwickelt werden.
 
 ## Projektstand
@@ -21,8 +23,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- Dashboard im Stil des UI-Kits (Lime Soda) in `web/static/index.html`, Branch `codex/dashboard-ui-kit` (`Phantom-create-1`).
-- Datumsformate, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung: [PR #12](https://github.com/lxc-ht/LP7/pull/12) wartet auf den Merge (`lxc-ht`).
+- Umgehungen des Kerns schließen (Token-Grenze des Modells, Unicode, Platzhalter-Kollision, Formate), nur `src/harness` und `tests`, Branch `kern/umgehungen`, baut auf PR #12 auf (`lxc-ht`).
 
 **Nächste Aufgaben**
 
@@ -33,12 +34,12 @@ Kern (`Phantom-create-1`):
 
 Beide:
 
-- [ ] Klären, ob das Projekt in unserem Hackathon-Track eingereicht werden darf.
 - [ ] Demo auf dem Vortragsrechner durchspielen und das Modell vorher einmal laden.
 - [ ] Pitch vorbereiten, auch für diese Fragen: Warum kein lokales Modell? Was, wenn der Kontext die Person verrät? Was ist mit der DSGVO?
 
 **Erledigt**
 
+- [x] Start per Doppelklick mit `LP7 starten.command` umgesetzt und geprüft, Browser öffnet sich automatisch, Server bleibt auf diesem Rechner (PR #20, `Phantom-create-1`).
 - [x] Repo angelegt, beide haben Schreibrechte.
 - [x] Kern gebaut: Erkennung, Maskierung, Freigabe, Senden, Rückübersetzung, CLI.
 - [x] Weboberfläche gebaut und auf `main` gemergt.
@@ -58,8 +59,16 @@ Beide:
 - [x] Review-Fix zu PR #8: Namensteile mehrdeutig, Schreibweisen nur als großgeschriebenes Wort (PR #11).
 - [x] Rückübersetzung warnt bei Platzhaltern, die nur für einen Namensteil standen, unbekannte Sitzung meldet einen fertigen Satz (PR #16).
 - [x] Entscheidung: ohne API-Key. Weitergabe nur durch Kopieren, unsichere Stellen werden in der Prüfung markiert (PR #17).
+- [x] Hackathon-Track geklärt: Einreichen geht klar.
+- [x] Dashboard im Lime-Soda-Stil des UI-Kits (PR #19, `Phantom-create-1`), gemergt.
+- [x] Start per Doppelklick mit `LP7 starten.command` (PR #20, `Phantom-create-1`), gemergt. Echter Doppelklick im Finder steht noch aus.
+- [x] Datum ohne Jahr, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung (PR #12), Banner im README (PR #10).
 
 **Demo starten**
+
+Auf dem Mac: Doppelklick auf `LP7 starten.command`. Der Browser öffnet sich, das Terminalfenster bleibt offen, solange LP7 läuft.
+
+Oder im Terminal:
 
 ```bash
 uv sync

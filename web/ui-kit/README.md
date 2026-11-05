@@ -7,7 +7,7 @@
 ## Enthalten
 
 1. **18 Icons:** Analysieren, Vorschau, Ausgabe, Original, Maskieren, Freigeben, Gesperrt, Senden, Zurückübersetzen, Kopieren, Importieren, Exportieren, Erledigt, Hinweis, Zurücksetzen, Einstellungen, Entfernen und Lokal.
-2. **Lime Soda als Standard:** heller Cyan/Mint/Lime/Gelb Verlauf, schwarze Typografie und transparente Glaselemente. Liquid Glass und Pure White bleiben zum Vergleichen umschaltbar.
+2. **Lime Soda mit Material C als Standard:** heller Cyan/Mint/Lime/Gelb Verlauf und schwarze Typografie. Ausgewählte Icon Kacheln, aktive Schalter und Freigabe Buttons haben helle Glasflächen mit feinem Farbrand. Liquid Glass und Pure White bleiben zum Vergleichen umschaltbar.
 3. **Komponenten:** beschriftete Buttons, Sperrzustände, Statusanzeigen, Hinweise, Eingaben und Platzhalter.
 4. **Drei Ablaufdemos:** Beispielsanalyse, Vorschau, Freigabe, simulierte Ausgabe und Zurücksetzen. Jede Demo funktioniert unabhängig; vor der Freigabe bleibt die Ausgabe gesperrt.
 5. **Interaktives Dashboard:** Banner im Kopfbereich oder Glas Ablaufleiste, drei Arbeitsbereiche sowie Freigabe und simulierte Ausgabe. Eine Änderung an den Platzhaltern verwirft Freigabe und Ausgabe.
@@ -28,7 +28,7 @@ Die Demos nutzen feste erfundene Beispieldaten. Erkennung, Maskierung und Antwor
 
 ## Vorschau
 
-![Lime Soda UI Kit mit Icons, Komponenten und Demos](assets/kit-lime-soda.png)
+![Lime Soda UI Kit mit Material C und feinen Farbrändern](assets/kit-farbrand.png)
 
 ![Die 18 Icons mit Auswahl, Größenvergleich und SVG Export](assets/kit-icons.png)
 
@@ -38,7 +38,9 @@ Die Demos nutzen feste erfundene Beispieldaten. Erkennung, Maskierung und Antwor
 
 ## Weniger grüne Auswahlflächen
 
-Vier Materialstudien ersetzen die kräftig grüne Auswahlfläche durch zurückhaltendere Oberflächen. Das sind Vorschläge zur Auswahl; der aktive Lime Soda Look wurde noch nicht verändert.
+Loc hat **C · Glas mit Farbrand** ausgewählt. Dieser Stil ist jetzt im Lime Soda Look für ausgewählte Icon Kacheln, aktive Schalter und verfügbare Freigabe Buttons umgesetzt. Die Kacheln erhalten zusätzlich einen kleinen Auswahlmarker. Deaktivierte Aktionen bleiben gesperrt und neutral dargestellt.
+
+Die vier ursprünglichen Materialstudien bleiben zum Vergleich verfügbar:
 
 ![Vier Varianten für ausgewählte Icon Kacheln](assets/materialstudien/vergleich.png)
 
@@ -71,7 +73,7 @@ Die Geometrien wurden für dieses Kit gezeichnet. Die Symbole in [index.html](in
 
 ## Banner und Dashboard Ideen
 
-Die Grafik liegt unter [assets/banner.png](assets/banner.png). Im Abschnitt **Dashboard** sind beide Layouts jetzt interaktiv: eine Variante mit dem Glasmotiv im Kopfbereich und eine kompaktere Variante mit Glas Icons in der Ablaufleiste. Beim Layoutwechsel bleibt der aktuelle Bearbeitungsstand erhalten.
+Die Grafik liegt unter [assets/banner.png](assets/banner.png). Im Abschnitt **Dashboard** sind beide Layouts jetzt interaktiv: eine Variante mit dem Glasmotiv im Kopfbereich und eine kompaktere Variante mit Glas Icons in der Ablaufleiste. Beim Layoutwechsel bleibt der aktuelle Bearbeitungsstand erhalten. Das Dashboard ist direkt im Menü erreichbar. Helle Arbeitsflächen, ein dezenter Verlauf und größere Texte erleichtern das Lesen. Die nummerierten Schritte und der Hinweis über den Arbeitsbereichen zeigen den nächsten Schritt. Nach der Analyse führt der Tastaturfokus zur Vorschau, nach der Freigabe zur Ausgabe. Erneut analysieren bleibt als Nebenaktion verfügbar; die Freigabe nutzt weiterhin Material C.
 
 ![Interaktive Dashboard Demo mit Glasmotiv im Kopfbereich](assets/dashboard-demo-banner.png)
 

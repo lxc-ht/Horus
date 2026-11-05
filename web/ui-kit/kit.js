@@ -145,7 +145,7 @@ function renderDashboard(message) {
   const output = dashboardStage === 'output';
   dashboard.dataset.stage = dashboardStage;
   for (const step of dashboard.querySelectorAll('[data-dash-step]')) {
-    if (step.dataset.dashStep === (original ? 'original' : output ? 'output' : 'preview')) step.setAttribute('aria-current', 'step');
+    if (step.dataset.dashStep === (original ? 'original' : released || output ? 'output' : 'preview')) step.setAttribute('aria-current', 'step');
     else step.removeAttribute('aria-current');
   }
   const person = (index, name) => removed.has(index) ? name : `<span class="data-chip person">[PERSON_${index}]<button type="button" data-person="${index}" aria-label="PERSON_${index} zurücknehmen">${icon('close')}</button></span>`;
@@ -154,6 +154,12 @@ function renderDashboard(message) {
   $('dashStatus').className = 'badge ' + (original ? 'neutral' : released || output ? 'success' : 'warning');
   $('dashRelease').disabled = original || released || output;
   $('dashOutput').disabled = !released;
+  $('dashAnalyze').classList.toggle('primary', original);
+  $('dashAnalyze').classList.toggle('secondary', !original);
+  $('dashAnalyze').innerHTML = icon('analyze') + (original ? 'Analysieren' : 'Erneut analysieren');
+  $('dashOutput').classList.toggle('primary', released);
+  $('dashOutput').classList.toggle('secondary', !released);
+  $('dashOutput').innerHTML = icon(released || output ? 'output' : 'lock') + 'Ausgabe simulieren';
   $('dashAnswer').textContent = output ? example.answer : 'Nach deiner Freigabe kannst du die Ausgabe simulieren.';
   $('dashAnswer').classList.toggle('dash-empty', !output);
   $('dashAnswerStatus').textContent = output ? 'Fertig' : 'Ausstehend';
@@ -165,11 +171,13 @@ $('dashAnalyze').addEventListener('click', () => {
   removed.clear();
   dashboardStage = 'preview';
   renderDashboard('Zwei Angaben im Beispiel ersetzt. Prüfe die Vorschau und gib sie ausdrücklich frei.');
+  $('dashPreviewTitle').focus();
 });
 $('dashRelease').addEventListener('click', () => {
   if (dashboardStage !== 'preview') return;
   dashboardStage = 'released';
   renderDashboard('Vorschau freigegeben. Die simulierte Ausgabe ist jetzt verfügbar.');
+  $('dashOutput').focus();
 });
 $('dashOutput').addEventListener('click', () => {
   if (dashboardStage !== 'released') return;

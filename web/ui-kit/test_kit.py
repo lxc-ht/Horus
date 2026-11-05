@@ -36,6 +36,7 @@ def main() -> None:
         expect(page.locator('body')).to_have_attribute('data-look', 'lime')
         expect(page.locator('.segmented [data-look="lime"]')).to_have_attribute('aria-pressed', 'true')
         expect(page.locator('#dashboardDemo')).to_have_attribute('data-layout', 'banner')
+        expect(page.get_by_role('navigation').get_by_role('link', name='Dashboard')).to_have_attribute('href', '#dashboard')
         expect(page.locator('.icon-tile')).to_have_count(18)
         for name, paths in source.items():
             page.locator(f'[data-icon="{name}"]').click()
@@ -96,6 +97,7 @@ def main() -> None:
             expect(dashboard).to_have_attribute('data-layout', layout)
             page.locator('#dashReset').click()
             expect(page.locator('#dashRelease')).to_be_disabled()
+            expect(dashboard.locator('.dash-panels .primary')).to_have_attribute('id', 'dashAnalyze')
             expect(page.locator('#dashOutput')).to_be_disabled()
             # Auch ein synthetischer Klick darf die Freigabesperre nicht umgehen.
             page.locator('#dashOutput').evaluate('button => button.dispatchEvent(new MouseEvent("click"))')
@@ -103,9 +105,15 @@ def main() -> None:
             page.locator('#dashAnalyze').click()
             expect(page.locator('#dashPreview [data-person]')).to_have_count(2)
             expect(page.locator('#dashRelease')).to_be_enabled()
+            expect(page.locator('#dashPreviewTitle')).to_be_focused()
+            expect(dashboard.locator('.dash-panels .primary')).to_have_count(0)
+            expect(dashboard.locator('[aria-current=step]')).to_have_attribute('data-dash-step', 'preview')
             expect(page.locator('#dashOutput')).to_be_disabled()
             page.locator('#dashRelease').click()
             expect(page.locator('#dashOutput')).to_be_enabled()
+            expect(page.locator('#dashOutput')).to_be_focused()
+            expect(dashboard.locator('.dash-panels .primary')).to_have_attribute('id', 'dashOutput')
+            expect(dashboard.locator('[aria-current=step]')).to_have_attribute('data-dash-step', 'output')
             other = 'banner' if layout == 'flow' else 'flow'
             page.locator(f'.dashboard-controls [data-layout="{other}"]').click()
             expect(page.locator('#dashOutput')).to_be_enabled()
