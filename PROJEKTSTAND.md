@@ -17,7 +17,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- [ ] Kleine Verbesserungen als einzelne PRs, nicht mergen: Aufgaben-Vorlagen unter „Dein Original“, Knopf „Kopieren und Claude öffnen“, „Zuordnung jetzt löschen“ (`lxc-ht`, Claude, seit 05.11. 20:10 UTC).
 
 
 
@@ -42,10 +41,11 @@ Beide:
   - Falls jemand nach Anonymisierung fragt, zum Beispiel wie bei Bildern: „Bilder lassen sich durch künstliche Gesichter weitgehend entschärfen, bei Text bleibt der Zusammenhang. Deshalb versprechen wir keine Anonymität. Wir zeigen dem Menschen genau, was rausgeht.“
   - Nicht versprechen: „DSGVO-konform“ oder „anonym“. Rechtlich ist das noch nicht geprüft.
   - Messung für den Pitch (Stand `a4e1dbe`, Regex und GLiNER): 87 von 89 Angaben in 22 kurzen, erfundenen Texten vollständig ersetzt, nur mit Regex 37 von 89. Die Texte hat der Agent selbst geschrieben, der den Code kannte. Das ist also kein Beleg für echte Akten und keine Erkennungsrate. Nicht als „98 % Schutz“ zeigen.
-  - Bekannte Grenzen aus derselben Prüfung: Stadt „Essen“ blieb in einem längeren Satz stehen, „Kundenkonto 88213-44“ und „Ausweis L01X00T47“ ebenso, „im Winter“ wurde bei einer Person „Rosa Winter“ zum Namen. „Die einzige Kinderärztin im Ort“ findet keine Erkennung.
+  - Bekannte Grenzen aus derselben Prüfung: Stadt „Essen“ blieb in einem längeren Satz stehen, „Kundenkonto 88213-44“ und „Ausweis L01X00T47“ ebenso, „im Winter“ wurde bei einer Person „Rosa Winter“ zum Namen. „Die einzige Kinderärztin im Ort“ findet keine Erkennung (mit #42 erscheint sie als unsichere Stelle).
 
 **Erledigt**
 
+- [x] Sieben kleine PRs, alle offen, Prüfung durch Paul (`lxc-ht`, Claude, 05.11. abends): Aufgaben-Vorlagen unter „Dein Original“ ([#39](https://github.com/lxc-ht/LP7/pull/39)), „Kopieren und Claude öffnen“ ([#40](https://github.com/lxc-ht/LP7/pull/40), in Safari einmal klicken), „Zuordnung jetzt löschen“ mit neuem `api.forget` ([#41](https://github.com/lxc-ht/LP7/pull/41)), Hinweis bei verräterischem Zusammenhang wie „die einzige Kinderärztin im Ort“ ([#42](https://github.com/lxc-ht/LP7/pull/42)), Texte über 100.000 Zeichen abgelehnt ([#43](https://github.com/lxc-ht/LP7/pull/43)), Antwortfeld klappt nach dem Zurückübersetzen ein ([#44](https://github.com/lxc-ht/LP7/pull/44)), Word-Tabellen als Zeilen ([#45](https://github.com/lxc-ht/LP7/pull/45)). #39, #40, #41 und #44 haben untereinander kleine Konflikte in `index.html` (beides behalten). Alle sieben zusammen liegen fertig zusammengeführt und geprüft auf `claude/alle-verbesserungen` (216 Tests, `web.test_app`, Browserprüfung grün), ohne #36 bis #38.
 - [x] Modell lädt beim Serverstart im Hintergrund, der erste Klick auf „Text analysieren“ wartet nicht mehr; neu im Vertrag `api.warm_up()` ([PR #37](https://github.com/lxc-ht/LP7/pull/37), `lxc-ht`, Claude). Offen, wartet auf Pauls Prüfung. Echtes Vorladen von GLiNER nur auf dem Mac prüfbar: starten, kurz warten, analysieren.
 - [x] Freigabe-Nachweis: nach der Freigabe Prüfsumme sichtbar, Knopf „Nachweis speichern“ lädt Zeit, SHA-256, Anzahl je Typ und freigegebenen Text herunter, ohne Originale ([PR #38](https://github.com/lxc-ht/LP7/pull/38), `lxc-ht`, Claude). Offen, wartet auf Pauls Prüfung.
 - [x] Überschrift „Your Data Is Yours“ mit Horus-Auge (SVG inline) in Systemserifen auf Papierton, nur Kopfzeile und Seitenhintergrund ([PR #36](https://github.com/lxc-ht/LP7/pull/36), `lxc-ht`, Claude). Offen, wartet auf Pauls Prüfung, nicht gemergt. Kopfzeile 121 px auf 1440 × 900 und 109 px auf 1280 × 800, Schrift dort 49 bzw. 43 px statt 64 (sonst über 130 px). Alle Tests und Browserprüfung grün. Auf dem Vortragsrechner einmal mit Hoefler Text ansehen.
