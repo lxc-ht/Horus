@@ -23,7 +23,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 - `lxc-ht`: Nur Kopier-Weg ohne API-Key, unsichere Stellen in der Prüfung anzeigen (`web/`, `src/harness/api.py`, `GlinerDetector` in `detect.py`; Branch `pruefung-unsicher`).
 - Datumsformate, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung: [PR #12](https://github.com/lxc-ht/LP7/pull/12) wartet auf den Merge (`lxc-ht`).
-- Warnung bei falscher Rückübersetzung, fertige Sätze für unbekannte Sitzung und fehlenden API-Key (`api.py`, `cloud.py`, `cli.py`): Claude für `lxc-ht`.
+- Warnung bei falscher Rückübersetzung, fertiger Satz bei unbekannter Sitzung: [PR #16](https://github.com/lxc-ht/LP7/pull/16) wartet auf den Merge (`lxc-ht`).
 
 **Nächste Aufgaben**
 
