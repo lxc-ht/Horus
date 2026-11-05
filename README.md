@@ -91,4 +91,4 @@ Einige deutsche Erkennungsmuster (Handelsregister, USt-IdNr mit Prüfziffer, Bez
 
 ## Lizenz
 
-Noch nicht festgelegt.
+[MIT](LICENSE): Du darfst LP7 nutzen, verändern und weitergeben, auch kommerziell, solange der Lizenzhinweis erhalten bleibt. Ohne Gewähr. Die aus Microsoft Presidio übernommenen Muster stehen ebenfalls unter MIT (siehe Danksagung).
