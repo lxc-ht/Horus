@@ -144,3 +144,43 @@ def test_format_is_found(text, typ, value):
 ])
 def test_ordinary_text_stays(text):
     assert _masked(text) == text
+
+
+# --- Zweite Runde: Zeilenumbrüche und Geheimnisse ------------------------------
+
+@pytest.mark.parametrize("text, typ, value", [
+    ("Konto DE89 3704 0044\n0532 0130 00 bitte", "IBAN", "DE89 3704 0044\n0532 0130 00"),
+    ("Konto DE89 3704 0044 \n0532 0130 00 bitte", "IBAN", "DE89 3704 0044 \n0532 0130 00"),
+    ("Tel. 0561\n7712093", "TELEFON", "0561\n7712093"),
+    ("geboren am 14. März\n1979", "DATUM", "14. März\n1979"),
+    ("geboren im März\n1979", "DATUM", "März\n1979"),
+    ("Passwort: Sommer2026!", "KENNUNG", "Sommer2026!"),
+    ("Kennwort = hallo123", "KENNUNG", "hallo123"),
+    ("PIN: 4711", "KENNUNG", "4711"),
+    ("API-Key: abc123def456", "KENNUNG", "abc123def456"),
+    ("Schlüssel sk-ant-api03-abcdefghijklmnopqrstuvwxyz123456", "KENNUNG", "sk-ant-api03-abcdefghijklmnopqrstuvwxyz123456"),
+    ("Token ghp_abcdefghijklmnopqrstuvwx", "KENNUNG", "ghp_abcdefghijklmnopqrstuvwx"),
+    ("Profil @jonas.weidenfeld79 gesehen", "KENNUNG", "@jonas.weidenfeld79"),
+])
+def test_format_across_lines_and_secrets_are_found(text, typ, value):
+    assert (typ, value) in {(f.typ, f.text) for f in RegexDetector().detect(text)}
+
+
+@pytest.mark.parametrize("text", [
+    "Das Passwort wurde geändert und der Token ist abgelaufen.",
+    "Die PIN ist neu.",
+    "Preis @ 5 Euro.",
+])
+def test_secret_words_without_value_stay(text):
+    assert _masked(text) == text
+
+
+def test_email_is_not_mistaken_for_a_handle():
+    assert _masked("Mail an j.w@example.org bitte") == "Mail an [EMAIL_1] bitte"
+
+
+def test_line_break_in_value_restores_exactly():
+    text = "Konto DE89 3704 0044\n0532 0130 00 bitte"
+    result = api.analyze(text)
+    assert "3704" not in result.masked_text
+    assert api.restore(result.session_id, result.masked_text).text == text
