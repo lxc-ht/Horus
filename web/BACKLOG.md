@@ -12,6 +12,6 @@
 ## Für später
 
 - Der Zähler "0 davon verlassen den Rechner" gilt nur für erkannte Angaben. Eine übersehene Angabe geht nach der Freigabe mit raus. Vorschlag: "{n} sensible Angaben ersetzt · Versand nur nach deiner Freigabe". Der Text steht wörtlich im Auftrag, deshalb ist er noch nicht geändert.
-- Datei laden kann PDF, .docx und .eml. Offen: Scans (OCR), Outlook .msg (bräuchte eine zusätzliche Bibliothek), Anhänge einer E-Mail, alte .doc-Dateien.
+- Datei laden kann PDF, .docx und .eml. PDF- und Word-Anhänge einer E-Mail werden mitgelesen. Offen: Scans (OCR), Outlook .msg (bräuchte eine zusätzliche Bibliothek), E-Mails als Anhang, alte .doc-Dateien.
 - Markieren per Tastatur, bisher geht es nur mit der Maus.
 - Freigaben liegen im Speicher des Servers und werden nie aufgeräumt. Für die Demo reicht das.

@@ -341,6 +341,8 @@ class HtmlText(HTMLParser):
         return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
 
 
+EML_ATTACHMENT_SKIPPED = "--- Anhang: {name} (nicht gelesen, nur PDF und Word werden gelesen) ---"
+EML_ATTACHMENT_FAILED = "--- Anhang: {name} (nicht gelesen: {reason}) ---"
 EML_HEADERS = [("From", "Von"), ("To", "An"), ("Cc", "Cc"), ("Date", "Datum"), ("Subject", "Betreff")]
 
 
@@ -364,7 +366,38 @@ def eml_text(data: bytes) -> dict:
     # Ohne Absender, Empfänger, Betreff und Text ist es keine E-Mail, auch wenn der Parser alles annimmt.
     if not head or not (text or message["Subject"]):
         raise FileError(EML_INVALID)
-    return {"text": "\n".join(head) + ("\n\n" + text if text else "")}
+    parts = ["\n".join(head)] + ([text] if text else []) + eml_attachments(message)
+    return {"text": "\n\n".join(parts)}
+
+
+def eml_attachments(message) -> list[str]:
+    # PDF- und Word-Anhänge kommen als Text dazu, jeder unter einer eigenen Zeile mit seinem Namen.
+    # Alles andere wird nur mit Namen genannt, damit niemand glaubt, es sei geprüft.
+    found = []
+    try:
+        attachments = list(message.iter_attachments())
+    except Exception:
+        return []
+    for part in attachments:
+        name = " ".join((part.get_filename() or "ohne Namen").split())
+        kind = part.get_content_type()
+        try:
+            data = part.get_payload(decode=True) or b""
+            if name.lower().endswith(".pdf") or kind == "application/pdf":
+                body = pdf_text(data)[0]
+            elif name.lower().endswith(".docx") or kind == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                body = docx_text(data)["text"]
+            else:
+                found.append(EML_ATTACHMENT_SKIPPED.format(name=name))
+                continue
+        except (FileError, PdfError) as e:
+            found.append(EML_ATTACHMENT_FAILED.format(name=name, reason=str(e)))
+            continue
+        except Exception:
+            found.append(EML_ATTACHMENT_FAILED.format(name=name, reason="Die Datei ist nicht lesbar."))
+            continue
+        found.append(f"--- Anhang: {name} ---\n{body}")
+    return found
 
 
 @app.post("/api/eml")
