@@ -70,7 +70,7 @@ Das Repo ist zunächst privat und soll später öffentlich werden. Dann gilt:
 
 Kanzleien, Arztpraxen und Steuerbüros wollen KI wie Claude nutzen, dürfen aber keine personenbezogenen Daten auf fremde Server geben. Der Harness läuft lokal:
 
-1. Er erkennt sensible Angaben in einem Text (Namen, Firmen, Adressen, Orte, E-Mail, Telefon, IBAN, Datum) und ersetzt sie durch konsistente Platzhalter wie `[PERSON_1]` oder `[FIRMA_1]`.
+1. Er erkennt sensible Angaben in einem Text (Namen, Firmen, Adressen, Orte, E-Mail, Telefon, IBAN, Datum, Kennungen wie Steuer-ID oder Aktenzeichen) und ersetzt sie durch konsistente Platzhalter wie `[PERSON_1]` oder `[FIRMA_1]`.
 2. Die Zuordnung Platzhalter → Original speichert er in einer lokalen SQLite-Datenbank, gültig nur für diese eine Sitzung.
 3. Der Mensch prüft den maskierten Text, maskiert bei Bedarf nach oder nimmt Ersetzungen zurück und gibt ihn ausdrücklich frei.
 4. Erst genau diese freigegebene Fassung geht an Claude. Ändert sich danach etwas, ist die Freigabe ungültig.

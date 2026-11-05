@@ -18,6 +18,7 @@ Keine Funktion gibt etwas auf stdout aus. Logs enthalten nur Platzhalter, Typen,
 
 from __future__ import annotations
 
+import atexit
 import logging
 import threading
 from collections import Counter
@@ -53,6 +54,9 @@ class _Session:
 _sessions: dict[str, _Session] = {}
 _lock = threading.RLock()
 _detectors: list[Detector] | None = None
+
+# Ohne den Prozess sind die Sitzungen weg, also auch ihre Zuordnung löschen. Nach einem Absturz greift vault.SESSION_TTL.
+atexit.register(lambda: vault.delete_sessions(list(_sessions)))
 
 
 def set_detectors(detectors: list[Detector] | None) -> None:

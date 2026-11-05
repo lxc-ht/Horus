@@ -1,4 +1,4 @@
-from harness.detect import Finding, RegexDetector, merge_findings
+from harness.detect import Finding, RegexDetector, detect_all, merge_findings
 
 
 def _found(text):
@@ -52,3 +52,70 @@ def test_merge_trims_punctuation():
     text = "an Max Müller, bitte"
     merged = merge_findings([Finding(3, 14, "Max Müller,", "PERSON", "gliner", 0.8)], text)
     assert merged[0].text == "Max Müller"
+
+
+def test_ids_without_label():
+    for value in ["12 345 678 901", "12345678901", "22/815/08150", "93815/08152", "12 150385 M 123", "A123456789",
+                  "3 O 123/26", "VIII ZR 45/24", "https://praxis.example/patient/4711", "www.praxis.example/fall/12"]:
+        assert ("KENNUNG", value) in _found(f"siehe {value} bitte"), value
+
+
+def test_ids_with_label():
+    assert ("KENNUNG", "3-O-99") in _found("Az.: 3-O-99 vom Gericht")
+    assert ("KENNUNG", "M-4711") in _found("Mandantennummer M-4711 anlegen")
+    assert ("KENNUNG", "LG-AB 123") in _found("Kennzeichen LG-AB 123 gemeldet")
+    assert not any(t == "KENNUNG" for t, _ in _found("Das Aktenzeichen fehlt noch."))
+
+
+def test_ids_do_not_hit_ordinary_numbers():
+    found = _found("Kaufpreis 6.800 Euro, Rechnung 2025/12, am 01.04.2025, Tel. 0171 2398841, PLZ 34127")
+    assert not any(t == "KENNUNG" for t, _ in found), found
+
+
+def test_steuernummer_beats_phone():
+    text = "St.-Nr. 022/815/08150"
+    assert [(f.typ, f.text) for f in merge_findings(RegexDetector().detect(text), text)] == [("KENNUNG", "022/815/08150")]
+
+
+def test_foreign_phones():
+    for number in ["+43 660 1234567", "+1 415 555 0100", "+33 1 23 45 67 89", "+44 20 7946 0958"]:
+        assert ("TELEFON", number) in _found(f"Tel. {number}."), number
+
+
+def test_addresses():
+    for value in ["Fasanenweg 22, 48149 Münster", "Brunnenstraße 4, 79098 Freiburg im Breisgau", "Am Kirchberg 9, 79227 Schallstadt",
+                  "Hamburger Straße 12a", "Karl-Marx-Allee 3", "21335 Lüneburg"]:
+        assert ("ADRESSE", value) in _found(f"Wohnhaft: {value}."), value
+
+
+def test_addresses_do_not_hit_prose():
+    found = _found("Im Jahr 2025 kostet es 10000 Euro. Paragraph 5 und Punkt 3 gelten, Anlage 2 auch.")
+    assert not any(t == "ADRESSE" for t, _ in found), found
+
+
+def test_salutation_marks_only_the_name():
+    found = _found("Herr Weidenfeld zahlt, Dr. med. Konrad Haslinger schreibt an Frau von Berg.")
+    assert {("PERSON", "Weidenfeld"), ("PERSON", "Konrad Haslinger"), ("PERSON", "von Berg")} <= found
+
+
+def test_salutation_ignores_role_words():
+    assert not any(t == "PERSON" for t, _ in _found("Sehr geehrte Frau Kollegin, wie Herr Mandant sagte."))
+
+
+def test_salutation_does_not_add_second_person():
+    class Model:
+        name = "fake"
+
+        def detect(self, text):
+            start = text.index("Sabine Kettelhut")
+            return [Finding(start, start + 16, "Sabine Kettelhut", "PERSON", "fake", 0.9)]
+
+    text = "Sabine Kettelhut kauft. Frau Kettelhut zahlt."
+    found = detect_all(text, [RegexDetector(), Model()])
+    assert [f.text for f in found if f.typ == "PERSON"] == ["Sabine Kettelhut"]
+
+
+def test_labeled_id_stops_at_sentence_end():
+    for text in ["Az. 3 O 123/26. Rückfragen bitte.", "Az. 3 O 123/26. 2 Termine folgen.", "Az. 3 O 123/26 Rückfragen bitte."]:
+        ids = [v for t, v in _found(text) if t == "KENNUNG"]
+        assert ids == ["3 O 123/26"], (text, ids)
