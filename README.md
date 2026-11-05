@@ -23,6 +23,8 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- Layout A in der echten Arbeitsoberfläche: drei per Hover, Klick und Tastatur flexible Spalten, obere Leisten und äußeren Footer entfernen, Glasmotiv mittig; nur `web/`, Branch `codex/flexible-arbeitsbereiche` (`lxc-ht`, Codex UI).
+
 
 
 **Nächste Aufgaben**
