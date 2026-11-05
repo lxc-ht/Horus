@@ -22,7 +22,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 **In Arbeit**
 
 - Umgehungen des Kerns schließen (Token-Grenze des Modells, Unicode, Platzhalter-Kollision, Formate), nur `src/harness` und `tests`, Branch `kern/umgehungen`, baut auf PR #12 auf (`lxc-ht`).
-- Dashboard im Stil des UI-Kits (Lime Soda) in `web/static/index.html`, Branch `codex/dashboard-ui-kit`: [PR #19](https://github.com/lxc-ht/LP7/pull/19) wartet auf Review (`Phantom-create-1`).
 - Datumsformate, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung: [PR #12](https://github.com/lxc-ht/LP7/pull/12) wartet auf den Merge (`lxc-ht`).
 
 **Nächste Aufgaben**
@@ -59,6 +58,7 @@ Beide:
 - [x] Rückübersetzung warnt bei Platzhaltern, die nur für einen Namensteil standen, unbekannte Sitzung meldet einen fertigen Satz (PR #16).
 - [x] Entscheidung: ohne API-Key. Weitergabe nur durch Kopieren, unsichere Stellen werden in der Prüfung markiert (PR #17).
 - [x] Hackathon-Track geklärt: Einreichen geht klar.
+- [x] Dashboard im Lime-Soda-Stil des UI-Kits (PR #19, `Phantom-create-1`), gemergt.
 
 **Demo starten**
 
