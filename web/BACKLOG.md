@@ -2,11 +2,10 @@
 
 ## Wunsch an den Kern
 
-- Abweichung vom Vertrag: Bei unbekannter Sitzung kommt ein `KeyError`, die Oberfläche zeigt dann `'Unbekannte Sitzung: nope'` mit Anführungszeichen. Das passiert zum Beispiel, wenn die Seite nach einem Serverneustart offen bleibt. Bitte einen fertigen deutschen Satz liefern, auch bei leerem Begriff oder unbekanntem Platzhalter.
+Erledigt und deshalb entfernt (geprüft am 05.11.): unbekannte Sitzung meldet einen fertigen Satz, `replacements` enthält jedes Vorkommen, „Am Sande 12“ wird seit PR #28 ersetzt.
+
 - `RestoreResult.warnings` wiederholt, was schon in `unknown`, `changed` und `missing` steht. Die Oberfläche filtert das heraus. Bitte dort nur zusätzliche Hinweise liefern.
-- Die Oberfläche markiert Text nur zwischen zwei Platzhaltern. `add_manual` sollte ablehnen, wenn der Begriff im maskierten Text nicht vorkommt.
-- `replacements` sollte jedes einzelne Vorkommen enthalten, denn daraus entstehen die Chips und der Zähler.
-- Adresse ohne Straßenwort bleibt stehen: In „wohnhaft Am Sande 12, 21335 Lüneburg“ wird nur „21335 Lüneburg“ ersetzt, „Am Sande 12“ geht mit raus (Stand `dcf069b`, gefunden von Paul/Claudian am 05.11.). Gleiches Muster: Am Markt, An der Kirche, Im Grund.
+- Die Oberfläche markiert Text nur zwischen zwei Platzhaltern. `add_manual` sollte ablehnen, wenn der Begriff im maskierten Text nicht vorkommt. Stand 05.11.: Der Kern lehnt nicht ab, liefert aber den Hinweis „… kommt im Text nicht vor, es wurde nichts maskiert.“ in `warnings`.
 
 ## Für später
 
