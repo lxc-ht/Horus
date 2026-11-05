@@ -1,16 +1,63 @@
 # LP7
 
-Datenverschlüsselung
+Pseudonymisierungs-Harness: KI nutzen, ohne personenbezogene Daten aus der Hand zu geben.
 
-## Ziel
+## Projektstand
 
-Daten sollen zwischen KIs verschlüsselt ausgetauscht werden, damit eine KI keinen Zugriff auf die öffentlichen Rohdaten hat.
+Hier stimmen sich alle ab, Menschen und Agenten. Agenten können nicht direkt miteinander sprechen und sehen nur, was gepusht ist.
 
-## Status
+**So nutzen wir diesen Abschnitt**
 
-Das Repo ist zunächst privat und soll später öffentlich werden.
+1. Vor der Arbeit: `git pull`, dann diesen Abschnitt lesen.
+2. Vor dem Start: Aufgabe mit deinem Namen unter „In Arbeit“ eintragen und pushen, damit niemand dasselbe baut.
+3. Nach der Arbeit: Aufgabe nach „Erledigt“ verschieben, neue Aufgaben ergänzen und pushen.
+4. Jede Aufgabe steht in einer eigenen Zeile. Das hält Merge-Konflikte klein.
 
-Vor dem Veröffentlichen gilt:
+**Ziel**
+
+Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. November 2026. Sie zeigt, dass eine Kanzlei Claude nutzen kann und nur der geprüfte, maskierte Text den Rechner verlässt.
+
+**In Arbeit**
+
+- Noch nichts eingetragen.
+
+**Nächste Aufgaben**
+
+Kern (`Phantom-create-1`):
+
+- [ ] Wünsche aus `web/BACKLOG.md` unter „Wunsch an den Kern“ umsetzen.
+
+Web (`lxc-ht`):
+
+- [ ] Zählertext ändern. „0 davon verlassen den Rechner“ gilt nur für erkannte Angaben. Vorschlag steht in `web/BACKLOG.md`.
+- [ ] „Kopieren“ gegen den echten Kern einmal klicken.
+
+Beide:
+
+- [ ] Klären, ob das Projekt in unserem Hackathon-Track eingereicht werden darf.
+- [ ] Echtes Senden an Claude mit API-Key in der `.env` testen. Das ist bisher ungetestet.
+- [ ] Demo auf dem Vortragsrechner durchspielen und das Modell vorher einmal laden.
+- [ ] Pitch vorbereiten, auch für diese Fragen: Warum kein lokales Modell? Was, wenn der Kontext die Person verrät? Was ist mit der DSGVO?
+
+**Erledigt**
+
+- [x] Repo angelegt, beide haben Schreibrechte.
+- [x] Kern gebaut: Erkennung, Maskierung, Freigabe, Senden, Rückübersetzung, CLI.
+- [x] Weboberfläche gebaut und auf `main` gemergt.
+- [x] Oberfläche im Browser gegen den echten Kern geprüft: Analysieren, Markieren, Zurücknehmen, Freigeben, Rückübersetzen.
+
+**Demo starten**
+
+```bash
+uv sync
+uv run --with-requirements web/requirements.txt uvicorn web.app:app --host 127.0.0.1 --port 8000
+```
+
+Danach http://127.0.0.1:8000 öffnen.
+
+## Vor dem Veröffentlichen
+
+Das Repo ist zunächst privat und soll später öffentlich werden. Dann gilt:
 
 - Keine Schlüssel, Passwörter oder `.env` Dateien committen. Die `.gitignore` deckt die üblichen Fälle ab.
 - Den Git Verlauf auf versehentlich committete Geheimnisse prüfen, denn gelöschte Dateien bleiben in der Historie sichtbar.
@@ -49,6 +96,6 @@ Ohne API-Key (siehe `.env.example`) läuft die CLI im Kopier-Modus: Der freigege
 
 ### Aufbau
 
-- `src/harness/api.py` – der Vertrag, gegen den die Weboberfläche (`web/`, eigener Branch) programmiert.
+- `src/harness/api.py` – der Vertrag, gegen den die Weboberfläche (`web/`) programmiert.
 - `detect.py` (Regex + GLiNER), `vault.py` (SQLite), `mask.py`, `gate.py` (Freigabe und Leck-Check), `cloud.py` (Claude), `restore.py`, `cli.py`.
 - `examples/` – vollständig erfundene Beispieltexte.
