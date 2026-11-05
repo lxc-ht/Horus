@@ -30,13 +30,13 @@ from dataclasses import dataclass, field
 from . import cloud, gate, mask, vault
 from . import restore as _restore
 from .cloud import CloudError, NoApiKeyError
-from .detect import TYPES, Detector, GlinerDetector, RegexDetector, detect_all
+from .detect import TYPES, UNSURE_BELOW_SCORE, Detector, Finding, GlinerDetector, RegexDetector, detect_all, merge_findings
 from .gate import LeakError, Release, ReleaseMismatchError
-from .mask import MaskResult, Replacement, Span
+from .mask import MaskResult, Replacement, Span, Uncertain
 from .restore import RestoreResult
 
 __all__ = [
-    "TYPES", "Replacement", "MaskResult", "Release", "RestoreResult",
+    "TYPES", "Replacement", "Uncertain", "MaskResult", "Release", "RestoreResult",
     "LeakError", "ReleaseMismatchError", "NoApiKeyError", "CloudError",
     "analyze", "add_manual", "remove", "get", "release", "has_api_key", "send", "restore",
     "set_detectors",
@@ -62,6 +62,8 @@ class _Session:
     original_text: str
     spans: list[Span] = field(default_factory=list)
     issued: set[str] = field(default_factory=set)   # SHA-256 der gültigen Freigaben
+    hints: list[Finding] = field(default_factory=list)   # Stellen unter der Schwelle des Modells
+    unsure: set[str] = field(default_factory=set)        # Platzhalter, bei denen das Modell knapp lag
 
 
 _sessions: dict[str, _Session] = {}
@@ -111,11 +113,56 @@ def _all_mappings(session_id: str) -> list[vault.Mapping]:
     return vault.mappings(session_id, active_only=False)
 
 
+REASON_MODEL_LOW = "Das Modell ist unsicher, ob das eine sensible Angabe ist."
+REASON_NUMBER = "Diese Nummer wurde nicht ersetzt. Prüfe, ob sie eine Kennung ist, etwa ein Aktenzeichen."
+REASON_UNSURE = "Ersetzt, aber das Modell war sich nicht sicher. Prüfe, ob das wirklich eine sensible Angabe ist."
+REASON_NAME_PART = "Nur ein Namensteil von „{full}“. Prüfe, ob hier wirklich diese Person gemeint ist."
+
+_NUMBER_LIKE = re.compile(r"(?<![\w/.-])[\w/.-]*\d[\w/.-]*")
+_YEAR = re.compile(r"(?:19|20)\d\d")
+_NOT_AN_ID_AFTER = re.compile(r"(?:,\d+)?\s*(?:Euro|EUR|€|%|Prozent)", re.IGNORECASE)
+_SALUTATION_BEFORE = re.compile(r"(?:Frau|Herrn?|Dr\.|Prof\.)\s+$", re.IGNORECASE)
+
+
+def _uncertain(s: _Session, masked: str, replacements: list[Replacement], mappings: list[vault.Mapping]) -> list[Uncertain]:
+    """Stellen, die der Mensch vor der Freigabe ansehen soll. Sie ändern nichts am Text."""
+    found: list[Uncertain] = []
+    placeholders = [m.span() for m in gate.PLACEHOLDER_RE.finditer(masked)]
+
+    def add_plain(start: int, end: int, typ: str, reason: str) -> None:
+        if all(end <= a or start >= b for a, b in placeholders):
+            found.append(Uncertain(masked[start:end], typ, start, end, False, reason))
+
+    for hint in s.hints:
+        for m in re.finditer(rf"(?<!\w){re.escape(hint.text)}(?!\w)", masked):
+            add_plain(m.start(), m.end(), hint.typ, REASON_MODEL_LOW)
+
+    for m in _NUMBER_LIKE.finditer(masked):
+        token = m.group().rstrip("./-")
+        end = m.start() + len(token)
+        is_paragraph = masked[:m.start()].rstrip().endswith("§")
+        if sum(c.isdigit() for c in token) < 3 or _YEAR.fullmatch(token) or is_paragraph or _NOT_AN_ID_AFTER.match(masked, end):
+            continue
+        add_plain(m.start(), end, "KENNUNG", REASON_NUMBER)
+
+    full_names = {m.placeholder: m.original for m in mappings}
+    for r in replacements:
+        full = full_names.get(r.placeholder, r.original)
+        if r.placeholder in s.unsure:
+            found.append(Uncertain(r.original, r.typ, r.start, r.end, True, REASON_UNSURE))
+        elif r.typ == "PERSON" and r.original.lower() != full.lower() and not _SALUTATION_BEFORE.search(masked[max(0, r.start - 8):r.start]):
+            found.append(Uncertain(r.original, r.typ, r.start, r.end, True, REASON_NAME_PART.format(full=full)))
+
+    found.sort(key=lambda u: (u.start, -u.end))
+    # Modell und Nummernregel können dieselbe Stelle melden, einmal reicht.
+    return [u for i, u in enumerate(found) if all(u.start >= p.end or u.end <= p.start for p in found[:i])]
+
+
 def _result(session_id: str, extra_warnings: list[str] | None = None) -> MaskResult:
     s = _session(session_id)
     masked, replacements, mappings = _masked(session_id, s)
     warnings = gate.name_part_warnings(masked, mappings) + (extra_warnings or [])
-    return MaskResult(session_id, s.original_text, masked, replacements, warnings)
+    return MaskResult(session_id, s.original_text, masked, replacements, warnings, _uncertain(s, masked, replacements, mappings))
 
 
 def _log_counts(action: str, session_id: str, s: _Session) -> None:
@@ -132,7 +179,11 @@ def analyze(text: str) -> MaskResult:
             placeholder = vault.placeholder_for(session_id, f.text, f.typ)
             if all(f.end <= x.start or f.start >= x.end for x in s.spans):
                 s.spans.append(Span(f.start, f.end, placeholder))
+                if f.quelle == GlinerDetector.name and f.score < UNSURE_BELOW_SCORE:
+                    s.unsure.add(placeholder)
         s.spans = mask.propagate(text, sorted(s.spans, key=lambda x: x.start), _all_mappings(session_id))
+        hints = [f for d in _active_detectors() if hasattr(d, "uncertain") for f in d.uncertain(text)]
+        s.hints = merge_findings(hints, text)
         _sessions[session_id] = s
         _log_counts("analyze", session_id, s)
         return _result(session_id)

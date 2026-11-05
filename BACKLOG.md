@@ -19,6 +19,8 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Neuer Typ `KENNUNG` in `TYPES`: Steuer-ID, Steuernummer, SV-Nummer, Versichertennummer, Aktenzeichen, Mandanten- und Patientennummer, URL.
 - `send()`: Stoppt Claude wegen `max_tokens`, liefert es den Teil plus `cloud.TRUNCATED_NOTE` am Ende. Die Signatur bleibt ein String.
 
+- `MaskResult.uncertain` – Liste von `Uncertain` (Text, Typ, Position im maskierten Text, `masked`, Grund als fertiger deutscher Satz). Stellen, die der Mensch ansehen soll: Modell unter der Schwelle, nicht ersetzte Nummern, knappe Modelltreffer, Namensteile ohne Anrede. Der Text ändert sich dadurch nicht. Bestehende Felder bleiben.
+
 ## Bekannte Schwächen
 
 - Maskiert wird jedes Vorkommen als Teilzeichenkette, passend zum Leck-Check. Das ergibt manchmal hässliche Stellen wie „[FIRMA_3]skündigung“ (aus „Eigenbedarfskündigung“). Sicher, aber nicht schön. Ein Leck-Check und eine Maskierung an Wortgrenzen bräuchten eine eigene Entscheidung, weil dann „Müllerstraße“ durchrutscht.

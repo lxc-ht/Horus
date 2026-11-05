@@ -8,7 +8,7 @@ jedes Mal neu gebaut, von hinten nach vorn, damit die Positionen stimmen.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .vault import Mapping
 
@@ -23,12 +23,24 @@ class Replacement:
 
 
 @dataclass
+class Uncertain:
+    """Eine Stelle, die der Mensch vor der Freigabe ansehen soll."""
+    text: str       # der Wert im Klartext (nur lokal, für die Anzeige)
+    typ: str        # Vorschlag aus TYPES
+    start: int      # Position im maskierten Text
+    end: int
+    masked: bool    # True: steckt schon hinter einem Platzhalter, False: steht im Klartext
+    reason: str     # fertiger deutscher Satz
+
+
+@dataclass
 class MaskResult:
     session_id: str
     original_text: str
     masked_text: str
     replacements: list[Replacement]   # nach start sortiert
     warnings: list[str]               # fertige deutsche Sätze
+    uncertain: list[Uncertain] = field(default_factory=list)   # nach start sortiert
 
 
 @dataclass(frozen=True)

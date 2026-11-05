@@ -288,6 +288,12 @@ def _chunks(text: str, max_chars: int = 800) -> list[tuple[int, str]]:
     return [split for offset, chunk in chunks for split in _split_long(offset, chunk, max_chars)]
 
 
+# Unterhalb davon rät das Modell nur noch, das wäre für die Prüfung bloß Rauschen.
+UNCERTAIN_MIN_SCORE = 0.25
+# Maskiert, aber das Modell war sich nicht sicher: Der Mensch soll die Stelle ansehen.
+UNSURE_BELOW_SCORE = 0.75
+
+
 class GlinerDetector:
     """PERSON, FIRMA, ADRESSE und ORT über urchade/gliner_multi_pii-v1."""
 
@@ -300,13 +306,20 @@ class GlinerDetector:
         self.model_name = model_name
 
     def detect(self, text: str) -> list[Finding]:
+        return self._predict(text, self.threshold)
+
+    def uncertain(self, text: str) -> list[Finding]:
+        """Stellen knapp unter der Schwelle: nicht maskiert, aber dem Menschen zu zeigen."""
+        return [f for f in self._predict(text, min(UNCERTAIN_MIN_SCORE, self.threshold)) if f.score < self.threshold]
+
+    def _predict(self, text: str, threshold: float) -> list[Finding]:
         model = _load_gliner(self.model_name)
         labels = list(GLINER_LABELS)
         found: list[Finding] = []
         for offset, chunk in _chunks(text):
             if not chunk.strip():
                 continue
-            for ent in model.predict_entities(chunk, labels, threshold=self.threshold):
+            for ent in model.predict_entities(chunk, labels, threshold=threshold):
                 typ = GLINER_LABELS.get(ent["label"])
                 if typ is None or (typ == "PERSON" and ent["text"].strip().lower() in _ROLE_WORDS):
                     continue
