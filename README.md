@@ -23,6 +23,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- Weitere Umgehungen schließen (Zeilenumbrüche, Passwörter, API-Keys, Handles): [PR #24](https://github.com/lxc-ht/LP7/pull/24) wartet auf den Merge (`lxc-ht`).
 - Dashboard polieren (`web/static/index.html`): [PR #23](https://github.com/lxc-ht/LP7/pull/23) wartet auf Review, Remote-Branch `web-polish` (`Phantom-create-1`).
 
 **Nächste Aufgaben**
