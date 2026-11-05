@@ -24,7 +24,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 **In Arbeit**
 
 
-- Übermaskierung aus PR #22 beheben (`EU-VO 2016`, `+100.000 Euro`) und letzte Lecks schließen (kurze Nachnamen, Aktenzeichen klein, Ausweis, Kundenkonto): [PR #27](https://github.com/lxc-ht/LP7/pull/27) wartet auf den Merge, sollte heute noch rein (`lxc-ht`).
 
 **Nächste Aufgaben**
 
@@ -50,6 +49,7 @@ Beide:
 
 **Erledigt**
 
+- [x] Übermaskierung aus PR #22 behoben (`EU-VO 2016`, `+100.000 Euro`), letzte Lecks geschlossen: kurze Nachnamen, Aktenzeichen klein, Ausweis, Kundenkonto ([PR #27](https://github.com/lxc-ht/LP7/pull/27)).
 - [x] Material C in der echten Pseudonymisierungsoberfläche umgesetzt: helle Karten, Farbrand am aktuellen Bereich, größere Texte und Icons, Kopiermodus Texte und Unsicher Legende. Element-IDs erhalten. Webtests, Browserprüfung mit fünf Breiten und echter Durchlauf mit lokalem GLiNER (Analyse, Freigabe, Kopieren, Rückübersetzung, erneute Sperre) bestanden; kein Claude Versand. Branch `codex/arbeitsoberflaeche-material-c` (`lxc-ht`, Codex UI).
 
 - [x] Weitere Umgehungen geschlossen: Werte über Zeilenumbrüche, Passwörter, API-Keys, Handles ([PR #24](https://github.com/lxc-ht/LP7/pull/24)).
