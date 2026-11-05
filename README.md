@@ -27,6 +27,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 Kern (`Phantom-create-1`):
 
+- [ ] Falsche Rückübersetzung ohne Warnung: Meldet das Modell „Muellers Antrag“ als PERSON, wird jedes „Antrag“ zum selben Platzhalter. Aus „stellte den Antrag“ wird „stellte den Muellers Antrag“, der Bericht bleibt leer. Liegt schon auf `main`, PR #8 ändert das nicht.
 - [ ] Wünsche aus `web/BACKLOG.md` unter „Wunsch an den Kern“ umsetzen.
 
 Beide:
