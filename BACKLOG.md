@@ -53,6 +53,14 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Schreibweisen und Genitiv-s gelten nur für großgeschriebene ganze Wörter. Am Satzanfang wird bei „Anna Link“ auch „Links“ maskiert, bei Herrn Koenig auch „Der König“. Sicher, verfälscht aber die Antwort.
 - Kleingeschriebene Schreibweisen („weiß“ bei „Hans Weiss“) bleiben im Text, die Warnung nennt sie. Der Leck-Check prüft bewusst nur die exakte Schreibweise, sonst könnte „ich weiß es“ jede Freigabe blockieren.
 
+## Aus der frischen Installation (05.11.2026, Linux in der Cloud)
+
+- Auf Linux zieht `torch` rund 3,2 GB CUDA-Bibliotheken (`nvidia-*`) mit, `.venv` wird 5,7 GB groß. LP7 braucht keine Grafikkarte. Eine CPU-Variante von torch wäre ein Umbau, kein Prüf-Auftrag. Auf macOS nicht gemessen.
+- Fehlt der Zugang zu huggingface.co, antwortet `/api/analyze` mit HTTP 409 und nur `403 Forbidden` bzw. einer englischen Meldung von Hugging Face. Eine deutsche Meldung wie „Das Erkennungsmodell konnte nicht geladen werden (huggingface.co nicht erreichbar)“ würde Nutzern hinter einer Firewall helfen.
+- `web/requirements.txt` nennt `fastapi`, `uvicorn` und `pypdf` ohne Version und steht nicht in `uv.lock`. Eine neue Version dieser Pakete kann den Start ändern, ohne dass sich das Repo ändert.
+- `LP7 starten.command` und der Marker `slow` in `pyproject.toml` sprechen noch von „ein paar Minuten“ bzw. „mehrere hundert MB“. Gemessen sind für die Pakete 7 Minuten und 5,8 GB (Linux); das Modell ist nicht gemessen.
+- Noch zu messen, auf einem Mac mit Netz: Größe und Ladezeit des Modells (`HF_HOME`), Dauer der ersten und zweiten Analyse, Analyse mit `HF_HUB_OFFLINE=1` und ohne Netz nach dem ersten Start.
+
 ## Später
 
 - Aus dem Vergleich mit Presidio (MIT-Lizenz), noch nicht übernommen: Positivliste für Begriffe, die nie maskiert werden sollen (z. B. „Landgericht Lüneburg“), Prüfziffern für Personalausweis und Reisepass ohne Bezeichner (ICAO 9303), MAC-Adressen, UUIDs, Krypto-Adressen, und eine Erklärung je Fundstelle, welches Muster und welches Kontextwort gegriffen hat.

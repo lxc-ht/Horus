@@ -18,7 +18,7 @@ Gedacht für Kanzleien, Arztpraxen und Steuerbüros, die Claude oder einen ander
 
 ## Installation
 
-Getestet auf macOS. Beim ersten Start lädt LP7 Python-Pakete und das Erkennungsmodell aus dem Internet, mehrere hundert MB. Das dauert ein paar Minuten.
+Getestet auf macOS. Beim ersten Start lädt LP7 Python-Pakete und das Erkennungsmodell aus dem Internet. Python und Pakete belegen danach 5,8 GB, das Laden dauerte 7 Minuten (gemessen auf Linux in der Cloud, dort mit Grafikkarten-Paketen für torch; auf macOS nicht gemessen). Größe und Ladezeit des Erkennungsmodells sind nicht gemessen.
 
 **1. uv installieren** (einmalig, im Terminal):
 
@@ -60,6 +60,7 @@ Die Oberfläche ist nur auf diesem Rechner erreichbar (127.0.0.1), nicht im Netz
 ## Getestet
 
 - Rückweg mit echtem Claude (claude.ai, Kopiermodus, 05.11.2026): 16 von 16 Platzhaltern, die Claude in seinen Antworten benutzt hat, kamen heil zurück, in 2 erfundenen Testtexten. Keine Person wurde verwechselt. Zwei Texte sind eine Stichprobe, kein Beweis.
+- Installation frisch durchgespielt (05.11.2026, Linux in der Cloud, leerer Klon und leere Caches): Pakete laden, Server starten und 213 Tests liefen durch. Das Erkennungsmodell ließ sich dort nicht laden, weil die Umgebung Hugging Face sperrt; dieser Schritt ist nicht geprüft.
 - Die Erkennung ist mit erfundenen Texten geprüft, nicht mit echten Akten. Eine Erkennungsrate für echte Dokumente gibt es noch nicht.
 
 ## Für Entwicklerinnen und Entwickler
