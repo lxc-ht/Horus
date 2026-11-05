@@ -17,6 +17,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- [ ] Modell beim Serverstart vorladen (A) und danach Freigabe-Nachweis mit Prüfsumme (C), je als eigener PR, nicht gemergt (`lxc-ht`, Claude).
 
 
 
