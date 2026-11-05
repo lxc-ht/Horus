@@ -17,6 +17,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- [ ] Kleine Verbesserungen als einzelne PRs, nicht mergen: Aufgaben-Vorlagen unter „Dein Original“, Knopf „Kopieren und Claude öffnen“, „Zuordnung jetzt löschen“ (`lxc-ht`, Claude, seit 05.11. 20:10 UTC).
 
 
 
