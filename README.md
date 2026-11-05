@@ -53,6 +53,7 @@ Beide:
 
 - [x] Layout A umgesetzt: drei flexible Arbeitsbereiche per Hover, Klick und Tastatur; stabil beim Schreiben und Markieren. Äußere Kopfzeile, Schrittleiste und Footer entfernt, kleines Glasmotiv mittig. Browserprüfung mit fünf Breiten, Touch und reduzierter Bewegung sowie Durchlauf mit echtem Kern bestanden. Bestehende Formular-IDs und Freigabeablauf erhalten; IDs der ausdrücklich entfernten Leisten entfallen. Branch `codex/flexible-arbeitsbereiche` (`lxc-ht`, Codex UI).
 
+- [x] Aus Presidio übernommen: Adressen ohne Straßenwort („Am Sande 12“) mit PLZ oder Kontextwort, HRB/HRA, USt-IdNr mit Prüfziffer, Reisepass und Führerschein ([PR #28](https://github.com/lxc-ht/LP7/pull/28)). Demo einmal mit „wohnhaft Am Sande 12, 21335 Lüneburg“ durchspielen.
 - [x] Rückweg mit echtem Claude gemessen (claude.ai, Kopiermodus, Stand `2d3e971`, je ein neuer Chat, Aufgabe: „Fass den Fall in fünf Sätzen zusammen und entwirf eine kurze Antwort an die betroffene Person.“): **16 von 16 Platzhaltern, die Claude benutzt hat, kamen heil zurück, in 2 Testtexten** (Kündigung: 7 von 11 benutzt, Unfall mit drei Personen: 9 von 13). Keine unbekannten, keine veränderten Platzhalter, keine Verwechslung der Personen. Nicht benutzte Platzhalter zählen nicht als Fehler. Claude schrieb eigene Lücken wie `[NAME]` und `[KANZLEI]`, LP7 lässt sie richtig stehen. Ein allein stehender Nachname kommt als ganzer Name zurück („Herr Oberdorf“ wird zu „Herr Jannik Oberdorf“, gewollte Folge von 722c4ff). Texte von Claudian, vorher nur auf Erkennung geprüft (`Phantom-create-1`).
 - [x] Übermaskierung aus PR #22 behoben (`EU-VO 2016`, `+100.000 Euro`), letzte Lecks geschlossen: kurze Nachnamen, Aktenzeichen klein, Ausweis, Kundenkonto ([PR #27](https://github.com/lxc-ht/LP7/pull/27)).
 - [x] Material C in der echten Pseudonymisierungsoberfläche umgesetzt: helle Karten, Farbrand am aktuellen Bereich, größere Texte und Icons, Kopiermodus Texte und Unsicher Legende. Element-IDs erhalten. Webtests, Browserprüfung mit fünf Breiten und echter Durchlauf mit lokalem GLiNER (Analyse, Freigabe, Kopieren, Rückübersetzung, erneute Sperre) bestanden; kein Claude Versand. Branch `codex/arbeitsoberflaeche-material-c` (`lxc-ht`, Codex UI).
@@ -97,6 +98,10 @@ uv run --with-requirements web/requirements.txt uvicorn web.app:app --host 127.0
 ```
 
 Danach http://127.0.0.1:8000 öffnen.
+
+## Danksagung
+
+Einige deutsche Erkennungsmuster (Handelsregister, USt-IdNr mit Prüfziffer, Bezeichner für Reisepass und Führerschein) und die Idee, unsichere Muster über Kontextwörter abzusichern, stammen aus [Microsoft Presidio](https://github.com/data-privacy-stack/presidio), MIT-Lizenz, Copyright (c) Presidio Contributors.
 
 ## Vor dem Veröffentlichen
 
