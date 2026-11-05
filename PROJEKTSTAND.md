@@ -17,6 +17,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- Installation im README frisch messen (leerer Klon, leere Caches, Cloud-Linux), nur README „Installation“, PROJEKTSTAND, BACKLOG; Branch `claude/project-thread-tllmvu` (`lxc-ht`, Claude).
 
 
 
