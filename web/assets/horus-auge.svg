@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 210" role="img" aria-label="Horus-Auge">
+  <defs>
+    <radialGradient id="lp7-iris" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#e6efd9"/>
+      <stop offset=".45" stop-color="#abc49c"/>
+      <stop offset=".85" stop-color="#6c8c69"/>
+      <stop offset="1" stop-color="#3d5842"/>
+    </radialGradient>
+    <clipPath id="lp7-lid"><path d="M8 82 C42 54 82 40 124 40 C158 40 182 52 202 72 C178 96 152 108 124 108 C86 108 46 98 8 82 Z"/></clipPath>
+  </defs>
+  <!-- Braue: Band, links und rechts spitz auslaufend -->
+  <path fill="currentColor" d="M16 46 C56 16 100 4 142 4 C200 5 254 22 296 40 C252 28 200 17 142 17 C100 17 60 28 16 46 Z"/>
+  <!-- Iris, oben vom Lid verdeckt -->
+  <g clip-path="url(#lp7-lid)">
+    <circle cx="122" cy="72" r="36" fill="url(#lp7-iris)"/>
+    <g stroke="#4f6b52" stroke-width=".6" opacity=".5" fill="none">
+      <path d="M122 72 L122 36 M122 72 L147 47 M122 72 L158 72 M122 72 L147 97 M122 72 L122 108 M122 72 L97 97 M122 72 L86 72 M122 72 L97 47 M122 72 L136 39 M122 72 L155 58 M122 72 L155 86 M122 72 L136 105 M122 72 L108 105 M122 72 L89 86 M122 72 L89 58 M122 72 L108 39"/>
+    </g>
+    <circle cx="122" cy="72" r="13.5" fill="#141412"/>
+    <circle cx="116" cy="65" r="4" fill="#fff" opacity=".9"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Oberlid und Lidstrich in einem Zug, aus dem Augenwinkel nach rechts -->
+    <path d="M8 82 C42 54 82 40 124 40 C158 40 182 52 202 72 C232 70 264 69 294 69" stroke-width="7"/>
+    <!-- Unterlid trifft den Lidstrich im Augenwinkel -->
+    <path d="M8 82 C46 98 86 108 124 108 C152 108 178 96 202 74" stroke-width="5"/>
+    <!-- Spirale -->
+    <path d="M146 106 C156 138 180 170 216 176 C246 181 263 160 256 142 C250 127 229 125 223 139 C219 149 229 157 237 151" stroke-width="6"/>
+  </g>
+  <!-- Tropfen: oben breit, unten spitz, leicht geschwungen -->
+  <path fill="currentColor" d="M90 104 C96 106 104 106 111 104 C108 136 106 168 104 202 C103 204 101 204 100 202 C97 168 94 136 90 104 Z"/>
+</svg>
