@@ -39,10 +39,10 @@ class Detector(Protocol):
 
 # --- Regex -----------------------------------------------------------------
 
-_EMAIL = re.compile(r"(?<![\w.+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}(?![\w-])")
+_EMAIL = re.compile(r"(?<![\w.%+-])[\w.%+-]+@[\w.-]+\.[^\W\d_]{2,}(?![\w-])")
 
 # IBAN in Blöcken (mit oder ohne Leerzeichen), allgemein: 2 Buchstaben, 2 Ziffern, bis 30 Zeichen.
-_IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,3})?\b")
+_IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,3})?\b", re.IGNORECASE | re.ASCII)
 
 # Telefonnummern: +Ländervorwahl / 0049 / führende 0, Trennzeichen Leerzeichen, - oder /.
 _PHONE = re.compile(
@@ -113,7 +113,11 @@ _DATE = re.compile(
     r"\b(?:"
     r"\d{1,2}\.\d{1,2}\.(?:\d{4}|\d{2})"            # 14.03.1979, 1.3.79
     r"|\d{4}-\d{2}-\d{2}"                           # 1979-03-14
-    rf"|\d{{1,2}}\. ?(?:{_MONTHS}) \d{{4}}"         # 14. März 1979
+    rf"|\d{{1,2}}\. ?(?:{_MONTHS})\b(?: \d{{4}})?"  # 14. März 1979, 14. März
+    rf"|(?:{_MONTHS}) \d{{4}}"                      # März 1979
+    r"|\d{1,2}/\d{1,2}/\d{4}"                       # 03/14/1979
+    # Ohne Jahr nur zweistellig, sonst wird jede Gliederung wie „3.1.“ zum Datum.
+    r"|(?:0[1-9]|[12]\d|3[01])\.(?:0[1-9]|1[0-2])\."  # 14.03.
     r")(?!\d)"
 )
 
@@ -195,7 +199,7 @@ class RegexDetector:
         for m in _IBAN.finditer(text):
             compact = m.group().replace(" ", "")
             # Deutsche IBAN am Format erkennen, alle anderen nur mit gültiger Prüfsumme.
-            if (compact.startswith("DE") and len(compact) == 22) or _iban_valid(m.group()):
+            if (compact[:2].upper() == "DE" and len(compact) == 22) or _iban_valid(m.group()):
                 add(m, "IBAN")
         for m in _PHONE.finditer(text):
             if 6 <= sum(c.isdigit() for c in m.group()) <= 15:
@@ -242,10 +246,29 @@ def _load_gliner(model_name: str):
     return _gliner_cache[model_name]
 
 
+def _split_long(offset: int, chunk: str, max_chars: int, overlap: int = 100) -> list[tuple[int, str]]:
+    """Teilt ein zu langes Stück an Leerzeichen, sonst hart. Alles dahinter sähe das Modell sonst nie.
+
+    Die Stücke überlappen, damit ein Name an der Schnittstelle in einem davon ganz steht.
+    Doppelte Fundstellen löst merge_findings() auf.
+    """
+    pieces: list[tuple[int, str]] = []
+    start = 0
+    while len(chunk) - start > max_chars:
+        cut = chunk.rfind(" ", start + overlap + 1, start + max_chars)
+        if cut == -1:
+            cut = start + max_chars
+        pieces.append((offset + start, chunk[start:cut]))
+        start = cut - overlap
+    pieces.append((offset + start, chunk[start:]))
+    return pieces
+
+
 def _chunks(text: str, max_chars: int = 800) -> list[tuple[int, str]]:
     """Teilt den Text an Zeilengrenzen in Stücke, die GLiNER verarbeiten kann.
 
-    Liefert (Offset, Stück). Überlange Zeilen werden an Satzenden geteilt.
+    Liefert (Offset, Stück). Überlange Zeilen werden an Satzenden geteilt,
+    Sätze über max_chars an Leerzeichen.
     """
     pieces: list[tuple[int, str]] = []
     pos = 0
@@ -266,7 +289,13 @@ def _chunks(text: str, max_chars: int = 800) -> list[tuple[int, str]]:
             chunks[-1] = (chunks[-1][0], chunks[-1][1] + piece)
         else:
             chunks.append((offset, piece))
-    return chunks
+    return [split for offset, chunk in chunks for split in _split_long(offset, chunk, max_chars)]
+
+
+# Unterhalb davon rät das Modell nur noch, das wäre für die Prüfung bloß Rauschen.
+UNCERTAIN_MIN_SCORE = 0.25
+# Maskiert, aber das Modell war sich nicht sicher: Der Mensch soll die Stelle ansehen.
+UNSURE_BELOW_SCORE = 0.75
 
 
 class GlinerDetector:
@@ -281,13 +310,20 @@ class GlinerDetector:
         self.model_name = model_name
 
     def detect(self, text: str) -> list[Finding]:
+        return self._predict(text, self.threshold)
+
+    def uncertain(self, text: str) -> list[Finding]:
+        """Stellen knapp unter der Schwelle: nicht maskiert, aber dem Menschen zu zeigen."""
+        return [f for f in self._predict(text, min(UNCERTAIN_MIN_SCORE, self.threshold)) if f.score < self.threshold]
+
+    def _predict(self, text: str, threshold: float) -> list[Finding]:
         model = _load_gliner(self.model_name)
         labels = list(GLINER_LABELS)
         found: list[Finding] = []
         for offset, chunk in _chunks(text):
             if not chunk.strip():
                 continue
-            for ent in model.predict_entities(chunk, labels, threshold=self.threshold):
+            for ent in model.predict_entities(chunk, labels, threshold=threshold):
                 typ = GLINER_LABELS.get(ent["label"])
                 if typ is None or (typ == "PERSON" and ent["text"].strip().lower() in _ROLE_WORDS):
                     continue

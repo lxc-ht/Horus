@@ -18,3 +18,12 @@ def test_gliner_finds_names_in_kanzlei_example():
     assert any(f.typ == "IBAN" and f.quelle == "regex" for f in found)
     for f in found:
         assert text[f.start : f.end] == f.text
+
+
+def test_gliner_finds_name_late_in_long_paragraph_without_sentence_end():
+    clause = "die Parteien haben sich im Rahmen der Besprechung ausführlich über den weiteren Ablauf ausgetauscht"
+    text = ", und ".join([clause] * 30) + ", und der Mandant Jonas Weidenfeld erschien."
+    found = detect_all(text, [GlinerDetector()])
+    assert "Jonas Weidenfeld" in {f.text for f in found if f.typ == "PERSON"}
+    for f in found:
+        assert text[f.start : f.end] == f.text

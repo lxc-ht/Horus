@@ -1,6 +1,6 @@
 import re
 
-from harness.detect import Finding, RegexDetector, detect_all, merge_findings
+from harness.detect import Finding, RegexDetector, _chunks, detect_all, merge_findings
 
 
 def _found(text):
@@ -29,6 +29,39 @@ def test_german_phone_formats():
 def test_dates():
     found = _found("geb. 14.03.1979, am 1.4.25, ISO 2026-09-02 und am 5. Juli 1984.")
     assert {("DATUM", "14.03.1979"), ("DATUM", "1.4.25"), ("DATUM", "2026-09-02"), ("DATUM", "5. Juli 1984")} <= found
+
+
+def _dates(text):
+    return [f.text for f in detect_all(text, [RegexDetector()]) if f.typ == "DATUM"]
+
+
+def test_date_without_year():
+    assert _dates("Termin am 14.03. und am 5. Juli bitte.") == ["14.03", "5. Juli"]
+
+
+def test_month_and_year():
+    assert _dates("geboren im März 1979 in Kassel") == ["März 1979"]
+
+
+def test_date_with_slashes():
+    assert _dates("geboren 03/14/1979 in Kassel") == ["03/14/1979"]
+
+
+def test_full_date_stays_one_finding():
+    assert _dates("geboren am 14. März 1979 und am 14.03.1979") == ["14. März 1979", "14.03.1979"]
+
+
+def test_section_numbers_and_versions_are_not_dates():
+    assert _dates("Abschnitt 3.1. und Kapitel 12.4. in Version 10.12.3 von 2019, Mai ohne Jahr") == []
+
+
+def test_iban_in_lowercase():
+    assert ("IBAN", "de89 3704 0044 0532 0130 00") in _found("Konto de89 3704 0044 0532 0130 00 bitte")
+    assert ("IBAN", "gb82 west 1234 5698 7654 32") in _found("Konto gb82 west 1234 5698 7654 32 bitte")
+
+
+def test_lowercase_text_with_invalid_checksum_is_no_iban():
+    assert not any(t == "IBAN" for t, _ in _found("Kennung gb00 west 1234 5698 7654 32 bitte"))
 
 
 def test_postcode_is_not_a_phone():
@@ -198,3 +231,37 @@ def test_model_person_loses_salutation_and_profession():
     model = [Finding(m.start(), m.end(), m.group(), "PERSON", "gliner", 0.9) for m in
              re.finditer(r"Frau Sabine Kettelhut|Herr Rechtsanwalt Brandt|Herr Rechtsanwalt(?= und)|Frau Doktor", text)]
     assert [f.text for f in merge_findings(model, text)] == ["Sabine Kettelhut", "Brandt"]
+
+
+def test_email_with_umlaut_in_local_part_and_domain():
+    assert ("EMAIL", "jürgen.müller@beispiel.de") in _found("Mail an jürgen.müller@beispiel.de bitte")
+    assert ("EMAIL", "info@müller-bau.de") in _found("Mail an info@müller-bau.de.")
+
+
+def test_chunks_stay_within_limit_and_keep_offsets():
+    text = "wort " * 1000
+    chunks = _chunks(text)
+    assert max(len(chunk) for _, chunk in chunks) <= 800
+    assert all(text[offset : offset + len(chunk)] == chunk for offset, chunk in chunks)
+    assert chunks[-1][0] + len(chunks[-1][1]) == len(text)
+
+
+def test_chunks_split_text_without_whitespace():
+    text = "x" * 2000
+    chunks = _chunks(text)
+    assert max(len(chunk) for _, chunk in chunks) <= 800
+    assert all(text[offset : offset + len(chunk)] == chunk for offset, chunk in chunks)
+    assert chunks[-1][0] + len(chunks[-1][1]) == len(text)
+
+
+def test_chunks_keep_name_on_cut_whole():
+    # Der Name wandert über jede mögliche Schnittstelle, in einem Stück muss er immer ganz stehen.
+    for padding in range(740, 800, 3):
+        text = "x" * padding + " Jonas Weidenfeld " + "wort " * 400
+        assert any("Jonas Weidenfeld" in chunk for _, chunk in _chunks(text)), padding
+
+
+def test_chunks_keep_long_name_whole_without_spaces_around_it():
+    for padding in range(250, 280):
+        text = "ab;" * padding + "Anna Maria Weidenfeld;" + "ab;" * 400
+        assert any("Anna Maria Weidenfeld" in chunk for _, chunk in _chunks(text)), padding

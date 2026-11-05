@@ -4,6 +4,8 @@ Pseudonymisierungs-Harness: KI nutzen, ohne personenbezogene Daten aus der Hand 
 
 ![LP7: Analysieren, Vorschau und Ausgabe. Klar. Lokal. Unter deiner Kontrolle.](web/assets/lp7-banner.png)
 
+**UI Kit:** [Icons, Komponenten und drei klickbare Design Demos](web/ui-kit/README.md). Der vollständige Quellcode liegt unter `web/ui-kit/` und kann gemeinsam weiterentwickelt werden.
+
 ## Projektstand
 
 Hier stimmen sich alle ab, Menschen und Agenten. Agenten können nicht direkt miteinander sprechen und sehen nur, was gepusht ist.
@@ -21,26 +23,24 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- Datum ohne Jahr, Monat und Jahr, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung. Nur `detect.py` und `vault.py` (Branch `kern/datum-iban-rechte`, `lxc-ht`).
-- Erkennungslücken im Kern (lange Absätze, E-Mails mit Umlaut, Namensvarianten): [PR #8](https://github.com/lxc-ht/LP7/pull/8) wartet auf den Merge (`lxc-ht`).
-- Löschen der Zuordnung auch bei SIGTERM und geschlossenem Terminal, Warnung bei teilweiser Überlappung: [PR #9](https://github.com/lxc-ht/LP7/pull/9) wartet auf den Merge (`lxc-ht`).
+- Umgehungen des Kerns schließen (Token-Grenze des Modells, Unicode, Platzhalter-Kollision, Formate), nur `src/harness` und `tests`, Branch `kern/umgehungen`, baut auf PR #12 auf (`lxc-ht`).
+- Datumsformate, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung: [PR #12](https://github.com/lxc-ht/LP7/pull/12) wartet auf den Merge (`lxc-ht`).
 
 **Nächste Aufgaben**
 
 Kern (`Phantom-create-1`):
 
-- [ ] Falsche Rückübersetzung ohne Warnung: Meldet das Modell „Muellers Antrag“ als PERSON, wird jedes „Antrag“ zum selben Platzhalter. Aus „stellte den Antrag“ wird „stellte den Muellers Antrag“, der Bericht bleibt leer. Liegt schon auf `main`, PR #8 ändert das nicht.
+- [ ] Falsche Rückübersetzung verhindern, nicht nur melden: Stand ein Platzhalter nur für einen Namensteil wie „Antrag“, warnt der Bericht seit PR #16, der falsche Text bleibt aber. Nach Herr, Frau, Dr. oder Prof. kommt bewusst keine Warnung.
 - [ ] Wünsche aus `web/BACKLOG.md` unter „Wunsch an den Kern“ umsetzen.
 
 Beide:
 
-- [ ] Klären, ob das Projekt in unserem Hackathon-Track eingereicht werden darf.
-- [ ] Echtes Senden an Claude mit API-Key in der `.env` testen. Das ist bisher ungetestet.
 - [ ] Demo auf dem Vortragsrechner durchspielen und das Modell vorher einmal laden.
 - [ ] Pitch vorbereiten, auch für diese Fragen: Warum kein lokales Modell? Was, wenn der Kontext die Person verrät? Was ist mit der DSGVO?
 
 **Erledigt**
 
+- [x] Start per Doppelklick mit `LP7 starten.command` umgesetzt und geprüft, Browser öffnet sich automatisch, Server bleibt auf diesem Rechner (PR #20, `Phantom-create-1`).
 - [x] Repo angelegt, beide haben Schreibrechte.
 - [x] Kern gebaut: Erkennung, Maskierung, Freigabe, Senden, Rückübersetzung, CLI.
 - [x] Weboberfläche gebaut und auf `main` gemergt.
@@ -55,8 +55,20 @@ Beide:
 - [x] Namen in jeder Schrift vollständig maskiert, weniger Falschtreffer bei ADRESSE und Anrede, abgeschnittene Antworten gekennzeichnet (PR #6).
 - [x] Erfundene Kennungen in allen drei Beispieltexten (Aktenzeichen, Mandanten-, Versicherten-, Patientennummer, Steuer-ID, Steuernummer). Durchlauf mit GLiNER: alle maskiert, Rückübersetzung löst alle Platzhalter auf (`Phantom-create-1`).
 - [x] `KENNUNG` in der Oberfläche: Chip-Farbe und Markier-Menü (PR #7, `lxc-ht`), gemergt.
+- [x] Zuordnung wird auch bei SIGTERM und geschlossenem Terminal gelöscht, Warnung bei teilweiser Überlappung (PR #9).
+- [x] Erkennungslücken geschlossen: lange Absätze, E-Mails mit Umlaut, Namensvarianten (PR #8).
+- [x] Review-Fix zu PR #8: Namensteile mehrdeutig, Schreibweisen nur als großgeschriebenes Wort (PR #11).
+- [x] Rückübersetzung warnt bei Platzhaltern, die nur für einen Namensteil standen, unbekannte Sitzung meldet einen fertigen Satz (PR #16).
+- [x] Entscheidung: ohne API-Key. Weitergabe nur durch Kopieren, unsichere Stellen werden in der Prüfung markiert (PR #17).
+- [x] Hackathon-Track geklärt: Einreichen geht klar.
+- [x] Dashboard im Lime-Soda-Stil des UI-Kits (PR #19, `Phantom-create-1`), gemergt.
+- [x] Start per Doppelklick mit `LP7 starten.command` (PR #20, `Phantom-create-1`), gemergt. Echter Doppelklick im Finder steht noch aus.
 
 **Demo starten**
+
+Auf dem Mac: Doppelklick auf `LP7 starten.command`. Der Browser öffnet sich, das Terminalfenster bleibt offen, solange LP7 läuft.
+
+Oder im Terminal:
 
 ```bash
 uv sync
