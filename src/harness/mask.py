@@ -79,7 +79,7 @@ def occurrence_pattern(value: str, whole_word: bool = False) -> re.Pattern:
     """
     words = value.split()
     body = r"\s+".join(
-        _SPELLING_RE.sub(lambda m: _SPELLINGS[m.group().lower()], re.escape(w)) for w in words
+        _SPELLING_RE.sub(lambda m: _SPELLINGS[m.group().lower().replace("ſ", "s")], re.escape(w)) for w in words
     )
     if whole_word:
         body = rf"(?<!\w){body}(?=s?(?!\w))"
@@ -96,17 +96,42 @@ def name_parts(value: str) -> list[str]:
     return parts
 
 
+def _fold(value: str) -> str:
+    """Einheitliche Schreibweise, damit „Müller“ und „Mueller“ als derselbe Namensteil zählen."""
+    return value.replace("ä", "ae").replace("ö", "oe").replace("ü", "ue").replace("ß", "ss")
+
+
 def name_part_owners(mappings: list[Mapping]) -> dict[str, list[str]]:
-    """Namensteil (klein geschrieben) → Platzhalter aller Personen, zu denen er gehört."""
+    """Namensteil (klein geschrieben) → Platzhalter aller Personen, zu denen er gehört.
+
+    Schlüssel ist die zuerst gesehene Schreibweise. Teile, die sich nur darin unterscheiden, sind
+    ein Teil: Die Suche träfe beide, also wäre sonst still die falsche Person eingesetzt.
+    """
     owners: dict[str, list[str]] = {}
+    spellings: dict[str, str] = {}
     for m in mappings:
         if m.typ != "PERSON":
             continue
         for part in name_parts(m.original):
-            placeholders = owners.setdefault(part, [])
+            placeholders = owners.setdefault(spellings.setdefault(_fold(part), part), [])
             if m.placeholder not in placeholders:
                 placeholders.append(m.placeholder)
     return owners
+
+
+def _accept(original: str, match: re.Match, value: str, whole_word: bool) -> bool:
+    """Exakte Treffer gelten immer. Schreibweisen und Genitiv nur als großgeschriebenes ganzes Wort.
+
+    Sonst würde „März“ bei einer Person „Mae“ zerschnitten und „links“ bei „Anna Link“ zum Namen.
+    Kleingeschriebenes bleibt stehen, dafür warnt gate.name_part_warnings().
+    """
+    start, end = match.span()
+    genitive = whole_word and original[end : end + 1].lower() == "s"
+    if " ".join(match.group().split()).lower() == " ".join(value.split()).lower() and not genitive:
+        return True
+    next_char = "" if genitive else original[end : end + 1]
+    bounded = not re.match(r"\w", original[start - 1 : start] if start else "") and not re.match(r"\w", next_char)
+    return bounded and match.group()[0].isupper()
 
 
 def add_occurrences(
@@ -122,6 +147,8 @@ def add_occurrences(
     if not value.split():
         return result
     for m in occurrence_pattern(value, whole_word).finditer(original):
+        if not _accept(original, m, value, whole_word):
+            continue
         start, end = m.start(), m.end()
         overlapping = [s for s in result if s.start < end and start < s.end]
         if not overlapping:

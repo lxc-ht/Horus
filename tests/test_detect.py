@@ -226,3 +226,9 @@ def test_chunks_keep_name_on_cut_whole():
     for padding in range(740, 800, 3):
         text = "x" * padding + " Jonas Weidenfeld " + "wort " * 400
         assert any("Jonas Weidenfeld" in chunk for _, chunk in _chunks(text)), padding
+
+
+def test_chunks_keep_long_name_whole_without_spaces_around_it():
+    for padding in range(250, 280):
+        text = "ab;" * padding + "Anna Maria Weidenfeld;" + "ab;" * 400
+        assert any("Anna Maria Weidenfeld" in chunk for _, chunk in _chunks(text)), padding

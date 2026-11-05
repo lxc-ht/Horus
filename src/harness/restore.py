@@ -30,7 +30,7 @@ class RestoreResult:
 
 # Ein Treffer: optionale Klammer, Typname (beliebige Schreibweise), Trenner, Nummer, optionale Klammer.
 _CANDIDATE = re.compile(
-    r"(?P<open>\[\s*)?(?<![\w])(?P<typ>" + "|".join(TYPES) + r")(?P<sep>[ _\-]?)(?P<num>\d+)(?![\w])(?P<close>\s*\])?",
+    r"(?P<open>\[\s*)?(?<![\w])(?P<typ>" + "|".join(TYPES) + r")(?P<sep>[ _\-]?)(?P<num>\d+)(?=s?(?!\w))(?P<close>\s*\])?",
     re.IGNORECASE,
 )
 
