@@ -56,6 +56,10 @@
   .task-row label { font-size: 12px; }
   #taskTemplate { flex: 1; min-width: 0; min-height: 36px; font: inherit; font-size: 13px; color: var(--ink); border: 1px solid #dce5e8; border-radius: 10px; background: #ffffffc9; padding: 6px 10px; cursor: pointer; }
   #taskTemplate:disabled { cursor: not-allowed; color: #75828a; background: #f1f5f7; }
+  /* Link, der wie ein Knopf aussieht: öffnet Claude in einem neuen Tab, lädt aber nichts in diese Seite. */
+  .button-link { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; padding: 10px 14px; border-radius: 12px; border: 1px solid #dce5e8; background: #ffffffc9; color: var(--ink); font-size: 13px; font-weight: 550; text-decoration: none; transition: background .15s, border-color .15s; }
+  .button-link:hover { background: #fff; border-color: #b7ccd2; }
+  .button-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   button:hover:not(:disabled) { background: #fff; border-color: #b7ccd2; }
   button.primary { background: var(--ink); border-color: var(--ink); color: #fff; font-weight: 550; box-shadow: 0 3px 6px #0000000c; }
   button.primary:hover:not(:disabled) { background: #314147; border-color: #314147; box-shadow: 0 4px 12px #0000001a; }
@@ -232,7 +236,8 @@
         <p class="note warn">Kopiere die freigegebene Fassung nach Claude. Füge die Antwort mit unveränderten Platzhaltern hier ein.</p>
         <label for="answerInput">Antwort von Claude</label>
         <textarea rows="3" id="answerInput" placeholder="Antwort mit Platzhaltern einfügen …" spellcheck="false"></textarea>
-        <div class="row"><button id="btnRestore" type="button" class="primary"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h11a5 5 0 0 1 0 10h-3M8 5 4 9l4 4M6 19h2"/></svg>Lokal zurückübersetzen</button></div>
+        <div class="row"><button id="btnRestore" type="button" class="primary"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h11a5 5 0 0 1 0 10h-3M8 5 4 9l4 4M6 19h2"/></svg>Lokal zurückübersetzen</button><a id="linkClaude" class="button-link" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Kopieren und Claude öffnen</a></div>
+        <span id="claudeCopied" class="hint" role="status" aria-live="polite"></span>
         <button id="btnNewAnswer" type="button" hidden><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Andere Antwort einfügen</button>
       </div>
       <div id="answer" class="pane" aria-labelledby="h-answer" aria-live="polite"></div>
@@ -315,6 +320,7 @@ async function run(action) {
 }
 
 function clearAnswer() {
+  $("claudeCopied").textContent = "";
   state.restored = false;
   $("answer").replaceChildren();
   $("report").replaceChildren();
@@ -686,6 +692,19 @@ $("btnCopy").addEventListener("click", () => run(async () => {
   await copyText(state.release.text);
   $("copied").textContent = "Kopiert.";
 }));
+
+// Kopiert die Freigabe und lässt den Link Claude in einem neuen Tab öffnen. Gesendet wird nichts, einfügen muss der Mensch selbst.
+$("linkClaude").addEventListener("click", (e) => {
+  if (!state.release || state.busy) {
+    e.preventDefault();
+    return;
+  }
+  // Ohne await: Der Browser öffnet den Tab nur direkt in der Klick-Behandlung.
+  copyText(state.release.text).then(
+    () => { $("claudeCopied").textContent = "Kopiert. In Claude einfügen."; $("copied").textContent = "Kopiert."; },
+    (err) => { $("claudeCopied").textContent = err.message; },
+  );
+});
 
 async function copyText(text) {
   try {
