@@ -20,7 +20,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 **In Arbeit**
 
 - Namen mit Sonderzeichen, Falschtreffer bei ADRESSE und Anrede, abgeschnittene Antworten: [PR #6](https://github.com/lxc-ht/LP7/pull/6) wartet auf Review und behebt einen Fehler auf `main` (`lxc-ht`).
-- `lxc-ht`: Layout ohne Scrollen auf dem Laptop: [PR #5](https://github.com/lxc-ht/LP7/pull/5) wartet auf den Merge.
 
 **Nächste Aufgaben**
 
@@ -51,6 +50,7 @@ Beide:
 - [x] Regex-Erkennung für Kennungen, Adressen und Anreden, Löschen der Zuordnung (PR #4, `lxc-ht`).
 - [x] KENNUNG strenger: Steuer-ID ohne Bezeichner nur mit gültiger Prüfziffer, Steuernummer nur nach Bezeichner. Paragrafen, Beträge und Jahreszahlen bleiben stehen (`Phantom-create-1`).
 - [x] Neues Design und Zählertext „Versand nur nach deiner Freigabe“ gemergt (PR #3), Abläufe gegen den echten Kern geprüft.
+- [x] Layout passt auf dem Laptop ohne Scrollen auf den Bildschirm (PR #5). Auf einem echten Beamer noch nicht geprüft.
 
 **Demo starten**
 
