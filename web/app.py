@@ -22,10 +22,8 @@ else:
         )
 
 INDEX = Path(__file__).parent / "static" / "index.html"
-NO_RELEASE = "Es gibt keine gültige Freigabe. Bitte erst prüfen und freigeben."
 
 app = FastAPI()
-releases: dict = {}
 
 
 class AnalyzeBody(BaseModel):
@@ -76,8 +74,6 @@ def call(fn, *args):
     # Alles fangen, damit kein Traceback mit Originaldaten im Serverlog landet.
     try:
         return fn(*args)
-    except core.NoApiKeyError as e:
-        raise CoreError({"error": str(e), "copy_mode": True}) from None
     except Exception as e:
         raise CoreError({"error": str(e)}) from None
 
@@ -89,7 +85,7 @@ def index() -> FileResponse:
 
 @app.get("/api/status")
 def status() -> dict:
-    return {"fake": FAKE, "api_key": call(core.has_api_key)}
+    return {"fake": FAKE}
 
 
 @app.post("/api/analyze")
@@ -99,31 +95,18 @@ def analyze(body: AnalyzeBody) -> dict:
 
 @app.post("/api/mask/add")
 def mask_add(body: AddBody) -> dict:
-    releases.pop(body.session_id, None)
     return asdict(call(core.add_manual, body.session_id, body.term, body.typ))
 
 
 @app.post("/api/mask/remove")
 def mask_remove(body: RemoveBody) -> dict:
-    releases.pop(body.session_id, None)
     return asdict(call(core.remove, body.session_id, body.placeholder))
 
 
 @app.post("/api/release")
 def release(body: SessionBody) -> dict:
-    releases.pop(body.session_id, None)
     rel = call(core.release, body.session_id)
-    releases[body.session_id] = rel
     return {"sha256": rel.sha256, "text": rel.text}
-
-
-@app.post("/api/send")
-def send(body: SessionBody) -> dict:
-    # Der Browser liefert nur die session_id, gesendet wird allein das hier gespeicherte Release.
-    rel = releases.get(body.session_id)
-    if rel is None:
-        raise CoreError({"error": NO_RELEASE})
-    return {"answer": call(core.send, rel)}
 
 
 @app.post("/api/restore")

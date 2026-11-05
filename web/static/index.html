@@ -90,8 +90,15 @@
   .t-PERSON { --chip: #d3fbbd; } .t-FIRMA { --chip: #e9deff; } .t-ADRESSE { --chip: #ffe8c9; }
   .t-ORT { --chip: #c7f9e9; } .t-EMAIL { --chip: #cff1ff; } .t-TELEFON { --chip: #e4ffb1; }
   .t-IBAN { --chip: #fff29f; } .t-DATUM { --chip: #deeee0; } .t-KENNUNG { --chip: #ffdcea; }
+  .chip.unsure { outline: 2px dashed #b58900; outline-offset: 1px; }
+  .suspect { display: inline; min-height: 0; padding: 0 2px; border: 0; border-bottom: 2px dashed #b58900; border-radius: 3px; background: var(--yellow-soft); color: inherit; font: inherit; white-space: pre-wrap; box-shadow: none; }
+  .suspect:hover:not(:disabled) { background: #fff0b0; border-color: #b58900; }
+  .suspect:disabled { background: var(--yellow-soft); border-color: #b58900; color: inherit; }
+  #typeMenu button.suggested { outline: 2px solid var(--ink); }
+  #menuKeep { flex-basis: 100%; background: #fff !important; border: 1px solid #dee7d5 !important; color: var(--ink) !important; }
   .legend { display: flex; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: 9px; }
   .legend span { display: flex; align-items: center; gap: 5px; }
+  .legend-unsure { --chip: var(--yellow-soft); }
   .legend i { height: 6px; width: 6px; border-radius: 50%; background: var(--chip); box-shadow: inset 0 0 0 1px #00000010; }
   #tooltip { position: fixed; z-index: 20; background: var(--ink); color: #fff; font-size: 12px; padding: 6px 11px; border-radius: 8px; pointer-events: none; max-width: 320px; }
   #typeMenu { position: fixed; z-index: 10; display: flex; flex-wrap: wrap; gap: 5px; width: 280px; padding: 10px; background: #ffffffeb; backdrop-filter: blur(16px); border: 1px solid #e4ebdb; border-radius: 16px; box-shadow: 0 10px 40px #15261920; }
@@ -191,7 +198,7 @@
       <h1>KI nutzen. <span>Daten behalten.</span></h1>
       <p class="subtitle">Text einfügen, sensible Angaben ersetzen und die Vorschau prüfen.</p>
     </div>
-    <div class="privacy-card"><strong>Originale und Zuordnung bleiben lokal.</strong><small>Versand nur nach deiner Freigabe.</small></div>
+    <div class="privacy-card"><strong>Originale und Zuordnung bleiben lokal.</strong><small>Weitergabe nur durch dich.</small></div>
   </div>
   <ol class="workflow" aria-label="Arbeitsschritte">
     <li id="stepOriginal" class="current" aria-current="step"><span class="step-number">01</span>Text vorbereiten<span class="step-line" aria-hidden="true"></span></li>
@@ -214,11 +221,10 @@
       <p class="card-subtitle">Nur diese Fassung wird nach Freigabe gesendet.</p>
       <div id="notes" class="stack" aria-live="polite"></div>
       <div id="masked" class="pane" tabindex="-1" aria-labelledby="h-masked"></div>
-      <div class="legend" aria-label="Beispiele für erkannte Datentypen"><span class="t-PERSON"><i aria-hidden="true"></i>Person</span><span class="t-EMAIL"><i aria-hidden="true"></i>E-Mail</span><span class="t-FIRMA"><i aria-hidden="true"></i>Firma</span><span class="t-IBAN"><i aria-hidden="true"></i>IBAN</span></div>
+      <div class="legend" aria-label="Beispiele für erkannte Datentypen und unsichere Stellen"><span class="t-PERSON"><i aria-hidden="true"></i>Person</span><span class="t-EMAIL"><i aria-hidden="true"></i>E-Mail</span><span class="t-FIRMA"><i aria-hidden="true"></i>Firma</span><span class="t-IBAN"><i aria-hidden="true"></i>IBAN</span><span class="legend-unsure"><i aria-hidden="true"></i>Unsicher, bitte prüfen</span></div>
       <div class="row actions">
         <button id="btnRelease" type="button" class="primary" disabled>Freigeben</button>
-        <button id="btnSend" type="button" disabled>An Claude senden</button>
-        <button id="btnCopy" type="button" hidden>Kopieren</button>
+        <button id="btnCopy" type="button" disabled>Kopieren</button>
         <span id="copied" class="hint" role="status"></span>
       </div>
       <p id="hint" class="hint" aria-live="polite"></p>
@@ -227,7 +233,7 @@
       <div class="card-heading"><h2 id="h-answer">Deine Antwort</h2><span id="answerStatus" class="status-badge" role="status">Ausstehend</span></div>
       <p class="card-subtitle">Originale Angaben werden lokal wieder eingesetzt.</p>
       <div id="copyPanel" class="stack" style="max-height:none" hidden>
-        <p class="note warn">Kopiermodus aktiv. Kopiere den freigegebenen Text in Claude und füge die Antwort hier ein.</p>
+        <p class="note warn">Nichts wird automatisch gesendet. Kopiere den freigegebenen Text selbst in Claude und füge die Antwort hier ein.</p>
         <label for="answerInput">Antwort von Claude</label>
         <textarea id="answerInput" placeholder="Antwort mit Platzhaltern einfügen …" spellcheck="false"></textarea>
         <div class="row"><button id="btnRestore" type="button" class="primary">Lokal zurückübersetzen</button></div>
@@ -248,21 +254,19 @@ const TYPES = ["PERSON", "FIRMA", "ADRESSE", "ORT", "EMAIL", "TELEFON", "IBAN", 
 // Erfunden. Enthält absichtlich Angaben, die die Attrappe nicht erkennt.
 const EXAMPLE = `Kanzlei Sommerfeld & Partner, Aktenzeichen 123/26
 
-Unsere Mandantin Erika Musterfrau (erika.musterfrau@example.org, Tel. 040 5550123), wohnhaft Musterweg 12, 21335 Lüneburg, wurde am 14.03.2026 von der Nordlicht Bau GmbH gekündigt. Ihr Vorgesetzter Max Mustermann begründet das mit Auftragsmangel. Frau Musterfrau zweifelt daran, weil kurz zuvor neue Stellen ausgeschrieben wurden. Das letzte Gehalt ging auf die IBAN DE00 1234 5678 9012 3456 78.
+Unsere Mandantin Erika Musterfrau (erika.musterfrau@example.org, Tel. 040 5550123), wohnhaft Musterweg 12, 21335 Lüneburg, wurde am 14.03.2026 von der Nordlicht Bau GmbH gekündigt. Ihr Vorgesetzter Max Mustermann begründet das mit Auftragsmangel. Frau Musterfrau zweifelt daran, weil kurz zuvor neue Stellen ausgeschrieben wurden. Das letzte Gehalt ging auf die IBAN DE00 1234 5678 9012 3456 78. Intern läuft der Fall als Vorgang 4471-B.
 
 Bitte fasse den Sachverhalt kurz zusammen, nenne die Frist für eine Kündigungsschutzklage und entwirf ein kurzes Schreiben an Max Mustermann. Übernimm alle Platzhalter in eckigen Klammern unverändert.`;
 
 const $ = (id) => document.getElementById(id);
-const state = { result: null, release: null, apiKey: false, copyMode: false, busy: false, restored: false, error: "" };
+const state = { result: null, release: null, busy: false, restored: false, error: "", accepted: new Set() };
 
 async function api(path, body) {
   const options = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {};
   const response = await fetch(path, options);
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const failure = new Error(data.error || "Der Server hat die Anfrage abgelehnt.");
-    failure.copyMode = data.copy_mode === true;
-    throw failure;
+    throw new Error(data.error || "Der Server hat die Anfrage abgelehnt.");
   }
   return data;
 }
@@ -277,7 +281,6 @@ async function run(action) {
     await action();
   } catch (e) {
     state.error = e.message;
-    if (e.copyMode) state.copyMode = true;
   } finally {
     state.busy = false;
     render();
@@ -306,19 +309,50 @@ function renderMasked() {
     box.append(emptyNote("Dein Text, mit Platzhaltern statt sensibler Angaben. Starte links mit der Analyse."));
     return;
   }
+  const appendPlain = (start, end) => {
+    let position = start;
+    for (const u of openUncertain(result).filter((x) => !x.masked && x.start >= start && x.end <= end)) {
+      box.append(document.createTextNode(result.masked_text.slice(position, u.start)));
+      box.append(suspect(u));
+      position = u.end;
+    }
+    box.append(document.createTextNode(result.masked_text.slice(position, end)));
+  };
   let position = 0;
   for (const r of result.replacements) {
-    box.append(document.createTextNode(result.masked_text.slice(position, r.start)));
+    appendPlain(position, r.start);
     box.append(chip(r));
     position = r.end;
   }
-  box.append(document.createTextNode(result.masked_text.slice(position)));
+  appendPlain(position, result.masked_text.length);
+}
+
+// Stellen, die der Mensch noch nicht mit „Passt so“ bestätigt hat.
+function openUncertain(result) {
+  return result.uncertain.filter((u) => !state.accepted.has(u.text));
+}
+
+function suspect(u) {
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = "suspect";
+  el.textContent = u.text;
+  el.dataset.original = u.reason;
+  el.disabled = state.busy;
+  el.setAttribute("aria-label", `Unsichere Stelle: ${u.text}. ${u.reason}`);
+  el.addEventListener("click", () => openMenu(u.text, el.getBoundingClientRect(), u.typ));
+  return el;
 }
 
 function chip(r) {
   const el = document.createElement("span");
   el.className = "chip t-" + r.typ;
   el.dataset.original = r.original;
+  const unsure = openUncertain(state.result).find((u) => u.masked && u.start === r.start);
+  if (unsure) {
+    el.classList.add("unsure");
+    el.dataset.original = `${r.original} · ${unsure.reason}`;
+  }
   el.append(r.placeholder);
   const close = document.createElement("button");
   close.type = "button";
@@ -349,18 +383,22 @@ function note(text, kind) {
 }
 
 function render() {
-  const { result, release, busy, error, copyMode } = state;
+  const { result, release, busy, error } = state;
   renderMasked();
   if (!$("answer").childNodes.length) $("answer").append(emptyNote("Die Antwort von Claude erscheint hier. Platzhalter werden lokal durch die ursprünglichen Angaben ersetzt."));
 
   const notes = [];
   if (error) notes.push(note(error, "error"));
-  if (result) result.warnings.forEach((w) => notes.push(note(w, "warn")));
+  if (result) {
+    const open = openUncertain(result).length;
+    if (open) notes.push(note(open === 1 ? "1 unsichere Stelle markiert. Bitte prüfen." : `${open} unsichere Stellen markiert. Bitte prüfen.`, "warn"));
+    result.warnings.forEach((w) => notes.push(note(w, "warn")));
+  }
   $("notes").replaceChildren(...notes);
 
   const counter = $("counter");
   counter.textContent = result
-    ? `${result.replacements.length} sensible Angaben ersetzt · Versand nur nach deiner Freigabe`
+    ? `${result.replacements.length} sensible Angaben ersetzt · Weitergabe nur durch dich`
     : "Bereit, wenn du es bist.";
   $("workspace").setAttribute("aria-busy", String(busy));
   $("releaseStatus").textContent = release ? "Freigegeben" : result ? "Prüfung nötig" : "Gesperrt";
@@ -377,20 +415,17 @@ function render() {
     else step.removeAttribute("aria-current");
   }
 
-  const showCopy = Boolean(release) && copyMode;
+  const showCopy = Boolean(release);
   $("btnExample").disabled = busy;
   $("btnAnalyze").disabled = busy;
   $("btnRelease").disabled = busy || !result || Boolean(release);
-  $("btnSend").hidden = showCopy;
-  $("btnSend").disabled = busy || !release;
-  $("btnSend").className = release ? "primary" : "";
-  $("btnCopy").hidden = !showCopy;
-  $("btnCopy").disabled = busy;
+  $("btnCopy").disabled = busy || !release;
+  $("btnCopy").className = release ? "primary" : "";
   $("btnRestore").disabled = busy;
   $("copyPanel").hidden = !showCopy;
   $("hint").textContent = release
     ? "Freigegeben. Ändert sich etwas, ist eine neue Freigabe nötig."
-    : result ? "Text markieren, um weitere Angaben zu ersetzen. × nimmt eine Ersetzung zurück." : "Der Versand bleibt bis zu deiner Freigabe gesperrt.";
+    : result ? "Text markieren, um weitere Angaben zu ersetzen. × nimmt eine Ersetzung zurück." : "Kopieren bleibt bis zu deiner Freigabe gesperrt.";
 }
 
 function renderAnswer(restored) {
@@ -441,22 +476,12 @@ $("btnAnalyze").addEventListener("click", () => run(async () => {
   const text = $("original").value;
   if (!text.trim()) throw new Error("Bitte erst einen Text eingeben.");
   applyResult(await api("/api/analyze", { text }));
+  state.accepted.clear();
 }));
 
 $("btnRelease").addEventListener("click", () => run(async () => {
   state.release = null;
   state.release = await api("/api/release", { session_id: state.result.session_id });
-}));
-
-$("btnSend").addEventListener("click", () => run(async () => {
-  $("answer").replaceChildren(emptyNote("Claude antwortet …"));
-  try {
-    const { answer } = await api("/api/send", { session_id: state.result.session_id });
-    await restoreAnswer(answer);
-  } catch (e) {
-    $("answer").replaceChildren();
-    throw e;
-  }
 }));
 
 $("btnCopy").addEventListener("click", () => run(async () => {
@@ -504,9 +529,32 @@ for (const typ of TYPES) {
   menu.append(button);
 }
 
+const keepButton = document.createElement("button");
+keepButton.type = "button";
+keepButton.id = "menuKeep";
+keepButton.textContent = "Passt so";
+keepButton.addEventListener("mousedown", (e) => e.preventDefault());
+keepButton.addEventListener("click", () => {
+  state.accepted.add(selectedTerm);
+  hideMenu();
+  render();
+});
+menu.append(keepButton);
+
 function hideMenu() {
   menu.hidden = true;
   selectedTerm = "";
+}
+
+// suggested: Typvorschlag einer unsicheren Stelle. Nur dort gibt es auch „Passt so“.
+function openMenu(term, box, suggested) {
+  selectedTerm = term;
+  keepButton.hidden = !suggested;
+  for (const button of menu.children) button.classList.toggle("suggested", button.textContent === suggested);
+  menu.hidden = false;
+  menu.style.left = Math.max(8, Math.min(box.left, innerWidth - menu.offsetWidth - 8)) + "px";
+  const below = box.bottom + 6;
+  menu.style.top = (below + menu.offsetHeight < innerHeight ? below : Math.max(8, box.top - menu.offsetHeight - 6)) + "px";
 }
 
 $("masked").addEventListener("mouseup", () => {
@@ -526,12 +574,7 @@ $("masked").addEventListener("mouseup", () => {
       render();
       return;
     }
-    selectedTerm = term;
-    menu.hidden = false;
-    const box = range.getBoundingClientRect();
-    menu.style.left = Math.max(8, Math.min(box.left, innerWidth - menu.offsetWidth - 8)) + "px";
-    const below = box.bottom + 6;
-    menu.style.top = (below + menu.offsetHeight < innerHeight ? below : Math.max(8, box.top - menu.offsetHeight - 6)) + "px";
+    openMenu(term, range.getBoundingClientRect());
   });
 });
 
@@ -555,7 +598,7 @@ function hideTooltip() {
 
 for (const [on, off] of [["mouseover", "mouseout"], ["focusin", "focusout"]]) {
   $("masked").addEventListener(on, (e) => {
-    const target = e.target.closest(".chip");
+    const target = e.target.closest(".chip, .suspect");
     if (target) showTooltip(target);
   });
   $("masked").addEventListener(off, hideTooltip);
@@ -565,9 +608,7 @@ for (const [on, off] of [["mouseover", "mouseout"], ["focusin", "focusout"]]) {
   render();
   try {
     const status = await api("/api/status");
-    state.apiKey = status.api_key;
-    state.copyMode = !status.api_key;
-    $("connectionMode").textContent = status.fake ? "Testmodus" : status.api_key ? "API-Modus" : "Kopiermodus";
+    $("connectionMode").textContent = status.fake ? "Testmodus" : "Kopiermodus";
     $("fakeBand").hidden = !status.fake;
   } catch (e) {
     state.error = e.message;

@@ -36,6 +36,19 @@ Die Demos nutzen feste erfundene Beispieldaten. Erkennung, Maskierung und Antwor
 
 ![Drei klickbare Demos: Liquid Glass, Lime Soda und Pure White](assets/kit-demos.png)
 
+## Weniger grüne Auswahlflächen
+
+Vier Materialstudien ersetzen die kräftig grüne Auswahlfläche durch zurückhaltendere Oberflächen. Das sind Vorschläge zur Auswahl; der aktive Lime Soda Look wurde noch nicht verändert.
+
+![Vier Varianten für ausgewählte Icon Kacheln](assets/materialstudien/vergleich.png)
+
+1. **A · Klares Glas:** transparenter Hintergrund mit Lichtkante und Schatten.
+2. **B · Rauchglas:** dunkles, leicht durchsichtiges Glas mit weißem Inhalt.
+3. **C · Glas mit Farbrand:** fast weiße Fläche und ein feiner Cyan/Mint Rand.
+4. **D · Weiß mit Akzent:** neutrale Fläche, dezenter Rand und kleiner dunkler Marker.
+
+Die [bearbeitbare Vergleichsvorlage](materialstudien.html) enthält alle vier Varianten als eigenständige Seite ohne Abhängigkeiten. Die [Materialwerte](assets/materialstudien/materialien.json) enthalten Füllung, Rand, Schatten und Textfarbe. Zu jeder Variante liegen [Einzelbilder und Ansichten im Kit und Dashboard](assets/materialstudien/) vor.
+
 ## Icons verwenden
 
 Alle Icons liegen einzeln unter [icons/](icons/) und gebündelt in [icons.zip](icons.zip). Im Kit ein Icon auswählen und als SVG kopieren oder herunterladen.

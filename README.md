@@ -21,19 +21,19 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- Dashboard im Stil des UI-Kits (Lime Soda) in `web/static/index.html`, Branch `codex/dashboard-ui-kit` (`Phantom-create-1`).
 - Datumsformate, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung: [PR #12](https://github.com/lxc-ht/LP7/pull/12) wartet auf den Merge (`lxc-ht`).
 
 **Nächste Aufgaben**
 
 Kern (`Phantom-create-1`):
 
-- [ ] Falsche Rückübersetzung ohne Warnung: Meldet das Modell „Muellers Antrag“ als PERSON, wird jedes „Antrag“ zum selben Platzhalter. Aus „stellte den Antrag“ wird „stellte den Muellers Antrag“, der Bericht bleibt leer. Liegt schon auf `main`, PR #8 ändert das nicht.
+- [ ] Falsche Rückübersetzung verhindern, nicht nur melden: Stand ein Platzhalter nur für einen Namensteil wie „Antrag“, warnt der Bericht seit PR #16, der falsche Text bleibt aber. Nach Herr, Frau, Dr. oder Prof. kommt bewusst keine Warnung.
 - [ ] Wünsche aus `web/BACKLOG.md` unter „Wunsch an den Kern“ umsetzen.
 
 Beide:
 
 - [ ] Klären, ob das Projekt in unserem Hackathon-Track eingereicht werden darf.
-- [ ] Echtes Senden an Claude mit API-Key in der `.env` testen. Das ist bisher ungetestet.
 - [ ] Demo auf dem Vortragsrechner durchspielen und das Modell vorher einmal laden.
 - [ ] Pitch vorbereiten, auch für diese Fragen: Warum kein lokales Modell? Was, wenn der Kontext die Person verrät? Was ist mit der DSGVO?
 
@@ -56,6 +56,8 @@ Beide:
 - [x] Zuordnung wird auch bei SIGTERM und geschlossenem Terminal gelöscht, Warnung bei teilweiser Überlappung (PR #9).
 - [x] Erkennungslücken geschlossen: lange Absätze, E-Mails mit Umlaut, Namensvarianten (PR #8).
 - [x] Review-Fix zu PR #8: Namensteile mehrdeutig, Schreibweisen nur als großgeschriebenes Wort (PR #11).
+- [x] Rückübersetzung warnt bei Platzhaltern, die nur für einen Namensteil standen, unbekannte Sitzung meldet einen fertigen Satz (PR #16).
+- [x] Entscheidung: ohne API-Key. Weitergabe nur durch Kopieren, unsichere Stellen werden in der Prüfung markiert (PR #17).
 
 **Demo starten**
 

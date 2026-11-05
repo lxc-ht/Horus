@@ -100,8 +100,26 @@ def test_get_returns_current_state():
 
 
 def test_unknown_session():
-    with pytest.raises(KeyError):
+    with pytest.raises(KeyError) as e:
         api.get("gibt-es-nicht")
+    assert str(e.value) == api.UNKNOWN_SESSION   # ohne die Anführungszeichen von KeyError
+
+
+def test_restore_warns_when_name_part_stood_for_a_common_word():
+    api.set_detectors([FakeDetector({"Muellers Antrag": "PERSON"})])
+    result = api.analyze("Sie stellte den Antrag. Muellers Antrag wurde abgelehnt.")
+    assert result.masked_text == "Sie stellte den [PERSON_1]. [PERSON_1] wurde abgelehnt."
+    restored = api.restore(result.session_id, result.masked_text)
+    assert restored.warnings == [api.WARN_PART_RESTORED.format(platzhalter="[PERSON_1]", teil="Antrag", wert="Muellers Antrag")]
+
+
+def test_restore_stays_quiet_after_salutation_or_without_placeholder():
+    api.set_detectors([FakeDetector({"Erika Musterfrau": "PERSON"})])
+    result = api.analyze("Erika Musterfrau klagt. Frau Musterfrau und Dr. Musterfrau erscheinen.")
+    assert api.restore(result.session_id, result.masked_text).warnings == []
+
+    result = api.analyze("Erika Musterfrau klagt. Musterfrau erscheint.")
+    assert api.restore(result.session_id, "Keine Platzhalter hier.").warnings == ["Nicht in der Antwort: [PERSON_1]"]
 
 
 # --- Namensteile ---------------------------------------------------------------
