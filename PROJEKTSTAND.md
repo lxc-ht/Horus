@@ -17,7 +17,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- Installation im README frisch messen (leerer Klon, leere Caches, Cloud-Linux), nur README „Installation“, PROJEKTSTAND, BACKLOG; Branch `claude/project-thread-tllmvu` (`lxc-ht`, Claude).
 - Überschrift „Your Data Is Yours“ mit Horus-Auge und Papierton, nur Kopfzeile `.intro` und Seitenhintergrund in `web/static/index.html`; Branch `claude/project-thread-63us4k`, PR ohne Merge, Paul prüft (`lxc-ht`, Claude).
 
 
@@ -47,6 +46,7 @@ Beide:
 
 **Erledigt**
 
+- [x] Installation frisch gemessen (Linux in der Cloud, leere Caches): Python und Pakete 5,8 GB, 7 Minuten, 213 Tests grün, Startdatei bleibt im ZIP ausführbar. Modell und Offline-Betrieb nicht prüfbar, weil die Umgebung Hugging Face sperrt; auf einem Mac nachmessen ([PR #35](https://github.com/lxc-ht/LP7/pull/35), offen, Prüfung durch Paul, `lxc-ht`, Claude).
 - [x] „Beispiel laden“ und Eintippen setzen Analyse und Freigabe zurück, Fehler beim Datei laden stehen unter „Dein Original“ ([PR #33](https://github.com/lxc-ht/LP7/pull/33), `lxc-ht`, Claude). Gemergt am 05.11.
 - [x] Word (.docx) und E-Mail (.eml) laden wie PDF, ohne neue Abhängigkeit; Knopf heißt jetzt „Datei laden“ ([PR #32](https://github.com/lxc-ht/LP7/pull/32), baut auf #30 auf, `lxc-ht`, Claude). Gemergt am 05.11. Demo einmal mit einer Word-Datei und einer E-Mail durchspielen.
 - [x] Gewählte Kopfvariante B2 ohne Rahmen eingebaut: „Klar. Lokal.“ links, „Unter deiner Kontrolle.“ rechts vom Motiv. Mittlere Spalte auf Locs Wunsch allgemein „Vorschau für LLM“. Bestehende Browserprüfung bestanden, Desktop und Mobil visuell geprüft. Nur Oberfläche, Freigabeablauf unverändert; Branch `codex/slogan-ohne-rahmen` (`lxc-ht`, Codex UI).
