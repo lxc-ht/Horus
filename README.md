@@ -35,6 +35,7 @@ Kern (`Phantom-create-1`):
 Oberfläche (`lxc-ht`, `web/static/index.html`):
 
 - [ ] Die aktualisierte echte Arbeitsoberfläche mit Paul am Vortragsrechner durchspielen.
+- [ ] Prüfen, ob es seit PR #26 noch so ist: Nach dem Zurückübersetzen blieb für die Antwort wenig Platz, weil Hinweis und Eingabefeld oben stehen bleiben (Stand vor PR #26, Screenshot bei Paul). Vorschlag: beides nach dem Zurückübersetzen einklappen.
 
 
 Beide:
@@ -49,6 +50,7 @@ Beide:
 
 **Erledigt**
 
+- [x] Rückweg mit echtem Claude gemessen (claude.ai, Kopiermodus, Stand `2d3e971`, je ein neuer Chat, Aufgabe: „Fass den Fall in fünf Sätzen zusammen und entwirf eine kurze Antwort an die betroffene Person.“): **16 von 16 Platzhaltern, die Claude benutzt hat, kamen heil zurück, in 2 Testtexten** (Kündigung: 7 von 11 benutzt, Unfall mit drei Personen: 9 von 13). Keine unbekannten, keine veränderten Platzhalter, keine Verwechslung der Personen. Nicht benutzte Platzhalter zählen nicht als Fehler. Claude schrieb eigene Lücken wie `[NAME]` und `[KANZLEI]`, LP7 lässt sie richtig stehen. Ein allein stehender Nachname kommt als ganzer Name zurück („Herr Oberdorf“ wird zu „Herr Jannik Oberdorf“, gewollte Folge von 722c4ff). Texte von Claudian, vorher nur auf Erkennung geprüft (`Phantom-create-1`).
 - [x] Übermaskierung aus PR #22 behoben (`EU-VO 2016`, `+100.000 Euro`), letzte Lecks geschlossen: kurze Nachnamen, Aktenzeichen klein, Ausweis, Kundenkonto ([PR #27](https://github.com/lxc-ht/LP7/pull/27)).
 - [x] Material C in der echten Pseudonymisierungsoberfläche umgesetzt: helle Karten, Farbrand am aktuellen Bereich, größere Texte und Icons, Kopiermodus Texte und Unsicher Legende. Element-IDs erhalten. Webtests, Browserprüfung mit fünf Breiten und echter Durchlauf mit lokalem GLiNER (Analyse, Freigabe, Kopieren, Rückübersetzung, erneute Sperre) bestanden; kein Claude Versand. Branch `codex/arbeitsoberflaeche-material-c` (`lxc-ht`, Codex UI).
 
