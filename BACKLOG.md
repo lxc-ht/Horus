@@ -39,11 +39,12 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Reisepassnummern werden nicht erkannt, Kfz-Kennzeichen und Personalausweisnummern nur mit Bezeichner davor.
 - „34127 Kassel“ wird als ADRESSE maskiert, „Kassel“ allein im Fließtext findet nur das Modell.
 - Nicht erkannt: IP-Adressen, Datum ohne Jahr („am 14.03.“), Monat und Jahr („im März 1979“), IBAN in Kleinbuchstaben (nur der Ziffernteil wird als TELEFON maskiert).
+- Schreibweisen und Genitiv-s maskieren eher zu viel: Bei einer Person namens „Das“ träfe es auch „dass“. Sicher, verfälscht aber die Antwort.
 
 ## Später
 
 - PDF, Word, OCR als Eingabe (Achtung: Lecks über Metadaten).
 - Zweiter Detektor, z. B. lokales LLM über Ollama – die Detektor-Schnittstelle in `detect.py` ist dafür vorbereitet.
-- Varianten derselben Person mit Tippfehlern, Genitiv („Musterfraus“) oder Spitznamen erkennen. Einzelne Namensteile als ganzes Wort werden schon mitmaskiert, alles andere meldet höchstens die Warnung.
+- Varianten derselben Person mit Tippfehlern, Spitznamen oder ohne Umlaut („Muller“) erkennen. Genitiv-s und die Schreibweisen ä/ae, ö/oe, ü/ue, ß/ss werden schon mitmaskiert.
 - Verschlüsselung der Datenbank.
 - Streaming der Claude-Antwort für lange Texte (aktuell eine Anfrage, max_tokens 16000).

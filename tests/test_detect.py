@@ -1,6 +1,6 @@
 import re
 
-from harness.detect import Finding, RegexDetector, detect_all, merge_findings
+from harness.detect import Finding, RegexDetector, _chunks, detect_all, merge_findings
 
 
 def _found(text):
@@ -198,3 +198,31 @@ def test_model_person_loses_salutation_and_profession():
     model = [Finding(m.start(), m.end(), m.group(), "PERSON", "gliner", 0.9) for m in
              re.finditer(r"Frau Sabine Kettelhut|Herr Rechtsanwalt Brandt|Herr Rechtsanwalt(?= und)|Frau Doktor", text)]
     assert [f.text for f in merge_findings(model, text)] == ["Sabine Kettelhut", "Brandt"]
+
+
+def test_email_with_umlaut_in_local_part_and_domain():
+    assert ("EMAIL", "jürgen.müller@beispiel.de") in _found("Mail an jürgen.müller@beispiel.de bitte")
+    assert ("EMAIL", "info@müller-bau.de") in _found("Mail an info@müller-bau.de.")
+
+
+def test_chunks_stay_within_limit_and_keep_offsets():
+    text = "wort " * 1000
+    chunks = _chunks(text)
+    assert max(len(chunk) for _, chunk in chunks) <= 800
+    assert all(text[offset : offset + len(chunk)] == chunk for offset, chunk in chunks)
+    assert chunks[-1][0] + len(chunks[-1][1]) == len(text)
+
+
+def test_chunks_split_text_without_whitespace():
+    text = "x" * 2000
+    chunks = _chunks(text)
+    assert max(len(chunk) for _, chunk in chunks) <= 800
+    assert all(text[offset : offset + len(chunk)] == chunk for offset, chunk in chunks)
+    assert chunks[-1][0] + len(chunks[-1][1]) == len(text)
+
+
+def test_chunks_keep_name_on_cut_whole():
+    # Der Name wandert über jede mögliche Schnittstelle, in einem Stück muss er immer ganz stehen.
+    for padding in range(740, 800, 3):
+        text = "x" * padding + " Jonas Weidenfeld " + "wort " * 400
+        assert any("Jonas Weidenfeld" in chunk for _, chunk in _chunks(text)), padding
