@@ -205,9 +205,25 @@ def check_eml() -> None:
     assert "Betreff: Kündigung durch Nordlicht Bau" in data["text"]
     assert data["text"].endswith("\n\nGuten Tag,\nmir wurde am 14.03.2026 gekündigt.")
 
-    # Bei Text und HTML gewinnt der Text, Anhänge bleiben draußen.
+    # Bei Text und HTML gewinnt der Text. Ein kaputter Anhang wird nur mit Namen genannt.
     status, data = post("/api/eml", eml(html=True))
-    assert status == 200 and "14.03.2026" in data["text"] and "PDF" not in data["text"]
+    assert status == 200 and "14.03.2026" in data["text"] and "<p>" not in data["text"]
+    assert data["text"].endswith("--- Anhang: anhang.pdf (nicht gelesen: Das ist keine lesbare PDF-Datei.) ---"), data["text"]
+
+    # Lesbare PDF- und Word-Anhänge kommen als Text dazu, andere nur mit Namen.
+    mail = EmailMessage()
+    mail["From"] = "erika@example.org"
+    mail["Subject"] = "Unterlagen"
+    mail.set_content("Anbei die Unterlagen.")
+    mail.add_attachment(text_pdf("Kuendigung vom 14.03.2026", "Max Mustermann"), maintype="application", subtype="pdf", filename="kuendigung.pdf")
+    mail.add_attachment(docx(para("<w:t>Vollmacht für Erika Musterfrau</w:t>")), maintype="application",
+                        subtype="vnd.openxmlformats-officedocument.wordprocessingml.document", filename="vollmacht.docx")
+    mail.add_attachment(b"\x89PNG", maintype="image", subtype="png", filename="foto.png")
+    status, data = post("/api/eml", mail.as_bytes())
+    assert status == 200, data
+    assert "Anbei die Unterlagen.\n\n--- Anhang: kuendigung.pdf ---\nKuendigung vom 14.03.2026" in data["text"], data["text"]
+    assert "--- Anhang: vollmacht.docx ---\nVollmacht für Erika Musterfrau" in data["text"], data["text"]
+    assert data["text"].endswith("--- Anhang: foto.png (nicht gelesen, nur PDF und Word werden gelesen) ---"), data["text"]
 
     only_html = EmailMessage()
     only_html["From"] = "erika@example.org"
