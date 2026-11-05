@@ -26,6 +26,10 @@ Layout A ist direkt in `web/static/index.html` eingebaut: drei flexible Spalten 
 
 Unter „Dein Original“ hängt „Aufgabe für Claude“ eine Vorlage an den Text an: Sachverhalt zusammenfassen, Fristen und Termine herausziehen, Antwortschreiben entwerfen, Risiken und offene Fragen nennen oder in einfacher Sprache erklären. Jede Vorlage endet mit der Bitte, die Platzhalter unverändert zu übernehmen. Die Aufgabe wird Teil des Originals, wird also mit analysiert, steht in der Vorschau und gehört zur Freigabe. Eine zweite Vorlage ersetzt die vorige am Textende. Wie beim Eintippen verfallen Analyse und Freigabe.
 
+## Zuordnung löschen
+
+Nach dem Zurückübersetzen löscht „Zuordnung jetzt löschen“ die Zuordnung von Platzhaltern zu Originalen auf diesem Rechner sofort, nicht erst beim Beenden. Die SQLite-Datei überschreibt gelöschte Werte (`secure_delete`). Die zurückübersetzte Antwort bleibt sichtbar, Vorschau und Freigabe sind danach leer und gesperrt.
+
 ## UI prüfen
 
 Die Oberfläche lädt keine externen Fonts, Skripte oder Bilder. Die drei Arbeitsschritte passen sich an Desktop und Handy an. Die Freigabe bleibt vor dem Kopieren zwingend. Die Weboberfläche arbeitet im Kopiermodus: Text lokal analysieren, Vorschau prüfen und freigeben, die Fassung selbst nach Claude kopieren und dessen Antwort zur lokalen Rückübersetzung einfügen. Es gibt keinen automatischen Versand. Nach der Freigabe kopiert „Kopieren und Claude öffnen“ die freigegebene Fassung und öffnet claude.ai in einem neuen Tab. Einfügen und Absenden bleibt Sache des Menschen; die Seite selbst lädt weiterhin nichts von außen.

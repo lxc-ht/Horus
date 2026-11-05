@@ -274,6 +274,11 @@ def main() -> None:
     assert restored["unknown"] == ["[PERSON_9]"]
     assert restored["missing"] == ["[EMAIL_1]"]
 
+    # Zuordnung löschen: danach ist die Sitzung weg, Rückübersetzen wird abgelehnt.
+    assert server.forget(server.SessionBody(session_id=sid)) == {"ok": True}
+    assert "error" in rejected(server.restore, server.RestoreBody(session_id=sid, answer="[PERSON_1]"))
+    assert "error" in rejected(server.forget, server.SessionBody(session_id=sid))
+
     # Ohne HARNESS_FAKE und ohne Kern bricht der Start ab, statt die Attrappe zu nehmen.
     env = {k: v for k, v in os.environ.items() if k != "HARNESS_FAKE"}
     start = subprocess.run([sys.executable, "-c", "import web.app"], env=env, capture_output=True, text=True)

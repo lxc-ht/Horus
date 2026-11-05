@@ -189,6 +189,11 @@ def send(rel: Release) -> str:
     raise NoApiKeyError("Es ist kein API-Key gesetzt. Nutze den Kopier-Modus.")
 
 
+def forget(session_id: str) -> None:
+    _session(session_id)
+    del _sessions[session_id]
+
+
 def restore(session_id: str, answer: str) -> RestoreResult:
     known = {e.placeholder: e.original for e in _session(session_id).entries}
     seen = set(_PLACEHOLDER.findall(answer))
