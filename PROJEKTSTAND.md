@@ -15,7 +15,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- [ ] Gewählte Kopfvariante B2 ohne Rahmen: „Klar. Lokal.“ links und „Unter deiner Kontrolle.“ rechts vom Glasmotiv, ausschließlich Kopf-CSS und Kopf-Markup in `web/static/index.html`, Branch `codex/slogan-ohne-rahmen` (`lxc-ht`, Codex UI).
 
 - [ ] PDF laden: Text aus digitalen PDFs lokal auslesen und ins Textfeld setzen, Scans ausdrücklich nicht. Endpunkt `/api/pdf`, Knopf und Ablegen in `index.html`, eigener PR, Review durch Paul (`lxc-ht`, Claude).
 
@@ -45,6 +44,8 @@ Beide:
   - Bekannte Grenzen aus derselben Prüfung: Stadt „Essen“ blieb in einem längeren Satz stehen, „Kundenkonto 88213-44“ und „Ausweis L01X00T47“ ebenso, „im Winter“ wurde bei einer Person „Rosa Winter“ zum Namen. „Die einzige Kinderärztin im Ort“ findet keine Erkennung.
 
 **Erledigt**
+
+- [x] Gewählte Kopfvariante B2 ohne Rahmen eingebaut: „Klar. Lokal.“ links, „Unter deiner Kontrolle.“ rechts vom Motiv. Mittlere Spalte auf Locs Wunsch allgemein „Vorschau für LLM“. Bestehende Browserprüfung bestanden, Desktop und Mobil visuell geprüft. Nur Oberfläche, Freigabeablauf unverändert; Branch `codex/slogan-ohne-rahmen` (`lxc-ht`, Codex UI).
 
 - [x] Layout A umgesetzt: drei flexible Arbeitsbereiche per Hover, Klick und Tastatur; stabil beim Schreiben und Markieren. Äußere Kopfzeile, Schrittleiste und Footer entfernt, kleines Glasmotiv mittig. Browserprüfung mit fünf Breiten, Touch und reduzierter Bewegung sowie Durchlauf mit echtem Kern bestanden. Bestehende Formular-IDs und Freigabeablauf erhalten; IDs der ausdrücklich entfernten Leisten entfallen. Branch `codex/flexible-arbeitsbereiche` (`lxc-ht`, Codex UI).
 

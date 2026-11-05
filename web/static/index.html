@@ -19,17 +19,19 @@
   .pane:focus-visible { outline: 3px solid #0076a9; outline-offset: -3px; }
   #fakeBand { background: #fff8d7; color: #70540a; font-size: 12px; font-weight: 600; text-align: center; padding: 6px 18px; border-bottom: 1px solid #f4e9b4; }
   .workspace { margin: 0 auto; padding: 10px 24px 20px; width: 100%; }
-  .intro { display: flex; justify-content: center; flex: none; padding: 0 0 16px; }
+  .intro { display: flex; align-items: center; justify-content: center; gap: 24px; flex: none; min-height: 76px; padding: 0 0 14px; }
+  .slogan { width: 190px; margin: 0; color: #20323b; font-size: 18px; font-weight: 550; letter-spacing: -.4px; }
+  .slogan-lead { text-align: right; color: #687c86; font-size: 20px; font-weight: 400; }
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .hero-art { position: relative; isolation: isolate; display: flex; justify-content: center; align-items: center; gap: 12px; width: 220px; min-height: 70px; flex-shrink: 0; }
-  .hero-art::before { content: ""; z-index: -2; position: absolute; inset: -15px -18px; background: radial-gradient(ellipse at 68% 30%,#ffe53b99,transparent 45%), radial-gradient(ellipse at 52% 55%,#c6ff3d,transparent 53%), radial-gradient(ellipse at 25% 40%,#00b8ffb3,transparent 55%), radial-gradient(ellipse at 60% 70%,#2be0a0,transparent 60%); filter: blur(15px); mask-image: radial-gradient(ellipse closest-side,#000 40%,transparent); }
+  .hero-art { position: relative; isolation: isolate; display: flex; justify-content: center; align-items: center; gap: 10px; width: 150px; min-height: 54px; flex-shrink: 0; }
+  .hero-art::before { content: ""; z-index: -2; position: absolute; inset: -8px -15px; opacity: .5; background: radial-gradient(ellipse at 68% 30%,#ffe53b99,transparent 45%), radial-gradient(ellipse at 52% 55%,#c6ff3d,transparent 53%), radial-gradient(ellipse at 25% 40%,#00b8ffb3,transparent 55%), radial-gradient(ellipse at 60% 70%,#2be0a0,transparent 60%); filter: blur(15px); mask-image: radial-gradient(ellipse closest-side,#000 40%,transparent); }
   .hero-art::after { content: ""; z-index: -1; position: absolute; inset: -8px 0; background: repeating-linear-gradient(90deg,#fff0 0 39px,#ffffff78 41px,#fff0 46px); mask-image: radial-gradient(ellipse closest-side,#000 55%,transparent); }
   .art-icon { position: relative; z-index: 1; display: grid; place-items: center; background: #ffffff6e; border: 1px solid #ffffffd9; box-shadow: 0 14px 28px -10px #26534e30,inset 0 1px #fff; }
-  .art-icon.small { width: 37px; height: 37px; border-radius: 13px; transform: rotate(-8deg); }
-  .art-icon.large { width: 50px; height: 50px; border-radius: 17px; }
+  .art-icon.small { width: 30px; height: 30px; border-radius: 10px; transform: rotate(-8deg); }
+  .art-icon.large { width: 42px; height: 42px; border-radius: 14px; }
   .art-icon:nth-child(3) { transform: rotate(8deg); }
-  .art-icon .icon { width: 19px; height: 19px; }
-  .art-icon.large .icon { width: 26px; height: 26px; }
+  .art-icon .icon { width: 16px; height: 16px; }
+  .art-icon.large .icon { width: 22px; height: 22px; }
   main { display: grid; grid-template-columns: minmax(0,.95fr) minmax(0,1fr) minmax(0,1.25fr); align-items: stretch; gap: 14px; transition: grid-template-columns .25s cubic-bezier(.2,.7,.2,1); }
   main[data-focus="stepOriginal"] { grid-template-columns: minmax(0,1.7fr) minmax(0,1fr) minmax(0,1fr); }
   main[data-focus="stepReview"] { grid-template-columns: minmax(0,1fr) minmax(0,1.7fr) minmax(0,1fr); }
@@ -135,7 +137,7 @@
   @media (max-width: 860px) {
     .workspace { padding: 0 20px 22px; }
     .intro { padding-bottom: 12px; }
-    .hero-art { width: 190px; min-height: 60px; }
+    .hero-art { width: 150px; min-height: 54px; }
     main, main[data-focus] { grid-template-columns: minmax(0,1fr); height: auto; gap: 14px; }
     .work-card { min-height: 0; padding: 20px; }
     #original, .pane { min-height: 0; font-size: 16px; }
@@ -144,6 +146,15 @@
     #answer { min-height: 230px; max-height: 350px; }
     #answerInput { min-height: 85px; }
     #copyPanel { flex-shrink: 0; }
+  }
+  @media (max-width: 600px) {
+    .intro { min-height: 82px; gap: 6px; }
+    .slogan { width: 102px; font-size: 12px; letter-spacing: -.2px; }
+    .slogan-lead { width: 72px; font-size: 13px; }
+    .hero-art { width: 84px; gap: 5px; }
+    .art-icon.small { width: 20px; height: 20px; border-radius: 7px; }
+    .art-icon.large { width: 28px; height: 28px; border-radius: 9px; }
+    .art-icon.large .icon { width: 19px; height: 19px; }
   }
   @media (pointer: coarse) { .chip button { min-width: 44px; min-height: 44px; } }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -154,11 +165,13 @@
 <div class="workspace">
   <div class="intro">
     <h1 class="sr-only">Text pseudonymisieren</h1>
+    <p class="slogan slogan-lead">Klar. Lokal.</p>
     <div class="hero-art" aria-hidden="true">
       <span class="art-icon small"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3M7 8h10M7 12h7M7 16h10"/></svg></span>
       <span class="art-icon large"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></span>
       <span class="art-icon small"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v4M14 3v5h5M5 3v18h7m0-5h9m-3-3 3 3-3 3"/></svg></span>
     </div>
+    <p class="slogan">Unter deiner Kontrolle.</p>
   </div>
   <main id="workspace" aria-label="Dokument bearbeiten">
     <section class="work-card" data-step="stepOriginal" aria-labelledby="h-original">
@@ -172,7 +185,7 @@
       <p class="card-foot">Erkennung und Ersetzung erfolgen lokal.</p>
     </section>
     <section class="work-card review-card" data-step="stepReview" aria-labelledby="h-masked">
-      <div class="card-heading"><h2 id="h-masked"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>Vorschau für Claude</h2><span id="releaseStatus" class="status-badge" role="status" aria-live="polite">Gesperrt</span></div>
+      <div class="card-heading"><h2 id="h-masked"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>Vorschau für LLM</h2><span id="releaseStatus" class="status-badge" role="status" aria-live="polite">Gesperrt</span></div>
       <p class="card-subtitle">Nur diese Fassung kannst du nach Freigabe kopieren.</p>
       <div id="notes" class="stack" aria-live="polite"></div>
       <div class="scroll-frame"><div id="masked" class="pane" tabindex="-1" aria-labelledby="h-masked"></div></div>
