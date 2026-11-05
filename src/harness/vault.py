@@ -12,8 +12,11 @@ import sqlite3
 import uuid
 from contextlib import closing
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+
+# Sitzungen leben nur im Speicher des Prozesses. Was nach einem Absturz liegen bleibt, ist nutzlos und wird gelöscht.
+SESSION_TTL = timedelta(hours=24)
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS sessions (
@@ -57,18 +60,36 @@ def _connect() -> sqlite3.Connection:
     path = db_path()
     path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(path)
+    conn.execute("PRAGMA secure_delete = ON")   # gelöschte Originalwerte nicht lesbar in der Datei lassen
     conn.executescript(_SCHEMA)
     return conn
+
+
+def _now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 def create_session() -> str:
     session_id = uuid.uuid4().hex
     with closing(_connect()) as conn, conn:
+        cutoff = (_now() - SESSION_TTL).isoformat(timespec="seconds")
+        conn.execute("DELETE FROM mappings WHERE session_id IN (SELECT id FROM sessions WHERE created_at < ?)", (cutoff,))
+        conn.execute("DELETE FROM sessions WHERE created_at < ?", (cutoff,))
         conn.execute(
             "INSERT INTO sessions (id, created_at) VALUES (?, ?)",
-            (session_id, datetime.now(timezone.utc).isoformat(timespec="seconds")),
+            (session_id, _now().isoformat(timespec="seconds")),
         )
     return session_id
+
+
+def delete_sessions(session_ids: list[str]) -> None:
+    """Löscht Sitzungen samt Zuordnung."""
+    if not session_ids:
+        return
+    with closing(_connect()) as conn, conn:
+        for session_id in session_ids:
+            conn.execute("DELETE FROM mappings WHERE session_id = ?", (session_id,))
+            conn.execute("DELETE FROM sessions WHERE id = ?", (session_id,))
 
 
 def mappings(session_id: str, active_only: bool = True) -> list[Mapping]:

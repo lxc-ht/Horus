@@ -12,10 +12,10 @@ import re
 from dataclasses import dataclass
 from typing import Protocol
 
-TYPES = ["PERSON", "FIRMA", "ADRESSE", "ORT", "EMAIL", "TELEFON", "IBAN", "DATUM"]
+TYPES = ["PERSON", "FIRMA", "ADRESSE", "ORT", "EMAIL", "TELEFON", "IBAN", "DATUM", "KENNUNG"]
 
 # Strukturierte Typen: hier ist Regex exakt und gewinnt bei Überlappungen.
-STRUCTURED_TYPES = {"EMAIL", "IBAN", "TELEFON", "DATUM"}
+STRUCTURED_TYPES = {"EMAIL", "IBAN", "TELEFON", "DATUM", "KENNUNG"}
 
 # Zeichen, die am Rand einer Fundstelle nicht zum Wert gehören.
 _EDGE_CHARS = " \t\r\n,;:.!?()[]{}\"'„“”‚‘’«»"
@@ -44,12 +44,59 @@ _EMAIL = re.compile(r"(?<![\w.+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}
 # IBAN in Blöcken (mit oder ohne Leerzeichen), allgemein: 2 Buchstaben, 2 Ziffern, bis 30 Zeichen.
 _IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,3})?\b")
 
-# Deutsche Telefonnummern: +49 / 0049 / führende 0, Trennzeichen Leerzeichen, - oder /.
+# Telefonnummern: +Ländervorwahl / 0049 / führende 0, Trennzeichen Leerzeichen, - oder /.
 _PHONE = re.compile(
     r"(?<![\w+])"
-    r"(?:(?:\+|00)49[ \-/]?(?:\(0\)[ \-/]?)?\(?\d{2,5}\)?|\(?0\d{2,5}\)?)"
+    r"(?:(?:\+\d{1,3}|0049)[ \-/]?(?:\(0\)[ \-/]?)?\(?\d{1,5}\)?|\(?0\d{2,5}\)?)"
     r"(?:[ \-/]?\d{2,}){1,4}"
     r"(?![\w])"
+)
+
+# Kennungen mit Bezeichner davor: Der Bezeichner verrät den Typ, der Wert darf fast jedes Format haben.
+_LABELED_ID = re.compile(
+    r"(?<!\w)(?i:Steuer-?ID|Steueridentifikationsnummer|IdNr\.?|Steuernummer|St\.?-?Nr\.?"
+    r"|SV-?(?:Nr\.?|Nummer)|Sozialversicherungsnummer|Versicherten-?(?:Nr\.?|Nummer)"
+    r"|Aktenzeichen|Az\.?|Gesch[äa]ftszeichen|Mandanten-?(?:Nr\.?|Nummer)|Patienten-?(?:Nr\.?|Nummer)"
+    r"|Personalausweis-?(?:Nr\.?|Nummer)|Kennzeichen)"
+    # Wert: Blöcke aus Großbuchstaben und Ziffern. Ein Punkt am Blockende beendet ihn, sonst käme der nächste Satz mit.
+    r"[\s:.#]*(?P<value>[A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w)(?: [A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w))*)"
+)
+
+# Kennungen, deren Format auch ohne Bezeichner eindeutig genug ist.
+_BARE_IDS = [
+    re.compile(r"(?<![\d/.,])[1-9]\d(?: ?\d{3}){3}(?![\d/.,]\d)"),           # Steuer-ID, 11 Stellen
+    re.compile(r"(?<![\d/])\d{2,3}/\d{3,4}/\d{4,5}(?![\d/])"),               # Steuernummer 22/815/08150
+    re.compile(r"(?<![\d/])\d{5}/\d{5}(?![\d/])"),                           # Steuernummer 93815/08152
+    re.compile(r"\b\d{2} ?\d{6} ?[A-Z] ?\d{3}\b"),                           # SV-Nummer
+    re.compile(r"\b[A-Z]\d{9}\b"),                                           # Krankenversichertennummer
+    re.compile(r"(?<![\w/])(?:\d{1,3}|[IVX]+) [A-Z][A-Za-z]{0,2} \d{1,6}/\d{2,4}\b"),  # Aktenzeichen 3 O 123/26
+    re.compile(r"(?<![\w@.])(?:https?://|www\.)[^\s<>\"']+"),                # URL, kann Patienten- oder Fallnummern enthalten
+]
+
+_STREET_SUFFIXES = (
+    "straße|strasse|str\\.|weg|gasse|allee|platz|ring|damm|ufer|chaussee|pfad|steig|stieg"
+    "|berg|bach|hof|feld|garten|kamp|bahn|markt|wall|graben|deich"
+)
+_POSTCODE_CITY = (
+    r"\d{5}\s+(?!Euro\b|EUR\b|Dollar\b|Stück\b)[A-ZÄÖÜ][\w\-]+"
+    r"(?:\s+(?:im|am|an der|bei|ob der)\s+[A-ZÄÖÜ][\w\-]+)?"
+)
+# Straße mit Hausnummer, optional mit PLZ und Ort dahinter, oder PLZ und Ort allein.
+_ADDRESS = re.compile(
+    r"(?<![\w\-])(?:"
+    r"(?:(?:Am|An der|Auf der|Auf dem|Im|In der|Zum|Zur)\s+)?"
+    rf"(?:[A-ZÄÖÜ][\w\-]*(?:{_STREET_SUFFIXES})|[A-ZÄÖÜ][\w\-]+(?:\s+|-)(?:Straße|Strasse|Str\.|Weg|Platz|Allee|Gasse|Ring|Damm|Ufer))"
+    r"\s+\d{1,4}(?:\s?[a-zA-Z](?!\w)|\s?[\-/]\s?\d{1,4})?"
+    rf"(?:,?\s+{_POSTCODE_CITY})?"
+    rf"|{_POSTCODE_CITY}"
+    r")"
+)
+
+_NAME = r"(?:(?:von|van|de|zu) )?[A-ZÄÖÜ][a-zäöüß]+(?:-[A-ZÄÖÜ][a-zäöüß]+)?"
+# Anrede oder Titel gefolgt von ein bis zwei Namen. Nur die Namen werden zur Fundstelle: „Frau [PERSON_1]“.
+_SALUTATION = re.compile(
+    r"(?<!\w)(?:Herrn?|Frau|Dr\.|Prof\.)\s+(?:(?:Dr\.|Prof\.|med\.|jur\.|rer\.|nat\.)\s+)*"
+    rf"(?P<name>{_NAME}(?: {_NAME})?)"
 )
 
 _MONTHS = "Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember"
@@ -73,16 +120,28 @@ def _iban_valid(raw: str) -> bool:
 
 
 class RegexDetector:
-    """EMAIL, IBAN (DE und allgemein), TELEFON (deutsche Formate) und DATUM."""
+    """EMAIL, IBAN, TELEFON, DATUM, KENNUNG sowie ADRESSE und PERSON als Netz, falls das Modell sie übersieht."""
 
     name = "regex"
 
     def detect(self, text: str) -> list[Finding]:
         found: list[Finding] = []
 
-        def add(m: re.Match, typ: str) -> None:
-            found.append(Finding(m.start(), m.end(), m.group(), typ, self.name, 1.0))
+        def add(m: re.Match, typ: str, group: str | int = 0) -> None:
+            found.append(Finding(m.start(group), m.end(group), m.group(group), typ, self.name, 1.0))
 
+        # Kennungen vor TELEFON: Bei gleicher Länge gewinnt, was zuerst gefunden wurde („022/815/08150“).
+        for m in _LABELED_ID.finditer(text):
+            if any(c.isdigit() for c in m.group("value")):
+                add(m, "KENNUNG", "value")
+        for pattern in _BARE_IDS:
+            for m in pattern.finditer(text):
+                add(m, "KENNUNG")
+        for m in _ADDRESS.finditer(text):
+            add(m, "ADRESSE")
+        for m in _SALUTATION.finditer(text):
+            if m.group("name").split()[0].lower() not in _ROLE_WORDS:
+                add(m, "PERSON", "name")
         for m in _EMAIL.finditer(text):
             add(m, "EMAIL")
         for m in _IBAN.finditer(text):
@@ -219,8 +278,22 @@ def merge_findings(findings: list[Finding], text: str) -> list[Finding]:
     return sorted(accepted, key=lambda f: f.start)
 
 
+def _drop_name_variants(findings: list[Finding]) -> list[Finding]:
+    """Verwirft „Kettelhut“ aus „Frau Kettelhut“, wenn „Sabine Kettelhut“ auch gefunden wurde.
+
+    Sonst bekäme dieselbe Person zwei Platzhalter. Den Namensteil maskiert danach mask.propagate().
+    """
+    persons = [(f, set(f.text.lower().split())) for f in findings if f.typ == "PERSON"]
+
+    def is_variant(f: Finding) -> bool:
+        parts = set(f.text.lower().split())
+        return f.quelle == RegexDetector.name and f.typ == "PERSON" and any(parts < other for _, other in persons)
+
+    return [f for f in findings if not is_variant(f)]
+
+
 def detect_all(text: str, detectors: list[Detector]) -> list[Finding]:
     found: list[Finding] = []
     for d in detectors:
         found.extend(d.detect(text))
-    return merge_findings(found, text)
+    return _drop_name_variants(merge_findings(found, text))
