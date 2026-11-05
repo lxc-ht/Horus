@@ -7,7 +7,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from .mask import name_part_owners, occurrence_pattern
+from .mask import name_part_owners, occurrence_pattern, short_name_owners, short_name_pattern
 from .vault import Mapping, normalize
 
 LEAK_MESSAGE = "Gestoppt: Ein Originalwert steht noch im Text. Maskiere ihn oder nimm die Ersetzung bewusst zurück."
@@ -66,6 +66,9 @@ def name_part_warnings(masked_text: str, mappings: list[Mapping]) -> list[str]:
         match = occurrence_pattern(part, whole_word=True).search(visible)
         if match:
             warnings.append(NAME_PART_WARNING.format(teil=match.group(), platzhalter=" oder ".join(placeholders)))
+    for part, placeholders in short_name_owners([m for m in mappings if m.active]).items():
+        if short_name_pattern(part).search(visible):
+            warnings.append(NAME_PART_WARNING.format(teil=part, platzhalter=" oder ".join(placeholders)))
     return warnings
 
 

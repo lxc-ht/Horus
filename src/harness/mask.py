@@ -175,6 +175,26 @@ def _accept(original: str, match: re.Match, value: str, whole_word: bool) -> boo
     return bounded and match.group()[0].isupper()
 
 
+def short_name_owners(mappings: list[Mapping]) -> dict[str, list[str]]:
+    """Zweibuchstabige Namensteile wie „Wu“ oder „Le“ → Platzhalter aller Personen, zu denen sie gehören."""
+    owners: dict[str, list[str]] = {}
+    for m in mappings:
+        if m.typ != "PERSON":
+            continue
+        for word in m.original.split():
+            word = word.strip(".,;:()\"'")
+            if len(word) == 2 and word[0].isupper() and word[1].islower() and word.lower() not in NAME_STOPWORDS:
+                placeholders = owners.setdefault(word, [])
+                if m.placeholder not in placeholders:
+                    placeholders.append(m.placeholder)
+    return owners
+
+
+def short_name_pattern(part: str) -> re.Pattern:
+    """Genau in dieser Schreibweise. Sonst würde bei „Anna Im“ jedes „im“ zum Namen."""
+    return re.compile(rf"(?<!\w){re.escape(part)}(?!\w)")
+
+
 def add_occurrences(
     original: str, spans: list[Span], value: str, placeholder: str,
     whole_word: bool = False, name_part: bool = False,
@@ -223,6 +243,11 @@ def propagate(original: str, spans: list[Span], mappings: list[Mapping]) -> list
     for part, placeholders in name_part_owners(mappings).items():
         if len(placeholders) == 1 and placeholders[0] in active_placeholders:
             spans = add_occurrences(original, spans, part, placeholders[0], whole_word=True, name_part=True)
+    for part, placeholders in short_name_owners(mappings).items():
+        if len(placeholders) == 1 and placeholders[0] in active_placeholders:
+            for m in short_name_pattern(part).finditer(original):
+                if all(m.end() <= s.start or m.start() >= s.end for s in spans):
+                    spans = sorted([*spans, Span(m.start(), m.end(), placeholders[0], True)], key=lambda s: s.start)
     return spans
 
 
