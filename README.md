@@ -20,17 +20,13 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 **In Arbeit**
 
 - Erkennungslücken im Kern (lange Absätze, E-Mails mit Umlaut, Namensvarianten): [PR #8](https://github.com/lxc-ht/LP7/pull/8) wartet auf den Merge (`lxc-ht`).
-- Nichts.
+- Löschen der Zuordnung auch bei SIGTERM und geschlossenem Terminal, Warnung bei teilweiser Überlappung in `add_manual`. Nur `api.py` (`lxc-ht`).
 
 **Nächste Aufgaben**
 
 Kern (`Phantom-create-1`):
 
 - [ ] Wünsche aus `web/BACKLOG.md` unter „Wunsch an den Kern“ umsetzen.
-
-Web (`lxc-ht`):
-
-- [ ] Nach PR #4: `KENNUNG` in `TYPES` und Chip-Farbe `.t-KENNUNG` in `web/static/index.html` ergänzen.
 
 Beide:
 
