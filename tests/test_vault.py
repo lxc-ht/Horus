@@ -1,6 +1,7 @@
 import os
 import signal
 import sqlite3
+import stat
 import subprocess
 import sys
 from datetime import timedelta
@@ -86,3 +87,13 @@ def test_term_inside_existing_mask_does_not_warn():
     result = api.add_manual(result.session_id, "Max Muster", "PERSON")
     result = api.add_manual(result.session_id, "Max", "PERSON")
     assert not any("nicht vollständig" in w for w in result.warnings)
+def test_database_is_readable_only_by_owner():
+    vault.create_session()
+    assert stat.S_IMODE(vault.db_path().stat().st_mode) == 0o600
+
+
+def test_existing_database_with_open_rights_is_tightened():
+    vault.create_session()
+    vault.db_path().chmod(0o644)
+    vault.create_session()
+    assert stat.S_IMODE(vault.db_path().stat().st_mode) == 0o600

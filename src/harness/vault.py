@@ -59,6 +59,9 @@ def db_path() -> Path:
 def _connect() -> sqlite3.Connection:
     path = db_path()
     path.parent.mkdir(parents=True, exist_ok=True)
+    # Die Datei enthält die Originalwerte im Klartext: nur der Besitzer darf sie lesen.
+    path.touch(mode=0o600, exist_ok=True)
+    path.chmod(0o600)
     conn = sqlite3.connect(path)
     conn.execute("PRAGMA secure_delete = ON")   # gelöschte Originalwerte nicht lesbar in der Datei lassen
     conn.executescript(_SCHEMA)
