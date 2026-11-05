@@ -246,3 +246,15 @@ def test_short_surname_is_reported_as_uncertain_when_restored():
     _with_person("Anna Wu")
     result = api.analyze("Wu hat gekündigt. Anna Wu kam.")
     assert any(u.text == "Wu" for u in result.uncertain)
+
+
+def test_iban_with_cyrillic_lookalikes_is_masked():
+    # „DЕ89“ mit kyrillischem Е, griechisches Ο in einer fremden IBAN: sieht gleich aus, darf nicht durchrutschen.
+    from harness import api
+    from harness.detect import RegexDetector
+    api.set_detectors([RegexDetector()])
+    for iban in ["DЕ89 3704 0044 0532 0130 00", "ԁе89370400440532013000", "GB82 WΕST 1234 5698 7654 32"]:
+        result = api.analyze(f"Bitte auf {iban} überweisen.")
+        assert result.masked_text == "Bitte auf [IBAN_1] überweisen.", result.masked_text
+        assert result.replacements[0].original == iban
+        api.release(result.session_id)   # Leck-Check findet nichts mehr

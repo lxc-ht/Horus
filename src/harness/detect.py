@@ -47,6 +47,12 @@ _IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?:[\s\-.]?[A-Z0-9]{4}){2,7}(?:[\s\-.]?[A-Z0
 # Auch über Zeilenumbrüche, wie sie beim Kopieren aus PDFs entstehen.
 _IBAN_DE = re.compile(r"(?<![A-Za-z0-9])[Dd][Ee][\s\-.]{0,2}\d{2}(?:[\s\-.]{0,2}\d){18}(?!\d)")
 _IBAN_SEPARATORS = re.compile(r"[\s\-.]")
+# Kyrillische und griechische Buchstaben, die wie lateinische aussehen („DЕ89“ mit kyrillischem Е).
+# Nur für die IBAN-Suche, Zeichen für Zeichen, damit die Positionen gleich bleiben. Der Text selbst bleibt unverändert.
+_LOOKALIKES = str.maketrans(
+    "АВСЕНІЈКМОРЅТХУаеіјорсхуѕԁΑΒΕΖΗΙΚΜΝΟΡΤΥΧον",
+    "ABCEHIJKMOPSTXYaeijopcxysdABEZHIKMNOPTYXov",
+)
 
 # Telefonnummern: +Ländervorwahl / 0049 / führende 0, Trennzeichen Leerzeichen, - oder /.
 _PHONE = re.compile(
@@ -254,13 +260,19 @@ class RegexDetector:
             found.append(Finding(m.start(group), m.end(group), m.group(group), typ, self.name, 1.0))
 
         # IBAN vor KENNUNG, Kennungen vor TELEFON: Bei gleicher Länge gewinnt, was zuerst gefunden wurde („022/815/08150“).
-        for m in _IBAN_DE.finditer(text):
-            add(m, "IBAN")
-        for m in _IBAN.finditer(text):
+        # Gesucht wird in der lateinischen Fassung, gemeldet wird der Originaltext an derselben Stelle.
+        latin = text.translate(_LOOKALIKES)
+
+        def add_iban(m: re.Match) -> None:
+            found.append(Finding(m.start(), m.end(), text[m.start() : m.end()], "IBAN", self.name, 1.0))
+
+        for m in _IBAN_DE.finditer(latin):
+            add_iban(m)
+        for m in _IBAN.finditer(latin):
             compact = _IBAN_SEPARATORS.sub("", m.group())
             # Deutsche IBAN am Format erkennen, alle anderen nur mit gültiger Prüfsumme.
             if (compact[:2].upper() == "DE" and len(compact) == 22) or _iban_valid(m.group()):
-                add(m, "IBAN")
+                add_iban(m)
         for m in _LABELED_ID.finditer(text):
             if any(c.isdigit() for c in m.group("value")):
                 add(m, "KENNUNG", "value")
