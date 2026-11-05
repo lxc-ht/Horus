@@ -24,7 +24,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 **In Arbeit**
 
 
-- Übermaskierung aus PR #22 beheben (`EU-VO 2016`, `+100.000 Euro`) und letzte Lecks schließen (kurze Nachnamen, Aktenzeichen klein, Ausweis, Kundenkonto), nur `src/harness` und `tests`, Branch `kern/umgehungen-3` (`lxc-ht`).
+- Übermaskierung aus PR #22 beheben (`EU-VO 2016`, `+100.000 Euro`) und letzte Lecks schließen (kurze Nachnamen, Aktenzeichen klein, Ausweis, Kundenkonto): [PR #27](https://github.com/lxc-ht/LP7/pull/27) wartet auf den Merge, sollte heute noch rein (`lxc-ht`).
 
 **Nächste Aufgaben**
 
