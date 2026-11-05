@@ -2,7 +2,9 @@
 
 ## Wunsch an den Kern
 
-- `add_manual`, `remove` und `get` haben im Vertrag keine eigene Ausnahme. Die Oberfläche zeigt `str(e)` unverändert an. Bitte auch bei unbekannter Sitzung, leerem Begriff oder unbekanntem Platzhalter einen fertigen deutschen Satz liefern, kein `KeyError`.
+- Abweichung vom Vertrag: Bei unbekannter Sitzung kommt ein `KeyError`, die Oberfläche zeigt dann `'Unbekannte Sitzung: nope'` mit Anführungszeichen. Das passiert zum Beispiel, wenn die Seite nach einem Serverneustart offen bleibt. Bitte einen fertigen deutschen Satz liefern, auch bei leerem Begriff oder unbekanntem Platzhalter.
+- Abweichung vom Vertrag: Der Text von `NoApiKeyError` ist für die CLI geschrieben ("Der freigegebene Text liegt in der Zwischenablage ... beende mit einer Zeile, auf der nur END steht"). Im Web stimmt das nicht. Die Oberfläche zeigt ihn nur, wenn der Key nach dem Seitenaufruf wegfällt. Bitte neutral formulieren und den CLI-Hinweis in die CLI verlegen.
+- `RestoreResult.warnings` wiederholt, was schon in `unknown`, `changed` und `missing` steht. Die Oberfläche filtert das heraus. Bitte dort nur zusätzliche Hinweise liefern.
 - Die Oberfläche markiert Text nur zwischen zwei Platzhaltern. `add_manual` sollte ablehnen, wenn der Begriff im maskierten Text nicht vorkommt.
 - `replacements` sollte jedes einzelne Vorkommen enthalten, denn daraus entstehen die Chips und der Zähler.
 

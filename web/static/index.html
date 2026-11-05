@@ -304,7 +304,9 @@ function renderAnswer(restored) {
   add("Unbekannt, nicht ersetzt", restored.unknown, "error");
   add("Möglicherweise verändert", restored.changed, "warn");
   add("Nicht in der Antwort", restored.missing, "warn");
-  restored.warnings.forEach((w) => report.push(note(w, "warn")));
+  // Der Kern nennt dieselben Funde auch in warnings. Hier nur zeigen, was die Listen oben nicht schon sagen.
+  const listed = [...restored.unknown, ...restored.changed, ...restored.missing];
+  restored.warnings.filter((w) => !listed.some((item) => w.includes(item))).forEach((w) => report.push(note(w, "warn")));
   $("report").replaceChildren(...report);
 }
 
