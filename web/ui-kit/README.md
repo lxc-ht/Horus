@@ -73,7 +73,7 @@ Die Geometrien wurden für dieses Kit gezeichnet. Die Symbole in [index.html](in
 
 ## Banner und Dashboard Ideen
 
-Die Grafik liegt unter [assets/banner.png](assets/banner.png). Im Abschnitt **Dashboard** sind beide Layouts jetzt interaktiv: eine Variante mit dem Glasmotiv im Kopfbereich und eine kompaktere Variante mit Glas Icons in der Ablaufleiste. Beim Layoutwechsel bleibt der aktuelle Bearbeitungsstand erhalten.
+Die Grafik liegt unter [assets/banner.png](assets/banner.png). Im Abschnitt **Dashboard** sind beide Layouts jetzt interaktiv: eine Variante mit dem Glasmotiv im Kopfbereich und eine kompaktere Variante mit Glas Icons in der Ablaufleiste. Beim Layoutwechsel bleibt der aktuelle Bearbeitungsstand erhalten. Das Dashboard ist direkt im Menü erreichbar. Helle Arbeitsflächen, ein dezenter Verlauf und größere Texte erleichtern das Lesen. Die nummerierten Schritte und der Hinweis über den Arbeitsbereichen zeigen den nächsten Schritt. Nach der Analyse führt der Tastaturfokus zur Vorschau, nach der Freigabe zur Ausgabe. Erneut analysieren bleibt als Nebenaktion verfügbar; die Freigabe nutzt weiterhin Material C.
 
 ![Interaktive Dashboard Demo mit Glasmotiv im Kopfbereich](assets/dashboard-demo-banner.png)
 
