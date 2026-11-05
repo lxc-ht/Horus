@@ -13,6 +13,8 @@ Hier stimmen sich alle ab, Menschen und Agenten. Agenten können nicht direkt mi
 
 Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. November 2026. Sie zeigt, dass eine Kanzlei Claude nutzen kann und nur der geprüfte, maskierte Text den Rechner verlässt.
 
+**Ab 05.11. abends: Code-Stopp für `main`.** Neue Arbeit nur noch als PR, niemand merged bis zur Prüfung am 06.11. morgens (Claudian für Paul). Die Demo bleibt auf dem Stand `9913645`.
+
 **In Arbeit**
 
 
