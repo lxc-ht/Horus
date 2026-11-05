@@ -228,15 +228,25 @@ DOCX_ORDER = {"header": 0, "document": 1, "footnotes": 2, "endnotes": 3, "footer
 def docx_paragraphs(root) -> list[str]:
     # Absätze in Textfeldern stecken in einem äußeren Absatz. Sie werden eigene Zeilen,
     # sonst stünde ihr Text doppelt da.
+    # Eine Tabellenzeile wird eine Zeile, die Zellen durch Tabulator getrennt. So bleibt „IBAN“ neben dem Wert.
     paragraphs = []
 
-    def walk(element, buffer):
+    def walk(element, buffer, out):
         for child in element:
             tag = child.tag
             if tag == W + "p":
                 inner = []
-                walk(child, inner)
-                paragraphs.append("".join(inner))
+                walk(child, inner, out)
+                out.append("".join(inner))
+            elif tag == W + "tr":
+                cells = []
+                for cell in child:
+                    if cell.tag != W + "tc":
+                        continue
+                    cell_lines = []
+                    walk(cell, [], cell_lines)
+                    cells.append(" ".join(line.strip() for line in cell_lines if line.strip()))
+                out.append("\t".join(cells))
             elif tag == W + "t":
                 buffer.append(child.text or "")
             elif tag == W + "tab":
@@ -247,9 +257,9 @@ def docx_paragraphs(root) -> list[str]:
                 # Gelöschter Text aus „Änderungen nachverfolgen“ steht nicht mehr im Dokument.
                 continue
             else:
-                walk(child, buffer)
+                walk(child, buffer, out)
 
-    walk(root, [])
+    walk(root, [], paragraphs)
     return paragraphs
 
 
