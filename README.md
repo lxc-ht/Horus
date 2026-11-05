@@ -22,7 +22,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 **In Arbeit**
 
 - Dashboard im Stil des UI-Kits (Lime Soda) in `web/static/index.html`, Branch `codex/dashboard-ui-kit` (`Phantom-create-1`).
-- `lxc-ht`: Nur Kopier-Weg ohne API-Key, unsichere Stellen in der Prüfung: PR von Branch `pruefung-unsicher` wartet auf den Merge.
 - Datumsformate, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung: [PR #12](https://github.com/lxc-ht/LP7/pull/12) wartet auf den Merge (`lxc-ht`).
 
 **Nächste Aufgaben**
@@ -58,6 +57,7 @@ Beide:
 - [x] Erkennungslücken geschlossen: lange Absätze, E-Mails mit Umlaut, Namensvarianten (PR #8).
 - [x] Review-Fix zu PR #8: Namensteile mehrdeutig, Schreibweisen nur als großgeschriebenes Wort (PR #11).
 - [x] Rückübersetzung warnt bei Platzhaltern, die nur für einen Namensteil standen, unbekannte Sitzung meldet einen fertigen Satz (PR #16).
+- [x] Entscheidung: ohne API-Key. Weitergabe nur durch Kopieren, unsichere Stellen werden in der Prüfung markiert (PR #17).
 
 **Demo starten**
 
