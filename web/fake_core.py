@@ -5,11 +5,12 @@ Sie erkennt absichtlich nur E-Mails und eine feste Liste erfundener Namen.
 import hashlib
 import re
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
 TYPES = ["PERSON", "FIRMA", "ADRESSE", "ORT", "EMAIL", "TELEFON", "IBAN", "DATUM", "KENNUNG"]
 
+_HINT = "Nordlicht"
 _NAMES = ["Erika Musterfrau", "Max Mustermann", "Anna Beispiel", "Jonas Probe"]
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 _PLACEHOLDER = re.compile(r"\[[A-ZÄÖÜ]+_\d+\]")
@@ -27,12 +28,23 @@ class Replacement:
 
 
 @dataclass
+class Uncertain:
+    text: str
+    typ: str
+    start: int
+    end: int
+    masked: bool
+    reason: str
+
+
+@dataclass
 class MaskResult:
     session_id: str
     original_text: str
     masked_text: str
     replacements: list[Replacement]
     warnings: list[str]
+    uncertain: list[Uncertain] = field(default_factory=list)
 
 
 @dataclass
@@ -115,7 +127,12 @@ def _mask(session_id: str) -> MaskResult:
             position += len(entry.placeholder)
             last = match.end()
     parts.append(session.text[last:])
-    return MaskResult(session_id, session.text, "".join(parts), replacements, [_WARNING])
+    masked = "".join(parts)
+    uncertain = [
+        Uncertain(_HINT, "FIRMA", m.start(), m.end(), False, "Die Attrappe meldet diese Stelle immer als unsicher.")
+        for m in re.finditer(re.escape(_HINT), masked)
+    ]
+    return MaskResult(session_id, session.text, masked, replacements, [_WARNING], uncertain)
 
 
 def analyze(text: str) -> MaskResult:
