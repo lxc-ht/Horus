@@ -1,4 +1,11 @@
+import os
+import signal
+import sqlite3
+import subprocess
+import sys
 from datetime import timedelta
+
+import pytest
 
 from harness import api, vault
 from harness.detect import RegexDetector
@@ -43,3 +50,39 @@ def test_kennung_is_masked_and_restored():
     placeholder = result.replacements[0].placeholder
     assert placeholder == "[KENNUNG_1]"
     assert api.restore(result.session_id, f"Die {placeholder} stimmt.").text == "Die 12 345 678 901 stimmt."
+
+
+@pytest.mark.parametrize("name", ["SIGTERM", "SIGHUP"])
+def test_signal_deletes_mapping(tmp_path, name):
+    db = tmp_path / "signal.sqlite"
+    script = (
+        "import os, signal\n"
+        "from harness import api\n"
+        "from harness.detect import RegexDetector\n"
+        "api.set_detectors([RegexDetector()])\n"
+        "api.analyze('Frau Muster, Tel. 0171 2398841')\n"
+        f"os.kill(os.getpid(), signal.{name})\n"
+    )
+    done = subprocess.run([sys.executable, "-c", script], env={**os.environ, "HARNESS_DB": str(db)}, timeout=60)
+    assert done.returncode == 128 + getattr(signal, name)
+    with sqlite3.connect(db) as conn:
+        assert conn.execute("SELECT count(*) FROM mappings").fetchone()[0] == 0
+        assert conn.execute("SELECT count(*) FROM sessions").fetchone()[0] == 0
+
+
+def test_partial_overlap_warns():
+    api.set_detectors([RegexDetector()])
+    result = api.analyze("Kontakt Max Muster Haus.")
+    result = api.add_manual(result.session_id, "Max Muster", "PERSON")
+    assert result.warnings == []
+    result = api.add_manual(result.session_id, "Muster Haus", "FIRMA")
+    assert "Haus" in result.masked_text
+    assert any("Muster Haus" in w and "nicht vollständig" in w for w in result.warnings)
+
+
+def test_term_inside_existing_mask_does_not_warn():
+    api.set_detectors([RegexDetector()])
+    result = api.analyze("Kontakt Max Muster Haus.")
+    result = api.add_manual(result.session_id, "Max Muster", "PERSON")
+    result = api.add_manual(result.session_id, "Max", "PERSON")
+    assert not any("nicht vollständig" in w for w in result.warnings)

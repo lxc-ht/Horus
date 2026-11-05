@@ -24,7 +24,7 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Kurze Originalwerte (z. B. ein ORT „Ems“) maskieren viel mit. Eventuell eine Mindestlänge oder Wortgrenzen nur für kurze Werte.
 - GLiNER meldet Rollenwörter („Vermieterin“, „Patientin“) gern als PERSON. Es gibt eine kleine Stoppliste in `detect.py`, keine vollständige Lösung.
 - „Möglicherweise verändert“ kann falsch anschlagen, wenn ein Typname mit Zahl normal im Text steht („am Ort 2“). Ist nur eine Warnung, ersetzt wird nichts.
-- Freigaben liegen nur im Speicher. Nach einem Neustart des Prozesses sind Sitzungen und Freigaben weg, die Zuordnung in SQLite bleibt. Beim normalen Beenden löscht der Prozess seine Sitzungen, nach einem Absturz fallen sie nach 24 Stunden weg.
+- Freigaben liegen nur im Speicher. Nach einem Neustart des Prozesses sind Sitzungen und Freigaben weg, die Zuordnung in SQLite bleibt. Bei Ctrl+C, SIGTERM und geschlossenem Terminal löscht der Prozess seine Sitzungen, nach einem Absturz oder SIGKILL fallen sie weg, sobald nach 24 Stunden ein neuer Text kommt.
 - Der Leck-Check vergleicht ohne Unicode-Normalisierung. NFC- und NFD-„ü“ gelten als verschieden.
 - Der stdin-Modus der CLI liest die Prüfbefehle von /dev/tty. Ohne Terminal (CI, Pipe ohne tty) bricht er mit Meldung ab.
 - Namensteile, die auch gewöhnliche Wörter sind, werden mitmaskiert: Bei einer Person „Anna Berg“ wird aus „am Berg“ „am [PERSON_1]“, zurückübersetzt „am Anna Berg“. Sicher, verfälscht aber die Antwort. Eventuell eine Liste häufiger Wörter oder Großschreibung als Bedingung.
