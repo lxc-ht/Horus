@@ -21,7 +21,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 - Datum ohne Jahr, Monat und Jahr, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung. Nur `detect.py` und `vault.py` (Branch `kern/datum-iban-rechte`, `lxc-ht`).
 - Erkennungslücken im Kern (lange Absätze, E-Mails mit Umlaut, Namensvarianten): [PR #8](https://github.com/lxc-ht/LP7/pull/8) wartet auf den Merge (`lxc-ht`).
-- Löschen der Zuordnung auch bei SIGTERM und geschlossenem Terminal, Warnung bei teilweiser Überlappung: [PR #9](https://github.com/lxc-ht/LP7/pull/9) wartet auf den Merge (`lxc-ht`).
 
 **Nächste Aufgaben**
 
@@ -53,6 +52,7 @@ Beide:
 - [x] Namen in jeder Schrift vollständig maskiert, weniger Falschtreffer bei ADRESSE und Anrede, abgeschnittene Antworten gekennzeichnet (PR #6).
 - [x] Erfundene Kennungen in allen drei Beispieltexten (Aktenzeichen, Mandanten-, Versicherten-, Patientennummer, Steuer-ID, Steuernummer). Durchlauf mit GLiNER: alle maskiert, Rückübersetzung löst alle Platzhalter auf (`Phantom-create-1`).
 - [x] `KENNUNG` in der Oberfläche: Chip-Farbe und Markier-Menü (PR #7, `lxc-ht`), gemergt.
+- [x] Zuordnung wird auch bei SIGTERM und geschlossenem Terminal gelöscht, Warnung bei teilweiser Überlappung (PR #9).
 
 **Demo starten**
 
