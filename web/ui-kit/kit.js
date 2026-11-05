@@ -144,24 +144,33 @@ function renderDashboard(message) {
   const released = dashboardStage === 'released';
   const output = dashboardStage === 'output';
   dashboard.dataset.stage = dashboardStage;
+  const currentStep = original ? 'original' : released || output ? 'output' : 'preview';
+  for (const panel of dashboard.querySelectorAll('[data-panel]')) {
+    panel.dataset.active = String(panel.dataset.panel === currentStep);
+  }
   for (const step of dashboard.querySelectorAll('[data-dash-step]')) {
-    if (step.dataset.dashStep === (original ? 'original' : released || output ? 'output' : 'preview')) step.setAttribute('aria-current', 'step');
+    step.dataset.complete = String(step.dataset.dashStep === 'original' ? !original : step.dataset.dashStep === 'preview' ? released || output : output);
+    if (step.dataset.dashStep === currentStep) step.setAttribute('aria-current', 'step');
     else step.removeAttribute('aria-current');
   }
   const person = (index, name) => removed.has(index) ? name : `<span class="data-chip person">[PERSON_${index}]<button type="button" data-person="${index}" aria-label="PERSON_${index} zurücknehmen">${icon('close')}</button></span>`;
-  $('dashPreview').innerHTML = original ? '<span class="dash-empty">Nach der Analyse siehst du hier die Fassung mit Platzhaltern.</span>' : `${person(1, 'Erika Musterfrau')} schreibt an ${person(2, 'Max Mustermann')}. Bitte formuliere eine kurze Rückfrage.`;
+  $('dashPreview').classList.toggle('is-empty', original);
+  $('dashPreview').innerHTML = original ? `<div class="dash-placeholder">${icon('preview')}<strong>Hier prüfst du die Fassung</strong><span>Starte die Analyse. Danach siehst du die Platzhalter.</span></div>` : `${person(1, 'Erika Musterfrau')} schreibt an ${person(2, 'Max Mustermann')}. Bitte formuliere eine kurze Rückfrage.`;
   $('dashStatus').textContent = original ? 'Gesperrt' : released || output ? 'Freigegeben' : 'Prüfung nötig';
   $('dashStatus').className = 'badge ' + (original ? 'neutral' : released || output ? 'success' : 'warning');
   $('dashRelease').disabled = original || released || output;
   $('dashOutput').disabled = !released;
+  $('dashRelease').innerHTML = icon(released || output ? 'check' : 'release') + (released || output ? 'Vorschau freigegeben' : 'Vorschau freigeben');
+  $('dashReviewHelp').textContent = original ? 'Die Vorschau wartet auf deine Analyse.' : `${2 - removed.size} von 2 Namen ersetzt. × setzt den Originalnamen wieder ein.`;
   $('dashAnalyze').classList.toggle('primary', original);
   $('dashAnalyze').classList.toggle('secondary', !original);
   $('dashAnalyze').innerHTML = icon('analyze') + (original ? 'Analysieren' : 'Erneut analysieren');
   $('dashOutput').classList.toggle('primary', released);
   $('dashOutput').classList.toggle('secondary', !released);
-  $('dashOutput').innerHTML = icon(released || output ? 'output' : 'lock') + 'Ausgabe simulieren';
-  $('dashAnswer').textContent = output ? example.answer : 'Nach deiner Freigabe kannst du die Ausgabe simulieren.';
-  $('dashAnswer').classList.toggle('dash-empty', !output);
+  $('dashOutput').innerHTML = icon(output ? 'check' : released ? 'output' : 'lock') + (output ? 'Ausgabe bereit' : 'Ausgabe simulieren');
+  $('dashAnswer').classList.toggle('is-empty', !output);
+  if (output) $('dashAnswer').textContent = example.answer;
+  else $('dashAnswer').innerHTML = `<div class="dash-placeholder">${icon(released ? 'output' : 'lock')}<strong>${released ? 'Bereit für deine Ausgabe' : 'Noch keine Ausgabe'}</strong><span>${released ? 'Die Vorschau ist freigegeben. Du kannst die Beispielantwort jetzt anzeigen.' : 'Prüfe die Vorschau und gib sie frei. Bis dahin bleibt die Ausgabe gesperrt.'}</span></div>`;
   $('dashAnswerStatus').textContent = output ? 'Fertig' : 'Ausstehend';
   $('dashAnswerStatus').className = 'badge ' + (output ? 'success' : 'neutral');
   $('dashNotice').textContent = message;
@@ -183,6 +192,7 @@ $('dashOutput').addEventListener('click', () => {
   if (dashboardStage !== 'released') return;
   dashboardStage = 'output';
   renderDashboard('Beispielantwort bereit. Keine Anfrage an Claude gesendet.');
+  $('dashAnswerTitle').focus();
 });
 $('dashPreview').addEventListener('click', (event) => {
   const button = event.target.closest('[data-person]');
@@ -196,6 +206,7 @@ $('dashReset').addEventListener('click', () => {
   removed.clear();
   dashboardStage = 'original';
   renderDashboard('Bereit für die Beispielsanalyse. Alle Abläufe werden lokal simuliert.');
+  $('dashAnalyze').focus();
 });
 document.querySelectorAll('.dashboard-controls [data-layout]').forEach((button) => {
   button.addEventListener('click', () => {
