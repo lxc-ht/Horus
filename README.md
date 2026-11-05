@@ -23,6 +23,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+
 - Übermaskierung aus PR #22 beheben (`EU-VO 2016`, `+100.000 Euro`) und letzte Lecks schließen (kurze Nachnamen, Aktenzeichen klein, Ausweis, Kundenkonto), nur `src/harness` und `tests`, Branch `kern/umgehungen-3` (`lxc-ht`).
 
 **Nächste Aufgaben**
@@ -32,14 +33,13 @@ Kern (`Phantom-create-1`):
 - [ ] Falsche Rückübersetzung verhindern, nicht nur melden: Stand ein Platzhalter nur für einen Namensteil wie „Antrag“, warnt der Bericht seit PR #16, der falsche Text bleibt aber. Nach Herr, Frau, Dr. oder Prof. kommt bewusst keine Warnung.
 - [ ] Wünsche aus `web/BACKLOG.md` unter „Wunsch an den Kern“ umsetzen.
 
-Oberfläche (`lxc-ht`, ab 05.11. nachmittags, `web/static/index.html` und `web/ui-kit/`):
+Oberfläche (`lxc-ht`, `web/static/index.html`):
 
-- [ ] Dashboard weiter verbessern. Stand ist PR #23. Element-IDs bitte nicht ändern, `web/test_ui.py` prüft sie.
-- [ ] Idee: Die Legende erklärt seit PR #23 die gelb gestrichelten unsicheren Stellen nicht mehr. Eintrag „Unsicher, bitte prüfen“ wieder ergänzen, sobald es eine solche Stelle gibt.
+- [ ] Die aktualisierte echte Arbeitsoberfläche mit Paul am Vortragsrechner durchspielen.
+
 
 Beide:
 
-- [ ] Texte in `web/static/index.html` an den Kopiermodus anpassen: „Nur diese Fassung wird nach Freigabe gesendet“ und „Versand gesperrt“ passen nicht zu „Nichts wird automatisch gesendet“.
 - [ ] Demo auf dem Vortragsrechner durchspielen und das Modell vorher einmal laden.
 - [ ] Pitch vorbereiten, auch für diese Fragen: Warum kein lokales Modell? Was, wenn der Kontext die Person verrät? Was ist mit der DSGVO?
   - DSGVO, Vorschlag: „LP7 macht niemanden automatisch DSGVO-konform. Aber es sorgt dafür, dass nur der geprüfte, maskierte Text den Rechner verlässt und die Zuordnung lokal bleibt. Das senkt das Risiko deutlich und ist der technische Baustein. Vertrag mit dem Anbieter und Prüfung durch den Menschen bleiben Pflicht.“
@@ -49,6 +49,8 @@ Beide:
   - Bekannte Grenzen aus derselben Prüfung: Stadt „Essen“ blieb in einem längeren Satz stehen, „Kundenkonto 88213-44“ und „Ausweis L01X00T47“ ebenso, „im Winter“ wurde bei einer Person „Rosa Winter“ zum Namen. „Die einzige Kinderärztin im Ort“ findet keine Erkennung.
 
 **Erledigt**
+
+- [x] Material C in der echten Pseudonymisierungsoberfläche umgesetzt: helle Karten, Farbrand am aktuellen Bereich, größere Texte und Icons, Kopiermodus Texte und Unsicher Legende. Element-IDs erhalten. Webtests, Browserprüfung mit fünf Breiten und echter Durchlauf mit lokalem GLiNER (Analyse, Freigabe, Kopieren, Rückübersetzung, erneute Sperre) bestanden; kein Claude Versand. Branch `codex/arbeitsoberflaeche-material-c` (`lxc-ht`, Codex UI).
 
 - [x] Weitere Umgehungen geschlossen: Werte über Zeilenumbrüche, Passwörter, API-Keys, Handles ([PR #24](https://github.com/lxc-ht/LP7/pull/24)).
 - [x] Dashboard poliert: lesbare Platzhalter, Legende zeigt alle erkannten Typen mit Anzahl, erledigte Schritte mit Haken, Verlauf bei abgeschnittenem Text. Element-IDs unverändert, keine externen Quellen, 173 Tests und Browserprüfung grün (PR #23, `Phantom-create-1`).

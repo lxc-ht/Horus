@@ -24,6 +24,8 @@ def main() -> None:
         expect(page.locator("#btnCopy")).to_be_disabled()
         expect(page.locator("#btnSend")).to_have_count(0)
         expect(page.locator("#stepOriginal")).to_have_attribute("aria-current", "step")
+        expect(page.locator(".work-card[data-active=true]")).to_have_attribute("data-step", "stepOriginal")
+        expect(page.locator("#dispatchStatus")).to_contain_text("Kopieren bis zur Freigabe gesperrt")
 
         page.locator("#btnExample").click()
         page.locator("#btnAnalyze").click()
@@ -31,6 +33,9 @@ def main() -> None:
         expect(page.locator("#btnCopy")).to_be_disabled()
         expect(page.locator("#releaseStatus")).to_have_text("Prüfung nötig")
         expect(page.locator("#stepReview")).to_have_attribute("aria-current", "step")
+        expect(page.locator(".work-card[data-active=true]")).to_have_attribute("data-step", "stepReview")
+        expect(page.locator("#btnAnalyze")).not_to_have_class("primary")
+        expect(page.locator("#legend")).to_contain_text("Unsicher, bitte prüfen")
         expect(page.locator("#counter")).to_contain_text("Weitergabe nur durch dich")
 
         # Unsichere Stelle: sichtbar, ersetzbar, und „Passt so“ blendet sie aus.
@@ -42,11 +47,14 @@ def main() -> None:
         page.locator("#menuKeep").click()
         expect(suspect).to_have_count(0)
         expect(page.locator("#notes")).not_to_contain_text("unsichere Stelle")
+        expect(page.locator("#legend")).not_to_contain_text("Unsicher, bitte prüfen")
 
         page.locator("#btnRelease").click()
         expect(page.locator("#btnCopy")).to_be_enabled()
         expect(page.locator("#releaseStatus")).to_have_text("Freigegeben")
         expect(page.locator("#stepAnswer")).to_have_attribute("aria-current", "step")
+        expect(page.locator(".work-card[data-active=true]")).to_have_attribute("data-step", "stepAnswer")
+        expect(page.locator("#releaseLabel")).to_have_text("Vorschau freigegeben")
         page.locator("#btnCopy").click()
         expect(page.locator("#copied")).to_have_text("Kopiert.")
         assert "[PERSON_1]" in page.evaluate("navigator.clipboard.readText()")
@@ -59,13 +67,13 @@ def main() -> None:
         expect(page.locator("#releaseStatus")).to_have_text("Prüfung nötig")
         expect(page.locator("#btnCopy")).to_be_disabled()
         expect(page.locator("#answerStatus")).to_have_text("Ausstehend")
-        for width in [390, 768, 1024, 1440]:
+        for width in [320, 390, 768, 1024, 1440]:
             page.set_viewport_size({"width": width, "height": 900})
             assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), width
 
         assert not errors, errors
         browser.close()
-    print("Browserprüfung bestanden: Freigabe, Kopieren, Rückübersetzung und vier Bildschirmbreiten.")
+    print("Browserprüfung bestanden: Freigabe, Kopieren, Rückübersetzung und fünf Bildschirmbreiten.")
 
 
 if __name__ == "__main__":
