@@ -27,7 +27,8 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 
 ## Bekannte Schwächen
 
-- Umgehungstest gegen die Demo, noch offen: kyrillische Doppelgänger in IBANs („DЕ89“ mit kyrillischem Е, nur der Rest wird maskiert), Quasi-Identifikatoren aus dem Kontext („der Bürgermeister von …“): Eine kurze Regel zeigt „die einzige Kinderärztin im Ort“ und Ämter wie „Bürgermeister von Hasenwinkel“ als unsichere Stelle, ersetzt aber nichts. Alles andere („die Nachbarin mit dem roten Porsche“) bleibt Sache der Prüfung.
+- Kyrillische und griechische Doppelgänger werden nur bei der IBAN-Suche wie lateinische Buchstaben behandelt („DЕ89“ mit kyrillischem Е). In E-Mails, Kennungen oder Namen gilt das nicht.
+- Umgehungstest gegen die Demo, noch offen: Quasi-Identifikatoren aus dem Kontext („der Bürgermeister von …“): Eine kurze Regel zeigt „die einzige Kinderärztin im Ort“ und Ämter wie „Bürgermeister von Hasenwinkel“ als unsichere Stelle, ersetzt aber nichts. Alles andere („die Nachbarin mit dem roten Porsche“) bleibt Sache der Prüfung.
 - Eine Antwort von Claude kann Links oder Markdown-Bilder enthalten, in denen nach der Rückübersetzung echte Werte stehen („![x](https://…?a=[IBAN_1])“). Die Oberfläche zeigt das nur als Text. Riskant wird es erst, wenn jemand den Text in ein Programm kopiert, das Markdown oder HTML darstellt.
 - Zweibuchstabige Namensteile („Wu“, „Do“) werden in genau dieser Schreibweise mitmaskiert. Bei einer Person „Tran Do“ wird auch die Abkürzung „Do“ für Donnerstag zum Namen. Die Prüfung zeigt solche Stellen als unsicher.
 - Die Ausnahmen beim Kfz-Kennzeichen sind eine kurze Liste (EU, VO, DIN, ISO, VDE, VW, BMW). Andere Normen wie „ABC-DE 12“ werden maskiert, echte Kennzeichen aus Dinslaken („DIN-AB 123“) nicht.
