@@ -19,7 +19,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- Namen mit Sonderzeichen vollständig maskieren, weniger Falschtreffer bei ADRESSE und Anrede, abgeschnittene Antworten kennzeichnen. `KENNUNG` bleibt unberührt (`lxc-ht`).
+- Namen mit Sonderzeichen, Falschtreffer bei ADRESSE und Anrede, abgeschnittene Antworten: [PR #6](https://github.com/lxc-ht/LP7/pull/6) wartet auf Review und behebt einen Fehler auf `main` (`lxc-ht`).
 - `lxc-ht`: Layout ohne Scrollen auf dem Laptop: [PR #5](https://github.com/lxc-ht/LP7/pull/5) wartet auf den Merge.
 
 **Nächste Aufgaben**
