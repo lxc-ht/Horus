@@ -257,6 +257,11 @@ def main() -> None:
     hint = marked["uncertain"][0]
     assert marked["masked_text"][hint["start"]:hint["end"]] == "Nordlicht"
 
+    # Zu lange Texte lehnt der Server ab, bevor der Kern sie sieht.
+    too_long = rejected(server.analyze, server.AnalyzeBody(text="a" * (server.TEXT_MAX_CHARS + 1)))
+    assert "100.001 Zeichen" in too_long["error"]
+    assert server.analyze(server.AnalyzeBody(text="a" * server.TEXT_MAX_CHARS))["masked_text"]
+
     # Rückübersetzung meldet Unbekanntes und Fehlendes.
     restored = server.restore(server.RestoreBody(session_id=sid, answer="[PERSON_1] und [PERSON_9]"))
     assert restored["text"] == "Erika Musterfrau und [PERSON_9]"
