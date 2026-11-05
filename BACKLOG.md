@@ -6,6 +6,7 @@ Was auffällt, aber nicht in den aktuellen Block gehört.
 
 Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausgehen. Bestehende Signaturen bleiben unverändert.
 
+- `api.warm_up()` – lädt die Detektoren vorab (GLiNER), wirft nie. Die Weboberfläche ruft es beim Start im Hintergrund auf, damit der erste Klick auf „Text analysieren“ nicht wartet. Abschalten mit `LP7_NO_WARMUP=1`.
 - `api.set_detectors(detectors | None)` – Detektoren festlegen (Tests mit Fake-Detektor, später weitere Detektoren). `None` = Standard (Regex + GLiNER).
 - `api.CloudError` – `send()` wirft sie, wenn Claude nicht erreichbar ist, den Key ablehnt oder die Anfrage ablehnt (`stop_reason: refusal`). Die Meldung ist ein fertiger deutscher Satz und enthält nie Text aus der Anfrage.
 - `analyze` vereinheitlicht den Text mit `mask.canonical` (NFKC, ohne unsichtbare Formatzeichen). `original_text` ist diese Fassung, nicht die eingegebene Zeichenfolge. `add_manual` behandelt den Begriff genauso.

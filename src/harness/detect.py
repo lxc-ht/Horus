@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 import re
+import threading
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -335,10 +336,17 @@ _ROLE_WORDS = {
 _NOT_A_NAME = _ROLE_WORDS | {"herr", "herrn", "frau"}
 
 _gliner_cache: dict[str, object] = {}
+# Vorladen beim Start und die erste Analyse können gleichzeitig laden wollen. Die Sperre lässt die Analyse warten, statt das Modell doppelt zu laden.
+_gliner_lock = threading.Lock()
 
 
 def _load_gliner(model_name: str):
     """Lädt das Modell einmal pro Prozess und verwendet es danach wieder."""
+    with _gliner_lock:
+        return _load_gliner_locked(model_name)
+
+
+def _load_gliner_locked(model_name: str):
     if model_name not in _gliner_cache:
         os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
         os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
@@ -435,6 +443,10 @@ class GlinerDetector:
 
     def detect(self, text: str) -> list[Finding]:
         return self._predict(text, self.threshold)
+
+    def warm_up(self) -> None:
+        """Lädt das Modell und rechnet einmal mit einem erfundenen Satz, damit die erste echte Analyse nicht wartet."""
+        _load_gliner(self.model_name).predict_entities("Erika Musterfrau wohnt in Lüneburg.", list(GLINER_LABELS), threshold=self.threshold)
 
     def uncertain(self, text: str) -> list[Finding]:
         """Stellen knapp unter der Schwelle: nicht maskiert, aber dem Menschen zu zeigen."""

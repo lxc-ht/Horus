@@ -470,3 +470,36 @@ def test_bare_placeholder_with_genitive_is_restored_and_reported():
     assert bare.text == "Anna Müllers Antrag"
     assert any("ohne Klammern" in warning for warning in bare.warnings)
     assert api.restore(session, "person 1s Antrag").changed == ["person 1"]
+
+
+# --- Vorladen ------------------------------------------------------------------
+
+class _WarmDetector:
+    name = "warm"
+
+    def __init__(self, fail: bool = False):
+        self.fail = fail
+        self.calls = 0
+
+    def detect(self, text):
+        return []
+
+    def warm_up(self):
+        self.calls += 1
+        if self.fail:
+            raise RuntimeError("Modell nicht erreichbar")
+
+
+def test_warm_up_loads_every_detector_that_can():
+    warm = _WarmDetector()
+    api.set_detectors([RegexDetector(), warm])   # RegexDetector hat nichts vorzuladen
+    api.warm_up()
+    assert warm.calls == 1
+
+
+def test_warm_up_never_raises_and_logs_only_the_error_type(caplog):
+    api.set_detectors([_WarmDetector(fail=True)])
+    with caplog.at_level(logging.INFO, logger="harness.api"):
+        api.warm_up()
+    assert "RuntimeError" in caplog.text
+    assert "nicht erreichbar" not in caplog.text

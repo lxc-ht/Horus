@@ -39,7 +39,7 @@ __all__ = [
     "TYPES", "Replacement", "Uncertain", "MaskResult", "Release", "RestoreResult",
     "LeakError", "ReleaseMismatchError", "NoApiKeyError", "CloudError",
     "analyze", "add_manual", "remove", "get", "release", "has_api_key", "send", "restore",
-    "set_detectors",
+    "set_detectors", "warm_up",
 ]
 
 log = logging.getLogger(__name__)
@@ -85,6 +85,23 @@ def set_detectors(detectors: list[Detector] | None) -> None:
     """Erweiterung: Detektoren festlegen (Tests, weitere Detektoren). None = Standard (Regex + GLiNER)."""
     global _detectors
     _detectors = detectors
+
+
+def warm_up() -> None:
+    """Erweiterung: Lädt die Detektoren vorab (das Modell braucht beim ersten Mal Sekunden).
+
+    Wirft nie. Klappt es nicht, meldet die erste Analyse den Fehler wie bisher.
+    Kein Text der Nutzer ist beteiligt, das Log nennt nur den Fehlertyp.
+    """
+    for d in _active_detectors():
+        warm = getattr(d, "warm_up", None)
+        if warm is None:
+            continue
+        try:
+            warm()
+            log.info("warm_up: %s geladen", getattr(d, "name", type(d).__name__))
+        except Exception as e:
+            log.warning("warm_up: %s nicht geladen (%s)", getattr(d, "name", type(d).__name__), type(e).__name__)
 
 
 def _active_detectors() -> list[Detector]:

@@ -223,7 +223,23 @@ def check_eml() -> None:
     assert post("/api/eml", eml(), host="angreifer.example")[0] == 403
 
 
+def check_warm_up() -> None:
+    # Beim Start lädt der Server den Kern im Hintergrund vor, ohne auf das Laden zu warten.
+    import threading
+    loaded = threading.Event()
+    core.warm_up = loaded.set
+    try:
+        async def start():
+            async with server.lifespan(server.app):
+                pass
+        asyncio.run(start())
+        assert loaded.wait(5), "warm_up wurde beim Start nicht aufgerufen"
+    finally:
+        del core.warm_up
+
+
 def main() -> None:
+    check_warm_up()
     check_pdf()
     check_docx()
     check_eml()

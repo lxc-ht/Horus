@@ -4,6 +4,8 @@ import re
 import zipfile
 import logging
 import os
+import threading
+from contextlib import asynccontextmanager
 import warnings
 from dataclasses import asdict
 from email import policy
@@ -53,7 +55,17 @@ EML_INVALID = "Das ist keine lesbare E-Mail-Datei (.eml)."
 # Entpackt höchstens so viel. Eine kleine ZIP-Datei kann sonst Gigabytes an XML enthalten.
 DOCX_MAX_XML = 50 * 1024 * 1024
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # Modell im Hintergrund laden, damit der erste Klick auf „Text analysieren“ vor Publikum nicht wartet.
+    # Der Server ist sofort erreichbar; eine Analyse während des Ladens wartet einfach mit.
+    warm = getattr(core, "warm_up", None)
+    if warm is not None and os.environ.get("LP7_NO_WARMUP") != "1":
+        threading.Thread(target=warm, name="lp7-warm-up", daemon=True).start()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 class AnalyzeBody(BaseModel):
