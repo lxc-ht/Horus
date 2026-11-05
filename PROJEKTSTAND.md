@@ -15,6 +15,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- [ ] Word (.docx) und E-Mail (.eml) laden wie PDF: Text lokal im Speicher auslesen und ins Textfeld setzen, ohne neue Abhängigkeit. Eigener PR auf PR #30 (`lxc-ht`, Claude).
 
 
 
