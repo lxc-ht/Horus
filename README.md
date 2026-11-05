@@ -24,7 +24,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 **In Arbeit**
 
 - Weitere Umgehungen schließen (Zeilenumbrüche, Passwörter, API-Keys, Handles): [PR #24](https://github.com/lxc-ht/LP7/pull/24) wartet auf den Merge (`lxc-ht`).
-- Dashboard polieren (`web/static/index.html`): [PR #23](https://github.com/lxc-ht/LP7/pull/23) wartet auf Review, Remote-Branch `web-polish` (`Phantom-create-1`).
 
 **Nächste Aufgaben**
 
@@ -43,6 +42,7 @@ Beide:
 
 **Erledigt**
 
+- [x] Dashboard poliert: lesbare Platzhalter, Legende zeigt alle erkannten Typen mit Anzahl, erledigte Schritte mit Haken, Verlauf bei abgeschnittenem Text. Element-IDs unverändert, keine externen Quellen, 173 Tests und Browserprüfung grün (PR #23, `Phantom-create-1`).
 - [x] Start per Doppelklick mit `LP7 starten.command` umgesetzt und geprüft, Browser öffnet sich automatisch, Server bleibt auf diesem Rechner (PR #20, `Phantom-create-1`).
 - [x] Repo angelegt, beide haben Schreibrechte.
 - [x] Kern gebaut: Erkennung, Maskierung, Freigabe, Senden, Rückübersetzung, CLI.
