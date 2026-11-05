@@ -136,7 +136,7 @@ def mask_remove(body: RemoveBody) -> dict:
 @app.post("/api/release")
 def release(body: SessionBody) -> dict:
     rel = call(core.release, body.session_id)
-    return {"sha256": rel.sha256, "text": rel.text}
+    return {"sha256": rel.sha256, "text": rel.text, "created_at": rel.created_at}
 
 
 @app.post("/api/restore")

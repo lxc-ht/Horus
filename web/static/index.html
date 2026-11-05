@@ -198,6 +198,7 @@
       <div id="legend" class="legend" aria-label="Erkannte Datentypen mit Anzahl"></div>
       <div class="row actions">
         <button id="btnRelease" type="button" class="primary" disabled><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 20 6v6c0 4.5-4 7.8-8 9.5C8 19.8 4 16.5 4 12V6l8-3.5Z M8.5 11.8l2.4 2.4 4.8-4.8"/></svg><svg class="icon locked-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg><span id="releaseLabel">Vorschau freigeben</span></button>
+        <button id="btnProof" type="button" hidden title="Speichert Zeit, Prüfsumme, Anzahl je Typ und den freigegebenen Text. Keine Originaldaten."><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M5 21h14"/></svg>Nachweis speichern</button>
         <button id="btnCopy" type="button" disabled><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="13" rx="2.5"/><path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg><svg class="icon locked-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg>Kopieren</button>
         <span id="copied" class="hint" role="status" aria-live="polite"></span>
       </div>
@@ -470,8 +471,10 @@ function render() {
   $("btnCopy").className = release ? "primary" : "";
   $("btnRestore").disabled = busy;
   $("copyPanel").hidden = !showCopy;
+  $("btnProof").hidden = !release;
+  $("btnProof").disabled = busy || !release;
   $("hint").textContent = release
-    ? "Freigegeben. Ändert sich etwas, ist eine neue Freigabe nötig."
+    ? `Freigegeben · Prüfsumme ${release.sha256.slice(0, 8)}. Ändert sich etwas, ist eine neue Freigabe nötig.`
     : result ? "Text markieren, um weitere Angaben zu ersetzen. × nimmt eine Ersetzung zurück." : "";
 }
 
@@ -619,6 +622,41 @@ $("btnRelease").addEventListener("click", () => run(async () => {
   state.release = null;
   state.release = await api("/api/release", { session_id: state.result.session_id });
 }));
+
+$("btnProof").addEventListener("click", () => {
+  // Nachweis, was den Rechner verlassen darf: nur der freigegebene Text, nie die Originale.
+  const { release, result } = state;
+  if (!release) return;
+  const perType = new Map();
+  for (const r of result.replacements) {
+    if (!perType.has(r.typ)) perType.set(r.typ, new Set());
+    perType.get(r.typ).add(r.placeholder);
+  }
+  const counts = [...perType].map(([typ, set]) => `  ${typ}: ${set.size}`).join("\n") || "  keine";
+  const lines = [
+    "LP7 Freigabe-Nachweis",
+    "",
+    `Freigegeben am: ${release.created_at || new Date().toISOString()}`,
+    `Prüfsumme (SHA-256): ${release.sha256}`,
+    `Ersetzte Stellen: ${result.replacements.length}`,
+    "Verschiedene Angaben je Typ:",
+    counts,
+    "",
+    "Dieser Nachweis enthält keine Originaldaten. Die Zuordnung zu den Platzhaltern bleibt auf diesem Rechner.",
+    "Die Prüfsumme gehört genau zu diesem Text. Jede Änderung ergibt eine andere Prüfsumme.",
+    "",
+    "----- Freigegebener Text -----",
+    release.text,
+  ];
+  const blob = new Blob([lines.join("\n") + "\n"], { type: "text/plain;charset=utf-8" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `lp7-nachweis-${release.sha256.slice(0, 8)}.txt`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+});
 
 $("btnCopy").addEventListener("click", () => run(async () => {
   // Kopiert wird der Text vom Server, also genau die gespeicherte Freigabe.
