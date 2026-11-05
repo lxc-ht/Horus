@@ -99,3 +99,20 @@ def test_low_score_match_is_flagged_only_for_the_model():
     api.set_detectors([Low({})])
     result = api.analyze("Rolf kommt.")
     assert [(u.text, u.masked) for u in result.uncertain] == [("Rolf", True)]
+
+
+def test_context_that_reveals_a_person_is_shown():
+    text = "Sie ist die einzige Kinderärztin im Ort. Der Bürgermeister von Hasenwinkel hat unterschrieben."
+    result = _analyze(text)
+    found = {u.text: u for u in _plain(result)}
+    assert set(found) == {"die einzige Kinderärztin im Ort", "Bürgermeister von Hasenwinkel"}
+    for u in found.values():
+        assert u.typ == "PERSON" and "ohne Namen" in u.reason
+        assert result.masked_text[u.start : u.end] == u.text
+    assert result.masked_text == text   # nur ein Hinweis, der Text bleibt
+
+
+def test_context_hint_skips_masked_places_and_things():
+    result = _analyze("Der Bürgermeister von Hasenwinkel sagt, das sei der einzige Weg.", terms={"Hasenwinkel": "ORT"})
+    assert "[ORT_1]" in result.masked_text
+    assert [u for u in _plain(result) if "ohne Namen" in u.reason] == []
