@@ -19,6 +19,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- `lxc-ht`: Layout der Weboberfläche bei 1280 x 800 reparieren (`web/static/index.html`).
 - Nichts.
 
 **Nächste Aufgaben**
@@ -29,7 +30,6 @@ Kern (`Phantom-create-1`):
 
 Web (`lxc-ht`):
 
-- [ ] Layout bei 1280 x 800 reparieren: Die Seite ist 1048 px hoch, „Freigeben“ liegt unter dem sichtbaren Bereich, von der Antwort ist im Kopier-Modus nur eine Zeile zu sehen, und ein langer Bericht ragt aus der Karte.
 - [ ] Nach PR #4: `KENNUNG` in `TYPES` und Chip-Farbe `.t-KENNUNG` in `web/static/index.html` ergänzen.
 
 Beide:
