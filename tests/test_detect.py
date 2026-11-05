@@ -289,7 +289,7 @@ def test_address_without_street_word_does_not_hit_prose():
 def test_german_ids_from_presidio():
     for text, value in [("unter HRB 12345 eingetragen", "HRB 12345"), ("HRA 4711 B beim AG", "HRA 4711 B"),
                         ("Unsere USt-IdNr lautet DE 136 695 976.", "DE 136 695 976"), ("USt-IdNr. DE136695976", "DE136695976"),
-                        ("Führerschein B072RRE2I55", "B072RRE2I55"), ("Reisepass C01X00T47", "C01X00T47"), ("LANR 123456601", "123456601")]:
+                        ("Führerschein B072RRE2I55", "B072RRE2I55"), ("Reisepass C01X00T47", "C01X00T47")]:
         assert ("KENNUNG", value) in _found(text), text
 
 

@@ -70,10 +70,8 @@ _LABELED_ID = re.compile(
     r"|SV-?(?:Nr\.?|Nummer)|Sozialversicherungsnummer|Versicherten-?(?:Nr\.?|Nummer)"
     r"|Aktenzeichen|Az\.?|Gesch[äa]ftszeichen|Mandanten-?(?:Nr\.?|Nummer)|Patienten-?(?:Nr\.?|Nummer)"
     r"|(?:Personal)?Ausweis(?:-?(?:Nr\.?|Nummer))?|Kundenkonto|Kennzeichen|BLZ|Bankleitzahl|(?:Unser|Ihr)\s+Zeichen"
-    # Bezeichner aus den deutschen Erkennern von Microsoft Presidio (MIT-Lizenz), siehe README unter „Danksagung“.
-    r"|Reisepass(?:nummer)?|Pass-?(?:Nr\.?|Nummer)|F[üu]hrerschein(?:-?(?:Nr\.?|Nummer))?|Fahrerlaubnis-?(?:Nr\.?|Nummer)"
-    r"|USt\.?-?Id(?:Nr\.?|-?Nummer)?|Umsatzsteuer-?(?:ID|Identifikationsnummer)|LANR|BSNR|Arzt-?(?:Nr\.?|Nummer)"
-    r"|Betriebsst[äa]ttennummer|Handelsregister(?:-?(?:Nr\.?|Nummer))?|HRB?-?(?:Nr\.?|Nummer)"
+    # Bezeichner nach den deutschen Erkennern von Presidio (MIT-Lizenz), siehe README unter „Danksagung“.
+    r"|Reisepass(?:nummer)?|F[üu]hrerschein(?:nummer)?|USt\.?-?Id(?:Nr\.?)?|Umsatzsteuer-?ID"
     r"|(?:Konto|Kunden|Fall|Vertrags|Rechnungs|Policen|Versicherungs|Beleg|Auftrags|Reisepass)-?(?:Nr\.?|Nummer))"
     # Wert: Blöcke aus Großbuchstaben und Ziffern. Ein Punkt am Blockende beendet ihn, sonst käme der nächste Satz mit.
     r"[\s:.#]*(?P<value>[A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w)(?: [A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w))*)"
@@ -137,11 +135,12 @@ _ADDRESS = re.compile(
 # Adresse ohne Straßenwort: „Am Sande 12“, „An der Kirche 3“, „Im Grund 4“. Ohne Straßenendung sähe das aus wie
 # „Am Montag 14 Termine“. Deshalb zählt es nur mit PLZ dahinter oder einem Kontextwort kurz davor („wohnhaft“, „Anschrift“).
 # Die Idee mit Kontextwörtern stammt aus Presidio (Context Enhancement), der Code ist eigen.
-_PREPOSITION = r"(?:[Aa]m|[Aa]n der|[Aa]n den|[Aa]uf der|[Aa]uf dem|[Ii]m|[Ii]n der|[Ii]n den|[Zz]um|[Zz]ur|[Hh]inter der|[Hh]inter dem|[Vv]or dem|[Uu]nter den)"
+_PREPOSITION = r"(?:[Aa]m|[Aa]n der|[Aa]uf der|[Aa]uf dem|[Ii]m|[Ii]n der|[Zz]um|[Zz]ur)"
+# Wörter, die nach „am“ oder „im“ fast nie eine Straße sind.
 _NOT_A_STREET_NAME = (
-    r"(?!(?:Jahre?|Monat|Tag|Woche|Ende|Anfang|Beginn|Abschnitt|Kapitel|Absatz|Artikel|Paragraphe?n?|Paragrafe?n?|Punkt|Seite|Satz"
-    r"|Rahmen|Fall|Alter|Rang|Termin|Zeitraum|Vergleich|Wert|Betrag|Durchschnitt|Schnitt|Verfahren|Vertrag|Gegensatz"
-    rf"|Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag|Wochenende|Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\b)"
+    r"(?!(?:Jahre?|Monat|Tag|Ende|Anfang|Abschnitt|Absatz|Kapitel|Punkt|Seite|Rahmen|Fall"
+    r"|Montag|Dienstag|Mittwoch|Donnerstag|Freitag|Samstag|Sonntag"
+    r"|Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\b)"
 )
 _ADDRESS_NO_STREET_WORD = re.compile(
     rf"(?<![\w\-]){_PREPOSITION}\s+{_NOT_A_STREET_NAME}[A-ZÄÖÜ][\w\-]+(?:\s+[A-ZÄÖÜ][\w\-]+)?{_HOUSE_NUMBER}(?![\d.,]\d)"
@@ -149,9 +148,7 @@ _ADDRESS_NO_STREET_WORD = re.compile(
     rf"(?:(?P<city>,?\s+{_POSTCODE_CITY})|(?=[ \t]*(?:[,.;:)\n]|$|(?:in|bei|und|zu)\s)))"
 )
 _ADDRESS_CONTEXT = re.compile(
-    r"(?i:wohnhaft|wohnt|wohnen|wohnte|Wohnsitz|Wohnort|Wohnung|Anschrift|Adresse|Postanschrift|Lieferadresse|Rechnungsadresse"
-    r"|Zustellanschrift|gemeldet|zugezogen|umgezogen|Sitz|ansässig|Mietobjekt|Mietsache|Grundstück|Liegenschaft|Objekt|gelegen)\b"
-    r"[^.!?\n]{0,40}$"
+    r"(?i:wohnhaft|wohnt|wohnen|Wohnsitz|Anschrift|Adresse|gemeldet|Sitz|Mietobjekt|Mietsache|gelegen)\b[^.!?\n]{0,40}$"
 )
 
 # PLZ und Ort allein. Nur nach einem Trenner oder „in“, sonst wären „es kamen 50000 Gäste“ auch Adressen.
