@@ -186,6 +186,7 @@
         <input id="pdfInput" type="file" accept=".pdf,application/pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.eml,message/rfc822" hidden>
         <button id="btnAnalyze" type="button" class="primary"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3M7 8h10M7 12h7M7 16h10"/></svg><span id="analyzeLabel">Text analysieren</span></button>
       </div>
+      <p id="fileError" class="note error" role="alert" hidden></p>
       <p class="card-foot">Erkennung und Ersetzung erfolgen lokal.</p>
     </section>
     <section class="work-card review-card" data-step="stepReview" aria-labelledby="h-masked">
@@ -233,7 +234,7 @@ Unsere Mandantin Erika Musterfrau (erika.musterfrau@example.org, Tel. 040 555012
 Bitte fasse den Sachverhalt kurz zusammen, nenne die Frist für eine Kündigungsschutzklage und entwirf ein kurzes Schreiben an Max Mustermann. Übernimm alle Platzhalter in eckigen Klammern unverändert.`;
 
 const $ = (id) => document.getElementById(id);
-const state = { result: null, release: null, busy: false, restored: false, error: "", accepted: new Set() };
+const state = { result: null, release: null, busy: false, restored: false, error: "", fileError: "", accepted: new Set() };
 
 const workCards = [...$("workspace").querySelectorAll(".work-card")];
 const mouseHover = matchMedia("(hover: hover) and (pointer: fine)");
@@ -280,6 +281,7 @@ async function run(action) {
   if (state.busy) return;
   state.busy = true;
   state.error = "";
+  state.fileError = "";
   render();
   try {
     await action();
@@ -441,6 +443,8 @@ function render() {
     result.warnings.forEach((w) => notes.push(note(w, "warn")));
   }
   $("notes").replaceChildren(...notes);
+  $("fileError").textContent = state.fileError;
+  $("fileError").hidden = !state.fileError;
 
   const counter = $("counter");
   counter.textContent = busy ? "Lokale Verarbeitung läuft …" : result
@@ -513,7 +517,19 @@ async function restoreAnswer(answer) {
   renderAnswer(await api("/api/restore", { session_id: state.result.session_id, answer }));
 }
 
-$("btnExample").addEventListener("click", () => { $("original").value = EXAMPLE; });
+$("btnExample").addEventListener("click", () => {
+  loadOriginal(EXAMPLE);
+  state.fileError = "";
+  render();
+});
+
+// Jede Änderung am Original macht Analyse und Freigabe ungültig: Die Vorschau zeigte sonst einen anderen Text.
+$("original").addEventListener("input", () => {
+  if (!state.result && !state.release && !state.fileError) return;
+  resetAnalysis();
+  state.fileError = "";
+  render();
+});
 
 // Nach Endung, nicht nur nach MIME-Typ: Viele Systeme melden für .eml und .docx keinen Typ.
 const FILE_KINDS = [
@@ -527,14 +543,18 @@ const FILE_HINTS = [
 ];
 const NOT_SUPPORTED = "Diese Datei kann LP7 nicht lesen. Möglich sind PDF, Word (.docx) und E-Mail (.eml).";
 
-// Ein neuer Text macht Analyse und Freigabe des alten wertlos, sonst ließe sich die alte Fassung kopieren.
-function loadOriginal(text) {
-  $("original").value = text;
+function resetAnalysis() {
   state.result = null;
   state.release = null;
   state.accepted.clear();
   $("copied").textContent = "";
   clearAnswer();
+}
+
+// Ein neuer Text macht Analyse und Freigabe des alten wertlos, sonst ließe sich die alte Fassung kopieren.
+function loadOriginal(text) {
+  $("original").value = text;
+  resetAnalysis();
   $("original").scrollTop = 0;
   requestAnimationFrame(updateScrollFades);
 }
@@ -543,11 +563,16 @@ function loadOriginal(text) {
 function loadFile(file) {
   return run(async () => {
     if (!file) return;
-    const hint = FILE_HINTS.find((h) => h.ext.test(file.name));
-    if (hint) throw new Error(hint.error);
-    const kind = FILE_KINDS.find((k) => k.ext.test(file.name)) || FILE_KINDS.find((k) => k.type === file.type);
-    if (!kind) throw new Error(NOT_SUPPORTED);
-    loadOriginal((await apiFile(kind.path, file)).text);
+    // Die Meldung steht beim Knopf unter „Dein Original“, nicht in der Vorschau.
+    try {
+      const hint = FILE_HINTS.find((h) => h.ext.test(file.name));
+      if (hint) throw new Error(hint.error);
+      const kind = FILE_KINDS.find((k) => k.ext.test(file.name)) || FILE_KINDS.find((k) => k.type === file.type);
+      if (!kind) throw new Error(NOT_SUPPORTED);
+      loadOriginal((await apiFile(kind.path, file)).text);
+    } catch (e) {
+      state.fileError = e.message;
+    }
   });
 }
 
@@ -582,7 +607,10 @@ for (const type of ["dragover", "drop"]) {
 $("btnAnalyze").addEventListener("click", () => run(async () => {
   const text = $("original").value;
   if (!text.trim()) throw new Error("Bitte erst einen Text eingeben.");
-  applyResult(await api("/api/analyze", { text }));
+  const result = await api("/api/analyze", { text });
+  // Wurde während der Analyse weitergetippt, passt das Ergebnis nicht mehr zum Text im Feld.
+  if ($("original").value !== text) throw new Error("Der Text hat sich während der Analyse geändert. Bitte erneut analysieren.");
+  applyResult(result);
   state.accepted.clear();
   $("masked").focus();
 }));
