@@ -31,6 +31,11 @@ Kern (`Phantom-create-1`):
 - [ ] Falsche Rückübersetzung verhindern, nicht nur melden: Stand ein Platzhalter nur für einen Namensteil wie „Antrag“, warnt der Bericht seit PR #16, der falsche Text bleibt aber. Nach Herr, Frau, Dr. oder Prof. kommt bewusst keine Warnung.
 - [ ] Wünsche aus `web/BACKLOG.md` unter „Wunsch an den Kern“ umsetzen.
 
+Oberfläche (`lxc-ht`, ab 05.11. nachmittags, `web/static/index.html` und `web/ui-kit/`):
+
+- [ ] Dashboard weiter verbessern. Stand ist PR #23. Element-IDs bitte nicht ändern, `web/test_ui.py` prüft sie.
+- [ ] Idee: Die Legende erklärt seit PR #23 die gelb gestrichelten unsicheren Stellen nicht mehr. Eintrag „Unsicher, bitte prüfen“ wieder ergänzen, sobald es eine solche Stelle gibt.
+
 Beide:
 
 - [ ] Texte in `web/static/index.html` an den Kopiermodus anpassen: „Nur diese Fassung wird nach Freigabe gesendet“ und „Versand gesperrt“ passen nicht zu „Nichts wird automatisch gesendet“.
