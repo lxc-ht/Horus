@@ -2,6 +2,8 @@
 
 Pseudonymisierungs-Harness: KI nutzen, ohne personenbezogene Daten aus der Hand zu geben.
 
+![LP7: Analysieren, Vorschau und Ausgabe. Klar. Lokal. Unter deiner Kontrolle.](web/assets/lp7-banner.png)
+
 **UI Kit:** [Icons, Komponenten und drei klickbare Design Demos](web/ui-kit/README.md). Der vollständige Quellcode liegt unter `web/ui-kit/` und kann gemeinsam weiterentwickelt werden.
 
 ## Projektstand
