@@ -4,3 +4,12 @@
 *.pem
 __pycache__/
 node_modules/
+
+# Harness: Zuordnungstabelle, Originaltexte und Schlüssel gehören nie in Git
+data/
+*.sqlite
+*.sqlite3
+.venv/
+.pytest_cache/
+*.egg-info/
+dist/
