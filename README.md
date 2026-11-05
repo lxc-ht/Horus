@@ -21,6 +21,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- `lxc-ht`: Nur Kopier-Weg ohne API-Key, unsichere Stellen in der Prüfung anzeigen (`web/`, `src/harness/api.py`, `GlinerDetector` in `detect.py`; Branch `pruefung-unsicher`).
 - Datumsformate, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung: [PR #12](https://github.com/lxc-ht/LP7/pull/12) wartet auf den Merge (`lxc-ht`).
 
 **Nächste Aufgaben**
@@ -33,7 +34,6 @@ Kern (`Phantom-create-1`):
 Beide:
 
 - [ ] Klären, ob das Projekt in unserem Hackathon-Track eingereicht werden darf.
-- [ ] Echtes Senden an Claude mit API-Key in der `.env` testen. Das ist bisher ungetestet.
 - [ ] Demo auf dem Vortragsrechner durchspielen und das Modell vorher einmal laden.
 - [ ] Pitch vorbereiten, auch für diese Fragen: Warum kein lokales Modell? Was, wenn der Kontext die Person verrät? Was ist mit der DSGVO?
 
