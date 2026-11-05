@@ -162,6 +162,12 @@ def check_docx() -> None:
         "Erika Musterfrau wohnt in Lüneburg.\nAz.\t123/26\nMax Mustermann\nZelle eins\nIm Textfeld\nAußen"
     ), data["text"]
 
+    # Zellen einer Tabellenzeile bleiben in einer Zeile, getrennt durch Tabulator.
+    cell = lambda *texts: "<w:tc>" + "".join(para(f"<w:t>{t}</w:t>") for t in texts) + "</w:tc>"
+    table = "<w:tbl><w:tr>" + cell("IBAN") + cell("DE00 1234", "5678") + "</w:tr><w:tr>" + cell("Name") + cell("Erika Musterfrau") + "</w:tr></w:tbl>"
+    status, data = post("/api/docx", docx(table))
+    assert status == 200 and data["text"] == "IBAN\tDE00 1234 5678\nName\tErika Musterfrau", data
+
     assert post("/api/docx", docx(para("<w:t> </w:t>"))) == (422, {"error": server.DOCX_EMPTY})
     assert post("/api/docx", b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" + b"0" * 100) == (422, {"error": server.DOCX_OLD})
     assert post("/api/docx", b"Das ist keine Word-Datei.") == (422, {"error": server.DOCX_INVALID})
