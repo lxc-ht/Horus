@@ -8,8 +8,9 @@
   /* Material C: helle Arbeitsflächen, dezenter Verlauf und Farbrand am aktuellen Schritt. */
   :root { color-scheme: light; --paper: #fff; --accent: #c6ff3d; --accent-ink: #101110; --red: #9b2823; --red-soft: #fff1ed; --yellow: #70540a; --yellow-soft: #fff9dd; --green: #17613d; --green-soft: #dffbe8; --ink: #182024; --muted: #5c6a72; --line: #dce7e9; }
   * { box-sizing: border-box; }
-  html { min-height: 100%; background: #f8fbfc; }
-  body { margin: 0; color: var(--ink); font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; background: radial-gradient(ellipse at 90% 5%,#ffe53b1c,transparent 45%), radial-gradient(ellipse at 10% 20%,#00b8ff12,transparent 50%), linear-gradient(125deg,#f6fbfd,#f8fcf9 60%,#fcfdf4); background-attachment: fixed; }
+  html { min-height: 100%; background: #f2ecdf; }
+  /* Papierton wie ein alter Druck: nur CSS-Verläufe, keine Bilddatei. Der dunkelste Ton (#efe9dc) hält mit --muted noch 4,6 zu 1. */
+  body { margin: 0; color: var(--ink); font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; background: radial-gradient(ellipse 70% 45% at 50% -8%,#fffdf7b3,transparent 70%), linear-gradient(180deg,#f6f1e7,#efe9dc); background-attachment: fixed; }
   [hidden] { display: none !important; }
   button { font: inherit; -webkit-tap-highlight-color: transparent; border-radius: 12px; border: 1px solid #dce5e8; color: var(--ink); font-size: 13px; font-weight: 550; cursor: pointer; transition: background .15s, border-color .15s, box-shadow .15s; display: inline-flex; justify-content: center; align-items: center; gap: 7px; background: #ffffffc9; padding: 10px 14px; min-height: 44px; }
   textarea { -webkit-tap-highlight-color: transparent; width: 100%; border: 0; border-top: 1px solid #edf1e7; border-radius: 0; color: #1b2119; font: 15px/1.8 -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif; resize: vertical; background: transparent; border-color: #dce5df; padding: 12px 0; line-height: 1.75; }
@@ -19,19 +20,13 @@
   .pane:focus-visible { outline: 3px solid #0076a9; outline-offset: -3px; }
   #fakeBand { background: #fff8d7; color: #70540a; font-size: 12px; font-weight: 600; text-align: center; padding: 6px 18px; border-bottom: 1px solid #f4e9b4; }
   .workspace { margin: 0 auto; padding: 10px 24px 20px; width: 100%; }
-  .intro { display: flex; align-items: center; justify-content: center; gap: 24px; flex: none; min-height: 76px; padding: 0 0 14px; }
-  .slogan { width: 190px; margin: 0; color: #20323b; font-size: 18px; font-weight: 550; letter-spacing: -.4px; }
-  .slogan-lead { text-align: right; color: #687c86; font-size: 20px; font-weight: 400; }
+  .intro { display: flex; justify-content: center; flex: none; padding: 0 0 10px; }
+  /* Überschrift im Stil eines alten Drucks. Nur Systemschriften, damit die Seite nichts von außen lädt. */
+  .headline { display: flex; align-items: center; justify-content: center; gap: .35em; margin: 0; color: #2b2a26; font: 400 clamp(36px, 4.45vw, 72px)/1 "Hoefler Text", Baskerville, "Iowan Old Style", Georgia, serif; letter-spacing: -.01em; white-space: nowrap; text-shadow: 0 1px 0 #fffdf8b3; }
+  /* Breite 3,26 em wie in der Vorschau (Auge 300 px bei Schrift 92 px). Das Auge sitzt mittig auf der Mitte der Kleinbuchstaben. */
+  .headline-eye { display: block; flex: none; width: 3.26em; transform: translateY(.06em); }
+  .headline-eye svg { display: block; width: 100%; height: auto; }
   .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  .hero-art { position: relative; isolation: isolate; display: flex; justify-content: center; align-items: center; gap: 10px; width: 150px; min-height: 54px; flex-shrink: 0; }
-  .hero-art::before { content: ""; z-index: -2; position: absolute; inset: -8px -15px; opacity: .5; background: radial-gradient(ellipse at 68% 30%,#ffe53b99,transparent 45%), radial-gradient(ellipse at 52% 55%,#c6ff3d,transparent 53%), radial-gradient(ellipse at 25% 40%,#00b8ffb3,transparent 55%), radial-gradient(ellipse at 60% 70%,#2be0a0,transparent 60%); filter: blur(15px); mask-image: radial-gradient(ellipse closest-side,#000 40%,transparent); }
-  .hero-art::after { content: ""; z-index: -1; position: absolute; inset: -8px 0; background: repeating-linear-gradient(90deg,#fff0 0 39px,#ffffff78 41px,#fff0 46px); mask-image: radial-gradient(ellipse closest-side,#000 55%,transparent); }
-  .art-icon { position: relative; z-index: 1; display: grid; place-items: center; background: #ffffff6e; border: 1px solid #ffffffd9; box-shadow: 0 14px 28px -10px #26534e30,inset 0 1px #fff; }
-  .art-icon.small { width: 30px; height: 30px; border-radius: 10px; transform: rotate(-8deg); }
-  .art-icon.large { width: 42px; height: 42px; border-radius: 14px; }
-  .art-icon:nth-child(3) { transform: rotate(8deg); }
-  .art-icon .icon { width: 16px; height: 16px; }
-  .art-icon.large .icon { width: 22px; height: 22px; }
   main { display: grid; grid-template-columns: minmax(0,.95fr) minmax(0,1fr) minmax(0,1.25fr); align-items: stretch; gap: 14px; transition: grid-template-columns .25s cubic-bezier(.2,.7,.2,1); }
   main[data-focus="stepOriginal"] { grid-template-columns: minmax(0,1.7fr) minmax(0,1fr) minmax(0,1fr); }
   main[data-focus="stepReview"] { grid-template-columns: minmax(0,1fr) minmax(0,1.7fr) minmax(0,1fr); }
@@ -122,6 +117,10 @@
     .workspace { flex: 1; min-height: 0; width: 100%; display: flex; flex-direction: column; padding-bottom: 20px; }
     .intro { flex: none; }
     main { flex: 1; min-height: 0; height: auto; }
+  }
+  /* Wenig Höhe (Laptops bis 900 px): Die Überschrift wird kleiner, damit die Spalten ihre Höhe behalten. Kopfzeile bleibt so unter 130 px. */
+  @media (min-width: 861px) and (max-height: 900px) {
+    .headline { font-size: clamp(30px, min(4.45vw, 5.4vh), 50px); }
     #original, #answerInput { resize: none; }
     #copyPanel { flex: none; }
     #answer { min-height: 40px; }
@@ -138,8 +137,7 @@
   }
   @media (max-width: 860px) {
     .workspace { padding: 0 20px 22px; }
-    .intro { padding-bottom: 12px; }
-    .hero-art { width: 150px; min-height: 54px; }
+    .intro { padding: 6px 0 12px; }
     main, main[data-focus] { grid-template-columns: minmax(0,1fr); height: auto; gap: 14px; }
     .work-card { min-height: 0; padding: 20px; }
     #original, .pane { min-height: 0; font-size: 16px; }
@@ -150,13 +148,8 @@
     #copyPanel { flex-shrink: 0; }
   }
   @media (max-width: 600px) {
-    .intro { min-height: 82px; gap: 6px; }
-    .slogan { width: 102px; font-size: 12px; letter-spacing: -.2px; }
-    .slogan-lead { width: 72px; font-size: 13px; }
-    .hero-art { width: 84px; gap: 5px; }
-    .art-icon.small { width: 20px; height: 20px; border-radius: 7px; }
-    .art-icon.large { width: 28px; height: 28px; border-radius: 9px; }
-    .art-icon.large .icon { width: 19px; height: 19px; }
+    /* Handy: Slogan bleibt eine Zeile und wächst mit der Breite, bei 320 px etwa 22 px Schrift. */
+    .headline { font-size: min(7vw, 30px); gap: .3em; }
   }
   @media (pointer: coarse) { .chip button { min-width: 44px; min-height: 44px; } }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -167,13 +160,44 @@
 <div class="workspace">
   <div class="intro">
     <h1 class="sr-only">Text pseudonymisieren</h1>
-    <p class="slogan slogan-lead">Klar. Lokal.</p>
-    <div class="hero-art" aria-hidden="true">
-      <span class="art-icon small"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3M7 8h10M7 12h7M7 16h10"/></svg></span>
-      <span class="art-icon large"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></span>
-      <span class="art-icon small"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v4M14 3v5h5M5 3v18h7m0-5h9m-3-3 3 3-3 3"/></svg></span>
-    </div>
-    <p class="slogan">Unter deiner Kontrolle.</p>
+    <p class="headline" aria-label="Your Data Is Yours">
+      <!-- Die Wörter bleiben lesbar: Ein Absatz darf laut ARIA keinen eigenen Namen tragen, manche Screenreader übergehen das aria-label. -->
+      <span>Your Data</span>
+      <!-- Inhalt von web/assets/horus-auge.svg unverändert eingebettet: Der Server liefert nur diese Datei aus. -->
+      <span class="headline-eye" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 210" role="img" aria-label="Horus-Auge">
+  <defs>
+    <radialGradient id="lp7-iris" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#e6efd9"/>
+      <stop offset=".45" stop-color="#abc49c"/>
+      <stop offset=".85" stop-color="#6c8c69"/>
+      <stop offset="1" stop-color="#3d5842"/>
+    </radialGradient>
+    <clipPath id="lp7-lid"><path d="M8 82 C42 54 82 40 124 40 C158 40 182 52 202 72 C178 96 152 108 124 108 C86 108 46 98 8 82 Z"/></clipPath>
+  </defs>
+  <!-- Braue: Band, links und rechts spitz auslaufend -->
+  <path fill="currentColor" d="M16 46 C56 16 100 4 142 4 C200 5 254 22 296 40 C252 28 200 17 142 17 C100 17 60 28 16 46 Z"/>
+  <!-- Iris, oben vom Lid verdeckt -->
+  <g clip-path="url(#lp7-lid)">
+    <circle cx="122" cy="72" r="36" fill="url(#lp7-iris)"/>
+    <g stroke="#4f6b52" stroke-width=".6" opacity=".5" fill="none">
+      <path d="M122 72 L122 36 M122 72 L147 47 M122 72 L158 72 M122 72 L147 97 M122 72 L122 108 M122 72 L97 97 M122 72 L86 72 M122 72 L97 47 M122 72 L136 39 M122 72 L155 58 M122 72 L155 86 M122 72 L136 105 M122 72 L108 105 M122 72 L89 86 M122 72 L89 58 M122 72 L108 39"/>
+    </g>
+    <circle cx="122" cy="72" r="13.5" fill="#141412"/>
+    <circle cx="116" cy="65" r="4" fill="#fff" opacity=".9"/>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Oberlid und Lidstrich in einem Zug, aus dem Augenwinkel nach rechts -->
+    <path d="M8 82 C42 54 82 40 124 40 C158 40 182 52 202 72 C232 70 264 69 294 69" stroke-width="7"/>
+    <!-- Unterlid trifft den Lidstrich im Augenwinkel -->
+    <path d="M8 82 C46 98 86 108 124 108 C152 108 178 96 202 74" stroke-width="5"/>
+    <!-- Spirale -->
+    <path d="M146 106 C156 138 180 170 216 176 C246 181 263 160 256 142 C250 127 229 125 223 139 C219 149 229 157 237 151" stroke-width="6"/>
+  </g>
+  <!-- Tropfen: oben breit, unten spitz, leicht geschwungen -->
+  <path fill="currentColor" d="M90 104 C96 106 104 106 111 104 C108 136 106 168 104 202 C103 204 101 204 100 202 C97 168 94 136 90 104 Z"/>
+</svg></span>
+      <span>Is Yours</span>
+    </p>
   </div>
   <main id="workspace" aria-label="Dokument bearbeiten">
     <section class="work-card" data-step="stepOriginal" aria-labelledby="h-original">

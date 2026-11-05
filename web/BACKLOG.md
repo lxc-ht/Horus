@@ -16,3 +16,5 @@
 - Word-Tabellen: Jede Zelle wird eine eigene Zeile. Zellen einer Zeile mit Tabulator verbinden, dann bleibt „IBAN“ neben dem Wert.
 - Markieren per Tastatur, bisher geht es nur mit der Maus.
 - Freigaben liegen im Speicher des Servers und werden nie aufgeräumt. Für die Demo reicht das.
+- `web/README.md` beschreibt unter „Arbeitsoberfläche“ noch das Glasmotiv zwischen „Klar. Lokal.“ und „Unter deiner Kontrolle.“, und der Screenshot `assets/arbeitsoberflaeche-material-c.png` zeigt die alte Kopfzeile. Nach dem Merge der Überschrift „Your Data Is Yours“ Text und Bild nachziehen.
+- `web/test_ui.py` könnte die Höhe der Kopfzeile auf 1440 × 900 und 1280 × 800 mitprüfen (höchstens 130 px, kein senkrechtes Scrollen). Bisher nur von Hand gemessen.
