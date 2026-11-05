@@ -1,11 +1,15 @@
 """Lokale Weboberfläche. Start aus dem Repo-Root: uvicorn web.app:app --host 127.0.0.1 --port 8000"""
+import io
+import logging
 import os
+import warnings
 from dataclasses import asdict
 from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
+from pypdf import PdfReader
 
 FAKE = os.environ.get("HARNESS_FAKE") == "1"
 
@@ -22,6 +26,19 @@ else:
         )
 
 INDEX = Path(__file__).parent / "static" / "index.html"
+
+# pypdf meldet kaputte Stellen über logging. Ohne eigenen Handler schreibt Python das ins
+# Serverlog, und solche Meldungen können Bruchstücke der Datei enthalten.
+logging.getLogger("pypdf").addHandler(logging.NullHandler())
+logging.getLogger("pypdf").propagate = False
+
+PDF_MAX_BYTES = 20 * 1024 * 1024
+# Weniger auslesbarer Text als das (ohne Leerraum) heißt fast immer: eingescannte Seiten.
+PDF_MIN_CHARS = 20
+PDF_TOO_LARGE = "Die PDF ist größer als 20 MB."
+PDF_SCAN = "In dieser PDF steht kein auslesbarer Text, vermutlich ist sie ein Scan. Scans kann LP7 noch nicht lesen."
+PDF_PASSWORD = "Diese PDF ist mit einem Passwort geschützt. Entferne den Schutz und lade sie erneut."
+PDF_INVALID = "Das ist keine lesbare PDF-Datei."
 
 app = FastAPI()
 
@@ -112,3 +129,58 @@ def release(body: SessionBody) -> dict:
 @app.post("/api/restore")
 def restore(body: RestoreBody) -> dict:
     return asdict(call(core.restore, body.session_id, body.answer))
+
+
+class PdfError(Exception):
+    pass
+
+
+def pdf_text(data: bytes) -> tuple[str, int]:
+    # Nur im Speicher lesen: Die PDF darf nirgends auf der Platte landen.
+    try:
+        with warnings.catch_warnings():
+            # Auch Warnungen von pypdf könnten Inhalt nennen und gehören nicht ins Log.
+            warnings.simplefilter("ignore")
+            return _read_pdf(data)
+    except PdfError:
+        raise
+    except Exception:
+        # Bewusst ohne Ursache: Die Meldung von pypdf kann Inhalt der Datei enthalten.
+        raise PdfError(PDF_INVALID) from None
+
+
+def _read_pdf(data: bytes) -> tuple[str, int]:
+    reader = PdfReader(io.BytesIO(data))
+    if reader.is_encrypted:
+        # Viele „geschützte“ PDFs sperren nur Rechte und öffnen mit leerem Passwort.
+        try:
+            opened = reader.decrypt("")
+        except Exception:
+            opened = 0
+        if not opened:
+            raise PdfError(PDF_PASSWORD)
+    pages = [(page.extract_text() or "").strip() for page in reader.pages]
+    text = "\n\n".join(pages)
+    if len("".join(text.split())) < PDF_MIN_CHARS:
+        raise PdfError(PDF_SCAN)
+    return text, len(pages)
+
+
+@app.post("/api/pdf")
+async def load_pdf(request: Request) -> JSONResponse:
+    # Rohe Bytes statt Formular-Upload, so braucht es kein python-multipart.
+    # Gezählt wird beim Lesen, denn Content-Length kann fehlen oder falsch sein.
+    chunks, size = [], 0
+    async for chunk in request.stream():
+        size += len(chunk)
+        if size > PDF_MAX_BYTES:
+            return JSONResponse({"error": PDF_TOO_LARGE}, status_code=413)
+        chunks.append(chunk)
+    try:
+        text, pages = pdf_text(b"".join(chunks))
+    except PdfError as e:
+        return JSONResponse({"error": str(e)}, status_code=422)
+    except Exception:
+        # Alles fangen, damit kein Traceback mit Inhalt der PDF im Serverlog landet.
+        return JSONResponse({"error": PDF_INVALID}, status_code=422)
+    return JSONResponse({"text": text, "pages": pages})
