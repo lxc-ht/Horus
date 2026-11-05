@@ -1,3 +1,5 @@
+import re
+
 from harness.detect import Finding, RegexDetector, detect_all, merge_findings
 
 
@@ -143,3 +145,56 @@ def test_legal_references_amounts_and_years_stay():
     text = ("Die Kündigung gemäß § 573 Abs. 2 BGB ist unwirksam. Die Werkbank kostete 6.800 Euro, "
             "verarbeitet nach Art. 6 DSGVO. Im Jahr 2025 kamen 12.345,67 EUR hinzu, siehe auch §§ 535, 536 BGB.")
     assert _found(text) == set()
+
+
+def _masked_names(text):
+    return [v for t, v in _found(text) if t == "PERSON"]
+
+
+def test_salutation_masks_whole_name_in_any_script():
+    for name in ["Nguyễn", "Hoàng", "Çelik", "Šimić", "McDonald", "O'Neill", "Müller-Lüdenscheidt", "José García", "Hoàng Trung Loc", "von der Leyen"]:
+        for anrede in ["Frau", "Herr", "Herrn", "Dr."]:
+            assert _masked_names(f"Laut {anrede} {name} zahlt.") == [name], (anrede, name)
+
+
+def test_salutation_in_capitals():
+    assert _masked_names("HERR MÜLLER zahlt.") == ["MÜLLER"]
+
+
+def test_salutation_skips_professions():
+    assert _masked_names("Sehr geehrter Herr Rechtsanwalt.") == []
+    assert _masked_names("Sehr geehrte Frau Doktor, bitte.") == []
+    assert _masked_names("Herr Rechtsanwalt Müller zahlt.") == ["Müller"]
+    assert _masked_names("Frau von nebenan zahlt.") == []
+
+
+def test_salutation_stops_at_lowercase_word():
+    assert _masked_names("Frau Kettelhut zahlt die Miete.") == ["Kettelhut"]
+
+
+def test_no_address_in_ordinary_sentences():
+    for text in ["Der Bundesgerichtshof 12 entschied.", "Am Arbeitsplatz 3 Personen.", "Im Umfeld 2 Fälle.", "Der Rechtsweg 2 ist offen.",
+                 "Es kamen 50000 Menschen und 12000 Kunden.", "Es kamen 50000 Gäste.", "Am Montag 14 Termine.", "Die Straße 5 mal gesperrt."]:
+        assert not any(t == "ADRESSE" for t, _ in _found(text)), text
+
+
+def test_ambiguous_street_with_context_is_an_address():
+    for value in ["Am Kirchberg 9", "Am Marktplatz 3", "Zur Mühlenbach 2", "Marktplatz 3, 21335 Lüneburg", "Bahnhof 7 21335 Lüneburg"]:
+        assert ("ADRESSE", value) in _found(f"Wohnhaft: {value}."), value
+
+
+def test_postcode_alone_needs_separator_or_preposition():
+    for text in ["Sitz: 21335 Lüneburg", "wohnt in 21335 Lüneburg.", "21335 Lüneburg", "Muster, 21335 Lüneburg"]:
+        assert ("ADRESSE", "21335 Lüneburg") in _found(text), text
+
+
+def test_salutation_does_not_swallow_next_salutation():
+    names = _masked_names("Frau Çelik schreibt an Herrn Šimić, Frau O'Neill und Herrn José García.")
+    assert {"Çelik", "Šimić", "O'Neill", "José García"} <= set(names), names
+
+
+def test_model_person_loses_salutation_and_profession():
+    text = "Frau Sabine Kettelhut, Herr Rechtsanwalt Brandt, Herr Rechtsanwalt und Frau Doktor."
+    model = [Finding(m.start(), m.end(), m.group(), "PERSON", "gliner", 0.9) for m in
+             re.finditer(r"Frau Sabine Kettelhut|Herr Rechtsanwalt Brandt|Herr Rechtsanwalt(?= und)|Frau Doktor", text)]
+    assert [f.text for f in merge_findings(model, text)] == ["Sabine Kettelhut", "Brandt"]

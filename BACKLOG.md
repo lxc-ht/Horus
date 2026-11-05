@@ -16,6 +16,7 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - `send()` akzeptiert nur Freigaben, die `release()` selbst ausgestellt hat. Jede Änderung (`add_manual`, `remove`) macht alle bisherigen Freigaben der Sitzung ungültig, auch wenn der Text danach wieder gleich aussieht.
 
 - Neuer Typ `KENNUNG` in `TYPES`: Steuer-ID, Steuernummer, SV-Nummer, Versichertennummer, Aktenzeichen, Mandanten- und Patientennummer, URL. Die Oberfläche braucht dafür noch einen Eintrag in `TYPES` und eine Chip-Farbe `.t-KENNUNG` in `web/static/index.html`; das gehört dem Web-Teil.
+- `send()`: Stoppt Claude wegen `max_tokens`, liefert es den Teil plus `cloud.TRUNCATED_NOTE` am Ende. Die Signatur bleibt ein String.
 
 ## Bekannte Schwächen
 
@@ -31,6 +32,8 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Der Bindestrich gilt als Wortgrenze: Aus „Musterfrau-Stiftung“ wird „[PERSON_1]-Stiftung“.
 - Erkennt der Detektor einen Nachnamen allein als eigene Person („Weidenfeld“ neben „Jonas Weidenfeld“), gibt es zwei Platzhalter für dieselbe Person. Der Teil ist dann mehrdeutig und wird nicht dem vollen Namen zugeordnet. Gleiches gilt, wenn der Mensch den Nachnamen per `add_manual` als PERSON ergänzt.
 - Die Regex für ADRESSE, KENNUNG und PERSON hinter einer Anrede sucht bewusst breit und kann Falschtreffer liefern („Frau Kettelhut Unterlagen“). Sie lassen sich in der Prüfung zurücknehmen.
+- Das Modell meldet auch Falschtreffer, die die Regex nicht verursacht: „Der Bundesgerichtshof 12“ wird zu FIRMA.
+- Mehrdeutige Straßenendungen wie „Reeperbahn 12“ erkennt die Regex nur mit „Am …“ davor oder PLZ dahinter, sonst bleibt nur das Modell.
 - Eine nackte Zahl wird nie zur KENNUNG: Eine elfstellige Zahl zählt ohne Bezeichner nur mit gültiger Prüfziffer der Steuer-ID (ISO 7064 MOD 11,10), eine Steuernummer nur nach „Steuernummer“, „St.-Nr.“ oder „StNr“. Eine Steuernummer ohne Bezeichner mit führender 0 („022/815/08150“) wird trotzdem maskiert, aber als TELEFON.
 - KENNUNG kennt als Bezeichner bisher nur Mandanten- und Patientennummer. Es fehlen Kunden-, Fall-, Vertrags-, Versicherungs-, Rechnungs- und Policennummer sowie „Unser Zeichen“ / „Ihr Zeichen“.
 - Die Beispieltexte in `examples/` enthalten noch keine Kennnummern (Aktenzeichen, Mandantennummer, Krankenversichertennummer, Steuer-ID). Für die Demo wären sie der sichtbarste Beleg.
