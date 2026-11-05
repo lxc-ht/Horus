@@ -19,7 +19,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- Regex-Erkennung für Kennungen, Adressen und Anreden, Löschen der Zuordnung: [PR #4](https://github.com/lxc-ht/LP7/pull/4) wartet auf Review (`lxc-ht`).
+- KENNUNG strenger: Steuer-ID nur mit gültiger Prüfziffer oder Kontextwort, Steuernummer nur nach Kontextwort, Negativtests für Paragrafen, Beträge, Jahreszahlen (`Phantom-create-1`).
 
 **Nächste Aufgaben**
 
@@ -48,6 +48,7 @@ Beide:
 - [x] Nachnamen allein werden mitmaskiert, wenn sie eindeutig zu einer Person gehören (722c4ff).
 - [x] Pitch-Deck (9 Folien) liegt bei Paul, Folie 8 wartet noch auf die Messung.
 - [x] „Kopieren“ gegen den echten Kern geklickt: In der Zwischenablage stehen nur Platzhalter.
+- [x] Regex-Erkennung für Kennungen, Adressen und Anreden, Löschen der Zuordnung (PR #4, `lxc-ht`).
 - [x] Neues Design und Zählertext „Versand nur nach deiner Freigabe“ gemergt (PR #3), Abläufe gegen den echten Kern geprüft.
 
 **Demo starten**
