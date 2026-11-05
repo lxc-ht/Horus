@@ -33,6 +33,9 @@ def main() -> None:
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.on('request', lambda request: unexpected_requests.append(request.url) if not request.url.startswith(url.rstrip('/') + '/') else None)
         page.goto(url)
+        expect(page.locator('body')).to_have_attribute('data-look', 'lime')
+        expect(page.locator('.segmented [data-look="lime"]')).to_have_attribute('aria-pressed', 'true')
+        expect(page.locator('#dashboardDemo')).to_have_attribute('data-layout', 'banner')
         expect(page.locator('.icon-tile')).to_have_count(18)
         for name, paths in source.items():
             page.locator(f'[data-icon="{name}"]').click()
@@ -86,10 +89,51 @@ def main() -> None:
             demo.locator('.demo-reset').click()
             expect(demo).to_have_attribute('data-stage', 'original')
             expect(output).to_be_disabled()
+
+        dashboard = page.locator('#dashboardDemo')
+        for layout in ['flow', 'banner']:
+            page.locator(f'.dashboard-controls [data-layout="{layout}"]').click()
+            expect(dashboard).to_have_attribute('data-layout', layout)
+            page.locator('#dashReset').click()
+            expect(page.locator('#dashRelease')).to_be_disabled()
+            expect(page.locator('#dashOutput')).to_be_disabled()
+            # Auch ein synthetischer Klick darf die Freigabesperre nicht umgehen.
+            page.locator('#dashOutput').evaluate('button => button.dispatchEvent(new MouseEvent("click"))')
+            expect(dashboard).to_have_attribute('data-stage', 'original')
+            page.locator('#dashAnalyze').click()
+            expect(page.locator('#dashPreview [data-person]')).to_have_count(2)
+            expect(page.locator('#dashRelease')).to_be_enabled()
+            expect(page.locator('#dashOutput')).to_be_disabled()
+            page.locator('#dashRelease').click()
+            expect(page.locator('#dashOutput')).to_be_enabled()
+            other = 'banner' if layout == 'flow' else 'flow'
+            page.locator(f'.dashboard-controls [data-layout="{other}"]').click()
+            expect(page.locator('#dashOutput')).to_be_enabled()
+            page.locator(f'.dashboard-controls [data-layout="{layout}"]').click()
+            page.locator('#dashOutput').click()
+            expect(page.locator('#dashAnswerStatus')).to_have_text('Fertig')
+            expect(page.locator('#dashAnswer')).to_contain_text('Erika Musterfrau')
+            page.locator('#dashPreview [data-person="1"]').click()
+            expect(page.locator('#dashStatus')).to_have_text('Prüfung nötig')
+            expect(page.locator('#dashOutput')).to_be_disabled()
+            expect(page.locator('#dashAnswerStatus')).to_have_text('Ausstehend')
+            expect(page.locator('#dashAnswer')).not_to_contain_text('Erika Musterfrau')
+            expect(page.locator('#dashPreview')).to_contain_text('Erika Musterfrau')
+            expect(page.locator('#dashPreview [data-person]')).to_have_count(1)
+            page.locator('#dashRelease').click()
+            page.locator('#dashAnalyze').click()
+            expect(page.locator('#dashOutput')).to_be_disabled()
+            expect(page.locator('#dashPreview [data-person]')).to_have_count(2)
+            for width in [320, 390, 768, 1024, 1440]:
+                page.set_viewport_size({'width':width, 'height':900})
+                assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (layout, width)
+            page.locator('#dashReset').click()
+            expect(dashboard).to_have_attribute('data-stage', 'original')
+            expect(page.locator('#dashOutput')).to_be_disabled()
         assert not errors, errors
         assert not unexpected_requests, unexpected_requests
         browser.close()
-    print('UI Kit geprüft: 18 SVG, Export, drei Looks, drei Ablaufdemos und fünf Bildschirmbreiten.')
+    print('UI Kit geprüft: 18 SVG, Export, drei Looks, Ablaufdemos, zwei Dashboard Layouts, Freigabeverlust nach Änderungen und fünf Bildschirmbreiten.')
 
 
 if __name__ == '__main__':

@@ -128,6 +128,50 @@ input { width:100%; border:1px solid #dce4e7; background:#ffffffbf; min-height:4
 .demo[data-design="pure"] .demo-editor { border-color:#e4eaed; border-radius:12px; background:#fff; }
 .demo[data-design="pure"] .button { border-radius:9px; }
 .demo[data-design="pure"] .button.accent { background:#182024; color:#fff; border-color:#182024; }
+.dashboard-controls { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; color:var(--muted); font-size:12px; }
+.dashboard { padding:22px; border:1px solid var(--line); border-radius:26px; background:linear-gradient(130deg,#ecf9fc,#f9fcfc 50%,#f0fae9); box-shadow:0 20px 55px -32px #274b5340; }
+.dashboard .demo-topbar { font-size:15px; }
+.dashboard .demo-mark { gap:9px; }
+.dash-local { font-size:10px; font-weight:400; color:var(--muted); margin-left:10px; }
+.dash-intro { display:flex; justify-content:space-between; align-items:center; gap:24px; padding:25px 2px; }
+.dash-intro h3 { font-size:32px; line-height:1.12; letter-spacing:-1.2px; }
+.dash-intro p { font-size:12px; color:var(--muted); margin:12px 0 0; }
+.dash-banner { display:none; width:290px; max-width:40%; min-height:155px; flex-shrink:0; gap:12px; margin:0; }
+.dashboard[data-layout="banner"] .dash-banner { display:flex; }
+.dash-banner .art-icon.small { width:48px; height:48px; border-radius:16px; }
+.dash-banner .art-icon.large { width:68px; height:68px; border-radius:22px; }
+.dash-banner .art-icon .icon { width:24px; height:24px; }
+.dash-banner .art-icon.large .icon { width:31px; height:31px; }
+.dash-banner .art-label { font-size:9px; bottom:0; padding:6px 10px; white-space:nowrap; }
+.dash-steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; padding:0; margin:0 0 16px; list-style:none; }
+.dash-steps li { display:flex; align-items:center; gap:10px; font-size:11px; padding:10px 13px; border:1px solid #ffffffed; border-radius:16px; color:#586d64; background:#ffffff80; }
+.dash-steps [aria-current="step"] { color:#173c2b; background:linear-gradient(100deg,#e3faff,#ecffc8); border-color:#cbe6c2; font-weight:600; }
+.dash-step-icon { width:36px; height:36px; flex-shrink:0; display:grid; place-items:center; border:1px solid #fff; border-radius:12px; background:#ffffffa8; box-shadow:0 3px 12px #2d563e08; }
+.dashboard[data-layout="banner"] .dash-steps li { border:0; border-radius:10px; background:#ffffff40; padding:8px; }
+.dashboard[data-layout="banner"] .dash-step-icon { width:28px; height:28px; border-radius:9px; box-shadow:none; }
+.dashboard[data-layout="banner"] .dash-step-icon .icon { width:17px; height:17px; }
+.dashboard[data-layout="banner"] .dash-steps [aria-current="step"] { background:#ffffffd6; }
+.dash-panels { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.dash-card { min-width:0; display:flex; flex-direction:column; gap:14px; min-height:360px; padding:19px; background:var(--panel); border:1px solid #ffffffed; border-radius:19px; box-shadow:inset 0 1px #fff; }
+.dash-review { border-color:#d6eab9; background:#ffffffdf; }
+.dash-card-heading { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+.dash-card h4 { display:flex; align-items:center; gap:7px; margin:0; font-size:15px; font-weight:600; letter-spacing:-.3px; }
+.dash-card h4 .icon { width:18px; height:18px; }
+.dash-card .badge { font-size:9px; padding:4px 7px; }
+.dash-caption { margin:-7px 0 0; color:var(--muted); font-size:11px; }
+.dash-text,#dashOriginal { flex:1; min-height:170px; width:100%; margin:0; padding:15px 0; border:0; border-top:1px solid #e2e9e8; background:transparent; font:13px/1.9 -apple-system,BlinkMacSystemFont,"Helvetica Neue","Segoe UI",sans-serif; color:var(--ink); overflow-wrap:anywhere; }
+#dashOriginal { resize:none; }
+.dash-empty { color:var(--muted); }
+.dash-text .data-chip { display:inline-flex; align-items:center; padding-right:2px; font-size:11px; margin:2px 0; }
+.dash-text button { display:inline-grid; place-items:center; width:26px; height:28px; border:0; border-radius:5px; padding:0; background:transparent; color:inherit; }
+.dash-text button:hover { background:#ffffffb3; }
+.dash-text button .icon { width:12px; height:12px; }
+.dash-foot { margin:0; min-height:17px; font-size:10px; color:var(--muted); }
+.dash-notice { margin:16px 2px 0; min-height:18px; font-size:11px; color:#466457; }
+body[data-look="lime"] .dashboard { background:radial-gradient(ellipse at 90% 0,#ffe53b50,transparent 50%),linear-gradient(120deg,#e4f8ff,#e2f9e5 55%,#f3ffd1); }
+body[data-look="pure"] .dashboard { background:#fafbfb; box-shadow:none; }
+body[data-look="pure"] .dash-steps [aria-current="step"] { background:#eaf0ee; border-color:#d7e0dc; }
+body[data-look="pure"] .dash-card { border-color:var(--line); box-shadow:none; }
 footer { display:flex; flex-wrap:wrap; justify-content:space-between; gap:15px; border-top:1px solid var(--line); padding:22px 0 30px; margin-top:12px; color:var(--muted); font-size:10px; }
 footer > span:first-child { color:var(--ink); font-weight:600; }
 footer a { color:var(--ink); }
@@ -148,4 +192,7 @@ body[data-look="pure"] .button.accent { background:var(--ink); color:#fff; borde
 @media(max-width:520px) { .site-header { gap:15px; min-height:80px; } .brand { font-size:24px; } .brand-caption { display:none; } nav { gap:16px; font-size:11px; } h1 { font-size:43px; letter-spacing:-2px; } .lead { font-size:13px; } h2 { font-size:25px; } .eyebrow { font-size:9px; letter-spacing:1.4px; } .icon-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; } .icon-tile { min-height:100px; } .icon-tile > span { font-size:11px; } .icon-inspector { padding:15px; gap:12px; } .inspector-info > span { font-size:11px; } .size-samples { display:none; } .inspector-symbol { width:44px; height:44px; } .icon-inspector .button { flex:1; padding:10px 9px; font-size:11px; } .segmented { width:100%; } .segmented button { flex:1; padding:8px; font-size:11px; } .section { padding-top:18px; } input { font-size:16px; } footer { flex-direction:column; } }
 /* Vermeidet leere Kompositflächen beim Scrollen langer Seiten auf kleinen Displays. */
 @media(max-width:800px) { .glass-panel { backdrop-filter:none; } }
+@media(max-width:1100px) and (min-width:801px) { .dashboard { padding:16px; } .dash-card { padding:14px; } .dash-card h4 { font-size:14px; } .dash-intro h3 { font-size:28px; } }
+@media(max-width:800px) { .dashboard-controls { flex-direction:column; align-items:flex-start; gap:11px; } .dashboard { padding:15px; border-radius:21px; } .dash-local { display:none; } .dash-intro { flex-direction:column; align-items:flex-start; gap:18px; padding:24px 2px; } .dash-intro h3 { font-size:29px; } .dash-banner { width:280px; max-width:100%; align-self:center; } .dash-panels { grid-template-columns:1fr; } .dash-card { min-height:330px; padding:19px; } .dash-steps { gap:6px; } .dash-steps li { flex-direction:column; gap:7px; padding:9px 4px; font-size:9px; text-align:center; } .dash-caption,.dash-foot,.dash-notice { font-size:11px; } #dashOriginal { font-size:16px; } .dash-card .button { min-height:44px; } }
+@media(pointer:coarse) { .dash-text button { width:44px; height:44px; } }
 @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } * { transition:none !important; } }

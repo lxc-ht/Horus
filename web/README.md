@@ -29,7 +29,7 @@ Die Prüfung nutzt erfundene Daten. Der API-Versand wird im Browser simuliert, e
 
 ## UI Kit
 
-Das [vollständige UI Kit](ui-kit/README.md) liegt direkt in diesem Repository unter `web/ui-kit/`: 18 SVG Icons, drei Looks, Komponentendemos, interaktive Beispieldurchläufe, Banner und Dashboard Vorschauen. Für den gezeigten farbigen Entwurf oben **Lime Soda** auswählen.
+Das [vollständige UI Kit](ui-kit/README.md) liegt direkt in diesem Repository unter `web/ui-kit/`: 18 SVG Icons, drei Looks, Komponentendemos und interaktive Beispieldurchläufe. Es startet im bestätigten **Lime Soda** Look. Im Abschnitt **Dashboard** lassen sich die Variante mit Banner und die Glas Ablaufleiste ausprobieren, einschließlich Freigabe und erneuter Sperre nach Änderungen.
 
 Aus dem Repository starten:
 

@@ -7,14 +7,14 @@
 ## Enthalten
 
 1. **18 Icons:** Analysieren, Vorschau, Ausgabe, Original, Maskieren, Freigeben, Gesperrt, Senden, Zurückübersetzen, Kopieren, Importieren, Exportieren, Erledigt, Hinweis, Zurücksetzen, Einstellungen, Entfernen und Lokal.
-2. **Drei Looks:** Liquid Glass, Lime Soda und Pure White, direkt im Kit umschaltbar.
+2. **Lime Soda als Standard:** heller Cyan/Mint/Lime/Gelb Verlauf, schwarze Typografie und transparente Glaselemente. Liquid Glass und Pure White bleiben zum Vergleichen umschaltbar.
 3. **Komponenten:** beschriftete Buttons, Sperrzustände, Statusanzeigen, Hinweise, Eingaben und Platzhalter.
 4. **Drei Ablaufdemos:** Beispielsanalyse, Vorschau, Freigabe, simulierte Ausgabe und Zurücksetzen. Jede Demo funktioniert unabhängig; vor der Freigabe bleibt die Ausgabe gesperrt.
-5. **Gestaltungsideen:** das bestätigte Banner sowie zwei Vorschläge zur Einbindung im Dashboard.
+5. **Interaktives Dashboard:** Banner im Kopfbereich oder Glas Ablaufleiste, drei Arbeitsbereiche sowie Freigabe und simulierte Ausgabe. Eine Änderung an den Platzhaltern verwirft Freigabe und Ausgabe.
 
 ## Ausprobieren
 
-Im gemeinsamen LP7 Repository `web/ui-kit/index.html` im Browser öffnen. Es gibt keinen Buildschritt und keine Laufzeitabhängigkeiten. Für den abgebildeten Look oben **Lime Soda** auswählen.
+Im gemeinsamen LP7 Repository `web/ui-kit/index.html` im Browser öffnen. Es gibt keinen Buildschritt und keine Laufzeitabhängigkeiten. Das Kit startet mit dem bestätigten **Lime Soda** Look.
 
 Für zuverlässigen Zugriff auf die Zwischenablage und die Browserprüfung aus dem LP7 Repository starten:
 
@@ -58,10 +58,15 @@ Die Geometrien wurden für dieses Kit gezeichnet. Die Symbole in [index.html](in
 
 ## Banner und Dashboard Ideen
 
-Die Grafik liegt unter [assets/banner.png](assets/banner.png). Die folgenden Dashboard Bilder sind Gestaltungsvorschläge, keine weiteren implementierten App Ansichten.
+Die Grafik liegt unter [assets/banner.png](assets/banner.png). Im Abschnitt **Dashboard** sind beide Layouts jetzt interaktiv: eine Variante mit dem Glasmotiv im Kopfbereich und eine kompaktere Variante mit Glas Icons in der Ablaufleiste. Beim Layoutwechsel bleibt der aktuelle Bearbeitungsstand erhalten.
 
-1. [Das komplette Motiv kompakt rechts neben dem Titel](assets/dashboard-kopfbereich.png).
-2. [Die drei Glas Icons als Ablaufleiste über den Arbeitsbereichen](assets/dashboard-ablaufleiste.png).
+![Interaktive Dashboard Demo mit Glasmotiv im Kopfbereich](assets/dashboard-demo-banner.png)
+
+![Interaktive Dashboard Demo mit Glas Ablaufleiste](assets/dashboard-demo-flow.png)
+
+Mit **Analysieren** die zwei Beispielnamen ersetzen, die Vorschau prüfen, **Freigeben** und **Ausgabe simulieren**. Das × an einem Platzhalter nimmt die Ersetzung zurück und sperrt die Ausgabe erneut. Auch eine erneute Analyse verwirft die vorherige Freigabe. **Neu starten** setzt die Demo zurück. Der Text ist ein festes erfundenes Beispiel, keine echte Modellerkennung oder API Verbindung.
+
+Die früheren statischen Entwürfe bleiben als [Kopfbereich](assets/dashboard-kopfbereich.png) und [Ablaufleiste](assets/dashboard-ablaufleiste.png) verfügbar.
 
 ## Gemeinsam weiterarbeiten
 
@@ -72,7 +77,7 @@ Das vollständige Kit liegt unter `web/ui-kit/` im gemeinsamen [LP7 Repository](
 3. Struktur und Icons in [index.html](index.html), Farben und Layout in [kit.css](kit.css) sowie Interaktionen in [kit.js](kit.js) bearbeiten.
 4. Browserprüfung ausführen und Änderungen als Pull Request nach `main` einreichen.
 
-Die drei Farbvarianten bleiben im Kit umschaltbar. Die Startansicht nutzt Liquid Glass; der Screenshot zeigt die Auswahl Lime Soda. Die Hauptoberfläche liegt getrennt unter `web/static/`.
+Die Startansicht nutzt auf Locs Wunsch Lime Soda. Die drei Farbvarianten bleiben im Kit umschaltbar. Die Hauptoberfläche liegt getrennt unter `web/static/`.
 
 ## Browserprüfung
 
@@ -83,7 +88,7 @@ uv run --no-project --with playwright playwright install chromium --only-shell
 uv run --no-project --with playwright python web/ui-kit/test_kit.py
 ```
 
-Die Prüfung testet alle 18 SVG Dateien und das ZIP, Icon Auswahl, Zwischenablage, SVG Download, drei Looks, die drei Ablaufdemos einschließlich Freigabesperre und Zurücksetzen sowie fünf Bildschirmbreiten von 320 bis 1440 Pixeln. Sie prüft außerdem JavaScript Fehler und unerwartete Netzwerkanfragen. Für einen anderen Port die URL als Argument übergeben.
+Die Prüfung testet alle 18 SVG Dateien und das ZIP, Icon Auswahl, Zwischenablage, SVG Download, drei Looks, die drei Ablaufdemos sowie beide Dashboard Layouts. Geprüft werden Freigabesperre, Freigabeverlust nach Änderungen und erneuter Analyse, Layoutwechsel bei bestehender Freigabe und Zurücksetzen. Alle Ansichten werden auf seitlichen Überlauf bei fünf Bildschirmbreiten von 320 bis 1440 Pixeln geprüft. Die Prüfung erfasst außerdem JavaScript Fehler und unerwartete Netzwerkanfragen. Für einen anderen Port die URL als Argument übergeben.
 
 ## Aufbau
 
