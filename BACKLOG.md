@@ -32,7 +32,7 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Eine Antwort von Claude kann Links oder Markdown-Bilder enthalten, in denen nach der Rückübersetzung echte Werte stehen („![x](https://…?a=[IBAN_1])“). Die Oberfläche zeigt das nur als Text. Riskant wird es erst, wenn jemand den Text in ein Programm kopiert, das Markdown oder HTML darstellt.
 - Zweibuchstabige Namensteile („Wu“, „Do“) werden in genau dieser Schreibweise mitmaskiert. Bei einer Person „Tran Do“ wird auch die Abkürzung „Do“ für Donnerstag zum Namen. Die Prüfung zeigt solche Stellen als unsicher.
 - Die Ausnahmen beim Kfz-Kennzeichen sind eine kurze Liste (EU, VO, DIN, ISO, VDE, VW, BMW). Andere Normen wie „ABC-DE 12“ werden maskiert, echte Kennzeichen aus Dinslaken („DIN-AB 123“) nicht.
-- Bezeichner ohne Nummernwort wie „Konto 532013000“ werden nicht ersetzt, sondern nur als unsichere Stelle gezeigt.
+- Kurze Bezeichner ohne Nummernwort (Konto, Kto., Depot, Vertrag, Police, Rechnung) zählen mit einem Wert ab drei Ziffern, Jahre und Zeiträume ausgenommen. Andere Wörter wie „Vorgang 4471-B“ werden weiter nur als unsichere Stelle gezeigt.
 - Sehr lange Texte (200 KB) blockieren die Analyse über eine Minute und halten dabei die globale Sperre. Nichts wird gesendet, die Demo hängt aber. Die Weboberfläche lehnt deshalb Texte über 100.000 Zeichen mit einem Hinweis ab; der Kern und die CLI haben keine Grenze.
 - Die Weboberfläche setzt keinen Frame-Schutz (X-Frame-Options) und prüft den Origin nicht. Fremde Seiten können sie einbetten, Antworten aber nicht lesen, Text und JSON lehnt die Preflight-Regel ab.
 - Wegen canonical() fallen auch Formatzeichen in Emojis weg (Zero-Width-Joiner) und „m²“ wird zu „m2“. Sicher, ändert aber minimal den gesendeten Text.

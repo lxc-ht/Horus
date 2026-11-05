@@ -83,6 +83,14 @@ _LABELED_ID = re.compile(
     r"[\s:.#]*(?P<value>[A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w)(?: [A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w))*)"
 )
 
+# Kurze Bezeichner ohne Nummernwort („Konto 532013000“, „Police AX-77812“). Diese Wörter stehen auch vor Mengen
+# („Konto 3 Tage überzogen“), deshalb zählt der Wert nur mit mindestens drei Ziffern.
+_SHORT_LABELED_ID = re.compile(
+    r"(?<!\w)(?:Konto|Kto\.?|Depot|Vertrag|Police|Rechnung)"
+    r"[\s:.#]*(?P<value>[A-Z0-9](?:[A-Z0-9/\-]*[A-Z0-9])?)(?![\w.,]\d)(?!\w)"
+)
+_YEAR_OR_PERIOD = re.compile(r"(?:19|20)\d\d(?:[/-](?:19|20)?\d\d)?")   # „Vertrag 2024“, „Rechnung 2023/24“
+
 # Steuer-ID ohne Bezeichner, 11 Stellen. Zählt nur mit gültiger Prüfziffer, sonst wäre jede lange Zahl eine Kennung.
 # Steuernummern sind ohne Bezeichner nicht von Rechnungs- oder Aktennummern zu unterscheiden, sie kommen nur über _LABELED_ID.
 _TAX_ID = re.compile(r"(?<![\d/.,])[1-9]\d(?: ?\d{3}){3}(?![\d/.,]\d)")
@@ -275,6 +283,10 @@ class RegexDetector:
                 add_iban(m)
         for m in _LABELED_ID.finditer(text):
             if any(c.isdigit() for c in m.group("value")):
+                add(m, "KENNUNG", "value")
+        for m in _SHORT_LABELED_ID.finditer(text):
+            value = m.group("value")
+            if sum(c.isdigit() for c in value) >= 3 and not _YEAR_OR_PERIOD.fullmatch(value):
                 add(m, "KENNUNG", "value")
         for m in _TAX_ID.finditer(text):
             if _tax_id_valid(m.group()):
