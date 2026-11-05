@@ -23,6 +23,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- Dashboard polieren (`web/static/index.html`), Branch `web/polish` (`Phantom-create-1`).
 - Umgehungen des Kerns schließen (Token-Grenze des Modells, Unicode, Platzhalter-Kollision, Formate): [PR #22](https://github.com/lxc-ht/LP7/pull/22) wartet auf den Merge (`lxc-ht`).
 
 **Nächste Aufgaben**
