@@ -1,10 +1,16 @@
 """Lokale Weboberfläche. Start aus dem Repo-Root: uvicorn web.app:app --host 127.0.0.1 --port 8000"""
 import io
+import re
+import zipfile
 import logging
 import os
 import warnings
 from dataclasses import asdict
+from email import policy
+from email.parser import BytesParser
+from html.parser import HTMLParser
 from pathlib import Path
+from xml.etree import ElementTree
 
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, JSONResponse
@@ -39,6 +45,13 @@ PDF_TOO_LARGE = "Die PDF ist größer als 20 MB."
 PDF_SCAN = "In dieser PDF steht kein auslesbarer Text, vermutlich ist sie ein Scan. Scans kann LP7 noch nicht lesen."
 PDF_PASSWORD = "Diese PDF ist mit einem Passwort geschützt. Entferne den Schutz und lade sie erneut."
 PDF_INVALID = "Das ist keine lesbare PDF-Datei."
+FILE_TOO_LARGE = "Die Datei ist größer als 20 MB."
+DOCX_INVALID = "Das ist keine lesbare Word-Datei (.docx)."
+DOCX_OLD = "Diese Word-Datei ist im alten Format (.doc) oder mit einem Passwort geschützt. Speichere sie in Word ohne Passwort als .docx und lade sie erneut."
+DOCX_EMPTY = "In dieser Word-Datei steht kein Text."
+EML_INVALID = "Das ist keine lesbare E-Mail-Datei (.eml)."
+# Entpackt höchstens so viel. Eine kleine ZIP-Datei kann sonst Gigabytes an XML enthalten.
+DOCX_MAX_XML = 50 * 1024 * 1024
 
 app = FastAPI()
 
@@ -166,21 +179,172 @@ def _read_pdf(data: bytes) -> tuple[str, int]:
     return text, len(pages)
 
 
-@app.post("/api/pdf")
-async def load_pdf(request: Request) -> JSONResponse:
+class FileError(Exception):
+    def __init__(self, message: str, status: int = 422):
+        super().__init__(message)
+        self.status = status
+
+
+async def read_upload(request: Request, too_large: str) -> bytes:
     # Rohe Bytes statt Formular-Upload, so braucht es kein python-multipart.
     # Gezählt wird beim Lesen, denn Content-Length kann fehlen oder falsch sein.
     chunks, size = [], 0
     async for chunk in request.stream():
         size += len(chunk)
         if size > PDF_MAX_BYTES:
-            return JSONResponse({"error": PDF_TOO_LARGE}, status_code=413)
+            raise FileError(too_large, 413)
         chunks.append(chunk)
+    return b"".join(chunks)
+
+
+async def load_file(request: Request, too_large: str, invalid: str, read) -> JSONResponse:
+    # Gemeinsamer Ablauf für alle Dateitypen: im Speicher lesen, nur Text zurückgeben.
     try:
-        text, pages = pdf_text(b"".join(chunks))
-    except PdfError as e:
-        return JSONResponse({"error": str(e)}, status_code=422)
+        data = await read_upload(request, too_large)
+        return JSONResponse(read(data))
+    except (FileError, PdfError) as e:
+        return JSONResponse({"error": str(e)}, status_code=getattr(e, "status", 422))
     except Exception:
-        # Alles fangen, damit kein Traceback mit Inhalt der PDF im Serverlog landet.
-        return JSONResponse({"error": PDF_INVALID}, status_code=422)
-    return JSONResponse({"text": text, "pages": pages})
+        # Alles fangen, damit kein Traceback mit Inhalt der Datei im Serverlog landet.
+        return JSONResponse({"error": invalid}, status_code=422)
+
+
+def pdf_result(data: bytes) -> dict:
+    text, pages = pdf_text(data)
+    return {"text": text, "pages": pages}
+
+
+@app.post("/api/pdf")
+async def load_pdf(request: Request) -> JSONResponse:
+    return await load_file(request, PDF_TOO_LARGE, PDF_INVALID, pdf_result)
+
+
+W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+# Kopfzeilen zuerst, wie sie im Brief oben stehen, dann Text, Fußnoten, Fußzeilen.
+DOCX_PARTS = re.compile(r"word/(header\d*|document|footnotes|endnotes|footer\d*)\.xml")
+DOCX_ORDER = {"header": 0, "document": 1, "footnotes": 2, "endnotes": 3, "footer": 4}
+
+
+def docx_paragraphs(root) -> list[str]:
+    # Absätze in Textfeldern stecken in einem äußeren Absatz. Sie werden eigene Zeilen,
+    # sonst stünde ihr Text doppelt da.
+    paragraphs = []
+
+    def walk(element, buffer):
+        for child in element:
+            tag = child.tag
+            if tag == W + "p":
+                inner = []
+                walk(child, inner)
+                paragraphs.append("".join(inner))
+            elif tag == W + "t":
+                buffer.append(child.text or "")
+            elif tag == W + "tab":
+                buffer.append("\t")
+            elif tag in (W + "br", W + "cr"):
+                buffer.append("\n")
+            elif tag == W + "del":
+                # Gelöschter Text aus „Änderungen nachverfolgen“ steht nicht mehr im Dokument.
+                continue
+            else:
+                walk(child, buffer)
+
+    walk(root, [])
+    return paragraphs
+
+
+def docx_text(data: bytes) -> dict:
+    if data[:4] == b"\xd0\xcf\x11\xe0":
+        # Altes .doc und verschlüsseltes .docx haben beide dieses Containerformat.
+        raise FileError(DOCX_OLD)
+    try:
+        archive = zipfile.ZipFile(io.BytesIO(data))
+        names = [n for n in archive.namelist() if DOCX_PARTS.fullmatch(n)]
+        if "word/document.xml" not in names:
+            raise FileError(DOCX_INVALID)
+        names.sort(key=lambda n: (DOCX_ORDER[re.sub(r"\d", "", n[5:-4])], n))
+        sections, seen = [], set()
+        for name in names:
+            with archive.open(name) as part:
+                xml = part.read(DOCX_MAX_XML + 1)
+            if len(xml) > DOCX_MAX_XML:
+                raise FileError(DOCX_INVALID)
+            # ElementTree lädt keine externen Entitäten, expat begrenzt verschachtelte.
+            text = "\n".join(docx_paragraphs(ElementTree.fromstring(xml))).strip()
+            # Gleiche Kopfzeile in mehreren Abschnitten nur einmal.
+            if text and text not in seen:
+                seen.add(text)
+                sections.append(text)
+    except FileError:
+        raise
+    except Exception:
+        raise FileError(DOCX_INVALID) from None
+    text = "\n\n".join(sections)
+    if not text.strip():
+        raise FileError(DOCX_EMPTY)
+    return {"text": text}
+
+
+@app.post("/api/docx")
+async def load_docx(request: Request) -> JSONResponse:
+    return await load_file(request, FILE_TOO_LARGE, DOCX_INVALID, docx_text)
+
+
+class HtmlText(HTMLParser):
+    # HTML-Mails nur als Text: Bilder, Skripte und Links werden nie geladen.
+    BLOCKS = {"p", "div", "br", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "table"}
+
+    def __init__(self):
+        super().__init__()
+        self.parts, self.skip = [], 0
+
+    def handle_starttag(self, tag, attrs):
+        if tag in ("script", "style", "head"):
+            self.skip += 1
+        elif tag in self.BLOCKS:
+            self.parts.append("\n")
+
+    def handle_endtag(self, tag):
+        if tag in ("script", "style", "head"):
+            self.skip = max(0, self.skip - 1)
+        elif tag in self.BLOCKS:
+            self.parts.append("\n")
+
+    def handle_data(self, data):
+        if not self.skip:
+            self.parts.append(data)
+
+    def text(self) -> str:
+        lines = [" ".join(line.split()) for line in "".join(self.parts).splitlines()]
+        return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
+
+
+EML_HEADERS = [("From", "Von"), ("To", "An"), ("Cc", "Cc"), ("Date", "Datum"), ("Subject", "Betreff")]
+
+
+def eml_text(data: bytes) -> dict:
+    try:
+        message = BytesParser(policy=policy.default).parsebytes(data)
+        # Kopfzeilen gehören dazu: Absender und Empfänger sind oft die sensibelsten Angaben.
+        head = [f"{label}: {message[key]}" for key, label in EML_HEADERS if message[key]]
+        body = message.get_body(preferencelist=("plain", "html"))
+        text = ""
+        if body is not None:
+            content = body.get_content()
+            if body.get_content_subtype() == "html":
+                parser = HtmlText()
+                parser.feed(content)
+                text = parser.text()
+            else:
+                text = content.strip()
+    except Exception:
+        raise FileError(EML_INVALID) from None
+    # Ohne Absender, Empfänger, Betreff und Text ist es keine E-Mail, auch wenn der Parser alles annimmt.
+    if not head or not (text or message["Subject"]):
+        raise FileError(EML_INVALID)
+    return {"text": "\n".join(head) + ("\n\n" + text if text else "")}
+
+
+@app.post("/api/eml")
+async def load_eml(request: Request) -> JSONResponse:
+    return await load_file(request, FILE_TOO_LARGE, EML_INVALID, eml_text)

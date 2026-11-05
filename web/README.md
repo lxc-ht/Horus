@@ -18,9 +18,9 @@ Layout A ist direkt in `web/static/index.html` eingebaut: drei flexible Spalten 
 
 ![Arbeitsoberfläche mit echter lokaler Pseudonymisierung und erfundenen Beispieldaten](assets/arbeitsoberflaeche-material-c.png)
 
-## PDF laden
+## Datei laden
 
-„PDF laden“ oder eine PDF auf das Feld „Dein Original“ ziehen setzt ihren Text ins Feld. Das geht nur mit digitalen PDFs, in denen der Text als Text steckt. Scans erkennt LP7 nicht und meldet das. Die Datei geht nur vom Browser an den lokalen Server auf 127.0.0.1, wird dort mit `pypdf` im Speicher gelesen und nirgends gespeichert oder protokolliert. Analysiert wird erst, wenn du selbst auf „Text analysieren“ klickst; eine vorherige Analyse und Freigabe verfallen beim Laden.
+„Datei laden“ oder eine Datei auf das Feld „Dein Original“ ziehen setzt ihren Text ins Feld. Das geht mit digitalen PDFs, Word-Dateien (.docx) und E-Mails (.eml). Scans erkennt LP7 nicht und meldet das, ebenso alte .doc- und Outlook-.msg-Dateien. Bei Word kommen Kopf- und Fußzeilen und Fußnoten mit, gelöschter Text aus „Änderungen nachverfolgen“ nicht. Bei E-Mails kommen Absender, Empfänger, Datum und Betreff mit, Anhänge nicht. Die Datei geht nur vom Browser an den lokalen Server auf 127.0.0.1, wird dort im Speicher gelesen und nirgends gespeichert oder protokolliert. Analysiert wird erst, wenn du selbst auf „Text analysieren“ klickst; eine vorherige Analyse und Freigabe verfallen beim Laden.
 
 ## UI prüfen
 
