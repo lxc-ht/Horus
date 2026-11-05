@@ -24,7 +24,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 **In Arbeit**
 
 - Dashboard polieren (`web/static/index.html`), Branch `web/polish` (`Phantom-create-1`).
-- Umgehungen des Kerns schließen (Token-Grenze des Modells, Unicode, Platzhalter-Kollision, Formate): [PR #22](https://github.com/lxc-ht/LP7/pull/22) wartet auf den Merge (`lxc-ht`).
 
 **Nächste Aufgaben**
 
@@ -67,6 +66,7 @@ Beide:
 - [x] Dashboard im Lime-Soda-Stil des UI-Kits (PR #19, `Phantom-create-1`), gemergt.
 - [x] Start per Doppelklick mit `LP7 starten.command` (PR #20, `Phantom-create-1`), gemergt. Echter Doppelklick im Finder steht noch aus.
 - [x] Datum ohne Jahr, IBAN in Kleinbuchstaben, Dateirechte der Zuordnung (PR #12), Banner im README (PR #10).
+- [x] Umgehungen des Kerns geschlossen: Token-Grenze des Modells, Unicode, Platzhalter-Kollision, Formate (PR #22, `lxc-ht`), gemergt. 176 Tests mit echtem Modell und `web.test_app` bestanden. Noch offen: siehe `BACKLOG.md`.
 
 **Demo starten**
 
