@@ -166,6 +166,15 @@
     .headline { font-size: min(5.2vw, 22px); gap: .6em; letter-spacing: 0; }
   }
   @media (pointer: coarse) { .chip button { min-width: 44px; min-height: 44px; } }
+  /* Sprachschalter oben rechts. Übersetzt wird nur die Oberfläche, nie der Text der Nutzer. */
+  .intro { position: relative; }
+  .lang-switch { position: absolute; top: 6px; right: 0; display: inline-flex; padding: 3px; gap: 2px; border: 1px solid #dce5df; border-radius: 999px; background: #ffffffcc; }
+  .lang-switch button { min-height: 0; padding: 4px 10px; border: 0; border-radius: 999px; background: transparent; box-shadow: none; color: #59614f; font-size: 12px; font-weight: 600; letter-spacing: .04em; }
+  .lang-switch button[aria-pressed="true"] { background: #1b2119; color: #fff; }
+  @media (max-width: 600px) {
+    .intro { flex-direction: column; align-items: center; gap: 8px; }
+    .lang-switch { position: static; align-self: flex-end; }
+  }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -186,6 +195,10 @@
 </svg></span>
       <span>Reveal Nothing</span>
     </p>
+    <div class="lang-switch" role="group" aria-label="Sprache der Oberfläche">
+      <button type="button" data-lang="de" aria-pressed="true" lang="de" title="Deutsch">DE</button>
+      <button type="button" data-lang="en" aria-pressed="false" lang="en" title="English">EN</button>
+    </div>
   </div>
   <main id="workspace" aria-label="Dokument bearbeiten">
     <section class="work-card" data-step="stepOriginal" aria-labelledby="h-original">
@@ -851,6 +864,195 @@ for (const [on, off] of [["mouseover", "mouseout"], ["focusin", "focusout"]]) {
   }
   render();
 })();
+</script>
+<script>
+// Sprachschalter Deutsch/Englisch. Die Oberfläche bleibt deutsch geschrieben; diese Tabelle übersetzt fertige
+// Sätze, sobald sie im Dokument erscheinen. Text der Nutzer (Original, Vorschau, Antwort, Tooltip) wird nie angefasst.
+const EN = {
+  "Testmodus: Attrappe aktiv. Keine vollständige Erkennung sensibler Angaben.": "Test mode: stand-in core active. Sensitive data is not fully detected.",
+  "Text pseudonymisieren": "Pseudonymise text",
+  "Sprache der Oberfläche": "Interface language",
+  "Dokument bearbeiten": "Edit document",
+  "Dein Original": "Your original",
+  "Lokal": "Local",
+  "Bleibt auf diesem Rechner.": "Stays on this computer.",
+  "Füge hier deinen Text ein …\n\nZum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.\n\nNoch keinen Text zur Hand? Starte mit unserem erfundenen Kanzleibeispiel.\n\nOder zieh eine PDF, Word-Datei oder E-Mail hierher.": "Paste your text here …\n\nFor example a letter, an email or a statement of facts.\n\nNo text at hand? Start with our made-up law firm example.\n\nOr drop a PDF, Word file or email here.",
+  "Füge hier deinen Text ein.": "Paste your text here.",
+  "Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.": "For example a letter, an email or a statement of facts.",
+  "Noch keinen Text zur Hand? Starte mit dem erfundenen Kanzleibeispiel oder zieh eine PDF, Word-Datei oder E-Mail hierher.": "No text at hand? Start with the made-up law firm example or drop a PDF, Word file or email here.",
+  "Aufgabe für Claude": "Task for Claude",
+  "Vorlage anhängen …": "Attach a template …",
+  "Sachverhalt zusammenfassen": "Summarise the facts",
+  "Fristen und Termine herausziehen": "List deadlines and dates",
+  "Antwortschreiben entwerfen": "Draft a reply letter",
+  "Risiken und offene Fragen nennen": "Name risks and open questions",
+  "In einfacher Sprache erklären": "Explain in plain language",
+  "Hängt eine Aufgabe an das Original an. Sie wird mit analysiert und steht in der Vorschau.": "Adds a task to the original. It is analysed too and appears in the preview.",
+  "Beispiel laden": "Load example",
+  "Datei laden": "Load file",
+  "Text analysieren": "Analyse text",
+  "Erneut analysieren": "Analyse again",
+  "Erkennung und Ersetzung erfolgen lokal.": "Detection and replacement happen locally.",
+  "Vorschau für LLM": "Preview for the LLM",
+  "Gesperrt": "Locked",
+  "Prüfung nötig": "Review needed",
+  "Freigegeben": "Approved",
+  "Nur diese Fassung kannst du nach Freigabe kopieren.": "Only this version can be copied, after you approve it.",
+  "Hier erscheint deine Fassung mit Platzhaltern. Starte zuerst die Analyse.": "Your version with placeholders appears here. Start the analysis first.",
+  "Erkannte Datentypen mit Anzahl": "Detected data types with counts",
+  "Lokale Verarbeitung läuft …": "Processing locally …",
+  "Unsicher, bitte prüfen": "Uncertain, please check",
+  "Vorschau freigeben": "Approve preview",
+  "Vorschau freigegeben": "Preview approved",
+  "Kopieren": "Copy",
+  "Kopiert.": "Copied.",
+  "Kopiert. In Claude einfügen.": "Copied. Paste it into Claude.",
+  "Kopieren und Claude öffnen": "Copy and open Claude",
+  "Kopieren bis zur Freigabe gesperrt": "Copying locked until approval",
+  "Freigegeben. Ändert sich etwas, ist eine neue Freigabe nötig.": "Approved. Any change needs a new approval.",
+  "Text markieren, um weitere Angaben zu ersetzen. × nimmt eine Ersetzung zurück.": "Select text to replace more data. × undoes a replacement.",
+  "Prüfe die gesamte Vorschau. Die Erkennung kann Angaben übersehen.": "Check the whole preview. Detection can miss data.",
+  "Deine Antwort": "Your answer",
+  "Ausstehend": "Pending",
+  "Zurückübersetzt": "Restored",
+  "Originale Angaben werden lokal wieder eingesetzt.": "Original data is put back locally.",
+  "Kopiere die freigegebene Fassung nach Claude. Füge die Antwort mit unveränderten Platzhaltern hier ein.": "Copy the approved version to Claude. Paste the answer here with the placeholders unchanged.",
+  "Antwort von Claude": "Answer from Claude",
+  "Antwort mit Platzhaltern einfügen …": "Paste the answer with placeholders …",
+  "Lokal zurückübersetzen": "Restore locally",
+  "Andere Antwort einfügen": "Paste another answer",
+  "Die Antwort von Claude erscheint hier. Platzhalter werden lokal durch die ursprünglichen Angaben ersetzt.": "Claude's answer appears here. Placeholders are replaced locally with the original data.",
+  "Wieder eingesetzte Angaben erscheinen grün.": "Restored data appears in green.",
+  "Zuordnung jetzt löschen": "Delete mapping now",
+  "Löscht die Zuordnung von Platzhaltern zu Originalen auf diesem Rechner. Danach lässt sich nichts mehr zurückübersetzen.": "Deletes the mapping from placeholders to originals on this computer. Nothing can be restored afterwards.",
+  "Zuordnung gelöscht. Diese Platzhalter lassen sich nicht mehr zurückübersetzen.": "Mapping deleted. These placeholders can no longer be restored.",
+  "Typ für die Markierung wählen": "Choose a type for the selection",
+  "Passt so": "Keep as is",
+  "Bitte erst einen Text eingeben.": "Please enter a text first.",
+  "Der Text hat sich während der Analyse geändert. Bitte erneut analysieren.": "The text changed during analysis. Please analyse again.",
+  "Bitte nur Text zwischen zwei Platzhaltern markieren.": "Please select only text between two placeholders.",
+  "Der Server hat die Anfrage abgelehnt.": "The server rejected the request.",
+  "Kopieren hat nicht geklappt. Bitte erlaube den Zugriff auf die Zwischenablage.": "Copying failed. Please allow access to the clipboard.",
+  "Diese Datei kann LP7 nicht lesen. Möglich sind PDF, Word (.docx) und E-Mail (.eml).": "LP7 cannot read this file. Supported are PDF, Word (.docx) and email (.eml).",
+  "Ältere Word-Dateien (.doc) kann LP7 nicht lesen. Speichere sie in Word als .docx und lade sie erneut.": "LP7 cannot read old Word files (.doc). Save it as .docx in Word and load it again.",
+  "Outlook-Dateien (.msg) kann LP7 noch nicht lesen. Speichere die E-Mail als .eml oder kopiere ihren Text hierher.": "LP7 cannot read Outlook files (.msg) yet. Save the email as .eml or copy its text here.",
+  // Meldungen des Servers und des Kerns
+  "Die Attrappe erkennt nur E-Mails und eine feste Namensliste. Prüfe den Text genau.": "The stand-in core only detects emails and a fixed list of names. Check the text carefully.",
+  "Diese Sitzung ist unbekannt. Bitte den Text neu analysieren.": "This session is unknown. Please analyse the text again.",
+  "Dieser Text steht nicht im maskierten Text und kann nicht ersetzt werden.": "This text is not in the masked text and cannot be replaced.",
+  "Im Text steht noch eine ersetzte Angabe im Klartext. Die Freigabe wurde abgelehnt.": "A replaced value is still in the text in plain form. Approval was refused.",
+  "Der Text passt nicht zur Freigabe. Bitte neu freigeben.": "The text does not match the approval. Please approve again.",
+  "Die PDF ist größer als 20 MB.": "The PDF is larger than 20 MB.",
+  "In dieser PDF steht kein auslesbarer Text, vermutlich ist sie ein Scan. Scans kann LP7 noch nicht lesen.": "This PDF has no readable text, it is probably a scan. LP7 cannot read scans yet.",
+  "Diese PDF ist mit einem Passwort geschützt. Entferne den Schutz und lade sie erneut.": "This PDF is password protected. Remove the protection and load it again.",
+  "Das ist keine lesbare PDF-Datei.": "This is not a readable PDF file.",
+  "Die Datei ist größer als 20 MB.": "The file is larger than 20 MB.",
+  "Das ist keine lesbare Word-Datei (.docx).": "This is not a readable Word file (.docx).",
+  "Diese Word-Datei ist im alten Format (.doc) oder mit einem Passwort geschützt. Speichere sie in Word ohne Passwort als .docx und lade sie erneut.": "This Word file is in the old format (.doc) or password protected. Save it as .docx without a password and load it again.",
+  "In dieser Word-Datei steht kein Text.": "This Word file contains no text.",
+  "Das ist keine lesbare E-Mail-Datei (.eml).": "This is not a readable email file (.eml).",
+  "Diese Oberfläche ist nur lokal erreichbar.": "This interface is only available locally.",
+  "Diese Sitzung ist nicht mehr bekannt, etwa nach einem Neustart. Bitte den Text neu analysieren.": "This session is no longer known, for example after a restart. Please analyse the text again.",
+  "Gestoppt: Ein Originalwert steht noch im Text. Maskiere ihn oder nimm die Ersetzung bewusst zurück.": "Stopped: an original value is still in the text. Mask it or deliberately undo the replacement.",
+  "Gestoppt: Der Text wurde nach der Freigabe geändert. Bitte erneut prüfen und freigeben.": "Stopped: the text changed after approval. Please check and approve again.",
+  "Kein API-Key gefunden — Kopier-Modus. Der freigegebene Text kann kopiert und von Hand an Claude gegeben werden.": "No API key found, copy mode. The approved text can be copied and given to Claude by hand.",
+  "Das Erkennungsmodell konnte nicht geladen werden. Beim ersten Start braucht LP7 einmal Internet, danach liegt das Modell auf diesem Rechner. Bitte mit Netz neu starten und einmal analysieren.": "The detection model could not be loaded. LP7 needs internet once on first start, then the model stays on this computer. Please restart with a connection and analyse once.",
+};
+const TYPE_EN = { "Person": "Person", "Firma": "Company", "Adresse": "Address", "Ort": "Place", "E-Mail": "Email", "Telefon": "Phone", "IBAN": "IBAN", "Datum": "Date", "Kennung": "ID" };
+const EN_PATTERNS = [
+  [/^(\d+) Angaben ersetzt$/, (m, n) => `${n} items replaced`],
+  [/^1 unsichere Stelle markiert\. Bitte prüfen\.$/, () => "1 uncertain spot marked. Please check."],
+  [/^(\d+) unsichere Stellen markiert\. Bitte prüfen\.$/, (m, n) => `${n} uncertain spots marked. Please check.`],
+  [/^(Person|Firma|Adresse|Ort|E-Mail|Telefon|IBAN|Datum|Kennung) (\d+)$/, (m, t, n) => `${TYPE_EN[t]} ${n}`],
+  [/^„(.+)“ kommt im Text nicht vor, es wurde nichts maskiert\.$/, (m, t) => `“${t}” does not occur in the text, nothing was masked.`],
+  [/^Achtung: „(.+)“ steht noch im Text und gehört vermutlich zu (\[[A-Z]+_\d+\])\.$/, (m, t, ph) => `Note: “${t}” is still in the text and probably belongs to ${ph}.`],
+  [/^Unbekannt, nicht ersetzt: /, () => "Unknown, not replaced: "],
+  [/^Möglicherweise verändert: /, () => "Possibly changed: "],
+  [/^Nicht in der Antwort: /, () => "Not in the answer: "],
+  [/^Der Text hat ([\d.]+) Zeichen\. LP7 analysiert höchstens 100\.000 Zeichen auf einmal, etwa 30 Seiten\. Teile ihn bitte auf\.$/, (m, n) => `The text has ${n} characters. LP7 analyses at most 100,000 characters at once, about 30 pages. Please split it.`],
+];
+
+function toEnglish(de) {
+  const core = de.trim();
+  if (!core) return null;
+  if (Object.hasOwn(EN, core)) return de.replace(core, EN[core]);
+  for (const [re, fn] of EN_PATTERNS) {
+    if (re.test(core)) return de.replace(core, core.replace(re, fn));
+  }
+  return null;
+}
+
+let lang = "de";
+try { if (localStorage.getItem("lp7-lang") === "en") lang = "en"; } catch {}
+const sourceText = new WeakMap();   // Textknoten -> deutscher Text
+const sourceAttrs = new WeakMap();  // Element -> { Attribut: deutscher Text }
+const I18N_ATTRS = ["placeholder", "aria-label", "title"];
+
+// Nutzertext: das Original, die Vorschau, die Antwort und der Tooltip mit Originalwerten. Nur die leeren Hinweise darin gehören zur Oberfläche.
+function isUserText(el) {
+  if (!el || el.closest("script, style, svg, #tooltip, .lang-switch")) return true;
+  return Boolean(el.closest(".pane, .chip, mark")) && !el.closest(".empty");
+}
+
+function localiseText(node) {
+  if (isUserText(node.parentElement)) return;
+  const current = node.data;
+  let de = sourceText.get(node);
+  // Neuer oder vom Programm geänderter Text: der aktuelle Wert ist die deutsche Quelle.
+  if (de === undefined || (current !== de && current !== toEnglish(de))) {
+    de = current;
+    sourceText.set(node, de);
+  }
+  const wanted = lang === "en" ? (toEnglish(de) ?? de) : de;
+  if (current !== wanted) node.data = wanted;
+}
+
+function localiseAttrs(el) {
+  if (isUserText(el)) return;
+  let saved = sourceAttrs.get(el);
+  if (!saved) { saved = {}; sourceAttrs.set(el, saved); }
+  for (const name of I18N_ATTRS) {
+    if (!el.hasAttribute(name)) continue;
+    const current = el.getAttribute(name);
+    let de = saved[name];
+    if (de === undefined || (current !== de && current !== toEnglish(de))) { de = current; saved[name] = de; }
+    const wanted = lang === "en" ? (toEnglish(de) ?? de) : de;
+    if (current !== wanted) el.setAttribute(name, wanted);
+  }
+}
+
+function localiseTree(root) {
+  if (root.nodeType === Node.TEXT_NODE) return localiseText(root);
+  if (root.nodeType !== Node.ELEMENT_NODE) return;
+  localiseAttrs(root);
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (node.nodeType === Node.TEXT_NODE) localiseText(node); else localiseAttrs(node);
+  }
+}
+
+function setLanguage(next) {
+  lang = next;
+  document.documentElement.lang = next;
+  for (const button of document.querySelectorAll(".lang-switch button")) {
+    button.setAttribute("aria-pressed", String(button.dataset.lang === next));
+  }
+  try { localStorage.setItem("lp7-lang", next); } catch {}
+  localiseTree(document.body);
+}
+
+new MutationObserver((records) => {
+  for (const record of records) {
+    if (record.type === "characterData") localiseText(record.target);
+    else if (record.type === "attributes") localiseAttrs(record.target);
+    else for (const node of record.addedNodes) localiseTree(node);
+  }
+}).observe(document.body, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: I18N_ATTRS });
+
+for (const button of document.querySelectorAll(".lang-switch button")) {
+  button.addEventListener("click", () => setLanguage(button.dataset.lang));
+}
+setLanguage(lang);
 </script>
 </body>
 </html>
