@@ -17,7 +17,7 @@ def main() -> None:
     with ZipFile(root / 'icons.zip') as archive:
         assert len(archive.namelist()) == len(source) == 18
         for name, paths in source.items():
-            filename = f'lp7-{name}.svg'
+            filename = f'horus-{name}.svg'
             svg = (root / 'icons' / filename).read_bytes()
             element = ET.fromstring(svg)
             assert element.attrib['viewBox'] == '0 0 24 24'
@@ -50,7 +50,7 @@ def main() -> None:
         with page.expect_download() as download_event:
             page.locator('#downloadSvg').click()
         download = download_event.value
-        assert download.suggested_filename == 'lp7-analyze.svg'
+        assert download.suggested_filename == 'horus-analyze.svg'
         with TemporaryDirectory() as tmp:
             path = Path(tmp) / download.suggested_filename
             download.save_as(path)
