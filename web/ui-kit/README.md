@@ -1,4 +1,4 @@
-# LP7 UI Kit
+# Horus UI Kit
 
 18 SVG Icons, wiederverwendbare Komponenten und drei klickbare Demos für einen lokalen KI Arbeitsbereich.
 
@@ -14,9 +14,9 @@
 
 ## Ausprobieren
 
-Im gemeinsamen LP7 Repository `web/ui-kit/index.html` im Browser öffnen. Es gibt keinen Buildschritt und keine Laufzeitabhängigkeiten. Das Kit startet mit dem bestätigten **Lime Soda** Look.
+Im gemeinsamen Horus Repository `web/ui-kit/index.html` im Browser öffnen. Es gibt keinen Buildschritt und keine Laufzeitabhängigkeiten. Das Kit startet mit dem bestätigten **Lime Soda** Look.
 
-Für zuverlässigen Zugriff auf die Zwischenablage und die Browserprüfung aus dem LP7 Repository starten:
+Für zuverlässigen Zugriff auf die Zwischenablage und die Browserprüfung aus dem Horus Repository starten:
 
 ```sh
 python3 -m http.server 8013 --bind 127.0.0.1 --directory web/ui-kit
@@ -24,7 +24,7 @@ python3 -m http.server 8013 --bind 127.0.0.1 --directory web/ui-kit
 
 Danach [http://127.0.0.1:8013](http://127.0.0.1:8013) öffnen.
 
-Die Demos nutzen feste erfundene Beispieldaten. Erkennung, Maskierung und Antwort werden simuliert. Das Kit ist eine Designstudie und hat keine Verbindung zum LP7 Kern oder zu Claude.
+Die Demos nutzen feste erfundene Beispieldaten. Erkennung, Maskierung und Antwort werden simuliert. Das Kit ist eine Designstudie und hat keine Verbindung zum Horus Kern oder zu Claude.
 
 ## Vorschau
 
@@ -62,7 +62,7 @@ Alle Icons liegen einzeln unter [icons/](icons/) und gebündelt in [icons.zip](i
 
 ```html
 <button type="button">
-  <img src="icons/lp7-analyze.svg" width="20" height="20" alt="">
+  <img src="icons/horus-analyze.svg" width="20" height="20" alt="">
   Analysieren
 </button>
 ```
@@ -81,11 +81,11 @@ Die Grafik liegt unter [assets/banner.png](assets/banner.png). Im Abschnitt **Da
 
 Mit **Analysieren** die zwei Beispielnamen ersetzen, die Vorschau prüfen, **Freigeben** und **Ausgabe simulieren**. Das × an einem Platzhalter nimmt die Ersetzung zurück und sperrt die Ausgabe erneut. Auch eine erneute Analyse verwirft die vorherige Freigabe. **Neu starten** setzt die Demo zurück. Der Text ist ein festes erfundenes Beispiel, keine echte Modellerkennung oder API Verbindung.
 
-Die früheren statischen Entwürfe bleiben als [Kopfbereich](assets/dashboard-kopfbereich.png) und [Ablaufleiste](assets/dashboard-ablaufleiste.png) verfügbar.
+Die früheren statischen Entwürfe bleiben als [Kopfbereich](https://github.com/lxc-ht/Horus/blob/9842718280a96edbd0f149da248c9c600eba5e26/web/ui-kit/assets/dashboard-kopfbereich.png) und [Ablaufleiste](https://github.com/lxc-ht/Horus/blob/9842718280a96edbd0f149da248c9c600eba5e26/web/ui-kit/assets/dashboard-ablaufleiste.png) verfügbar.
 
 ## Gemeinsam weiterarbeiten
 
-Das vollständige Kit liegt unter `web/ui-kit/` im gemeinsamen [LP7 Repository](https://github.com/lxc-ht/LP7). Bestehende LP7 Mitarbeitende benötigen keinen Zugang zu einem weiteren Repository.
+Das vollständige Kit liegt unter `web/ui-kit/` im gemeinsamen [Horus Repository](https://github.com/lxc-ht/Horus). Bestehende Horus Mitarbeitende benötigen keinen Zugang zu einem weiteren Repository.
 
 1. Aktuellen Stand mit `git pull` holen.
 2. Für eigene Änderungen einen Arbeitsbranch anlegen, zum Beispiel `git switch -c codex/ui-kit-anpassung`.

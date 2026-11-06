@@ -58,7 +58,7 @@ $('downloadSvg').addEventListener('click', () => {
   const url = URL.createObjectURL(new Blob([selectedSvg()], { type: 'image/svg+xml' }));
   const link = document.createElement('a');
   link.href = url;
-  link.download = `lp7-${selected}.svg`;
+  link.download = `horus-${selected}.svg`;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   $('iconFeedback').textContent = $('selectedName').textContent + ' als SVG heruntergeladen.';
@@ -84,7 +84,7 @@ $('demoGrid').innerHTML = designs.map(([id, label, detail]) => `
   <article class="demo" data-design="${id}" data-stage="original" aria-label="${label} Demo">
     <div class="demo-caption"><strong>${label}</strong><span>${detail}</span></div>
     <div class="demo-window">
-      <div class="demo-topbar"><span class="demo-mark">${icon('mask')}LP7</span><button type="button" class="icon-button demo-reset" aria-label="${label} Demo zurücksetzen">${icon('reset')}</button></div>
+      <div class="demo-topbar"><span class="demo-mark">${icon('mask')}Horus</span><button type="button" class="icon-button demo-reset" aria-label="${label} Demo zurücksetzen">${icon('reset')}</button></div>
       <div class="demo-steps" aria-label="Arbeitsschritte"><span data-step="original">${icon('original')}Original</span><span data-step="preview">${icon('preview')}Vorschau</span><span data-step="output">${icon('output')}Ausgabe</span></div>
       <div class="demo-editor"><div class="demo-editor-top"><h4 class="demo-heading"></h4><span class="demo-status"></span></div><p class="demo-text"></p><p class="demo-help" role="status"></p></div>
       <div class="demo-actions"><button type="button" class="button primary demo-next"></button><button type="button" class="button secondary demo-output" disabled>${icon('lock')}Ausgabe</button></div>

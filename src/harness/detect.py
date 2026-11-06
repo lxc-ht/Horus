@@ -371,7 +371,7 @@ _gliner_lock = threading.Lock()
 
 
 MODEL_UNAVAILABLE = (
-    "Das Erkennungsmodell konnte nicht geladen werden. Beim ersten Start braucht LP7 einmal Internet, "
+    "Das Erkennungsmodell konnte nicht geladen werden. Beim ersten Start braucht Horus einmal Internet, "
     "danach liegt das Modell auf diesem Rechner. Bitte mit Netz neu starten und einmal analysieren."
 )
 

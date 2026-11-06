@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KI nutzen. Daten behalten.</title>
+<title>Horus · KI nutzen. Daten behalten.</title>
 <style>
   /* Material C: helle Arbeitsflächen, dezenter Verlauf und Farbrand am aktuellen Schritt. */
   :root { color-scheme: light; --paper: #fff; --accent: #c6ff3d; --accent-ink: #101110; --red: #9b2823; --red-soft: #fff1ed; --yellow: #70540a; --yellow-soft: #fff9dd; --green: #17613d; --green-soft: #dffbe8; --ink: #182024; --muted: #5c6a72; --line: #dce7e9; }
@@ -328,9 +328,9 @@ const I18N = {
     errTextChanged: "Der Text hat sich während der Analyse geändert. Bitte erneut analysieren.",
     errSelection: "Bitte nur Text zwischen zwei Platzhaltern markieren.",
     errClipboard: "Kopieren hat nicht geklappt. Bitte erlaube den Zugriff auf die Zwischenablage.",
-    fileDoc: "Ältere Word-Dateien (.doc) kann LP7 nicht lesen. Speichere sie in Word als .docx und lade sie erneut.",
-    fileMsg: "Outlook-Dateien (.msg) kann LP7 noch nicht lesen. Speichere die E-Mail als .eml oder kopiere ihren Text hierher.",
-    fileUnsupported: "Diese Datei kann LP7 nicht lesen. Möglich sind PDF, Word (.docx) und E-Mail (.eml).",
+    fileDoc: "Ältere Word-Dateien (.doc) kann Horus nicht lesen. Speichere sie in Word als .docx und lade sie erneut.",
+    fileMsg: "Outlook-Dateien (.msg) kann Horus noch nicht lesen. Speichere die E-Mail als .eml oder kopiere ihren Text hierher.",
+    fileUnsupported: "Diese Datei kann Horus nicht lesen. Möglich sind PDF, Word (.docx) und E-Mail (.eml).",
     typeLabels: ["Person", "Firma", "Adresse", "Ort", "E-Mail", "Telefon", "IBAN", "Datum", "Kennung"],
     emptyOriginal1: "Füge hier deinen Text ein.",
     emptyOriginal2: "Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.",
@@ -408,9 +408,9 @@ const I18N = {
     errTextChanged: "The text changed during the analysis. Please analyze again.",
     errSelection: "Please select only text between two placeholders.",
     errClipboard: "Copying didn't work. Please allow access to the clipboard.",
-    fileDoc: "LP7 can't read older Word files (.doc). Save the file as .docx in Word and load it again.",
-    fileMsg: "LP7 can't read Outlook files (.msg) yet. Save the email as .eml or copy its text in here.",
-    fileUnsupported: "LP7 can't read this file. Supported are PDF, Word (.docx) and email (.eml).",
+    fileDoc: "Horus can't read older Word files (.doc). Save the file as .docx in Word and load it again.",
+    fileMsg: "Horus can't read Outlook files (.msg) yet. Save the email as .eml or copy its text in here.",
+    fileUnsupported: "Horus can't read this file. Supported are PDF, Word (.docx) and email (.eml).",
     typeLabels: ["Person", "Company", "Address", "Place", "Email", "Phone", "IBAN", "Date", "ID"],
     emptyOriginal1: "Paste your text here.",
     emptyOriginal2: "For example a letter, an email or a statement of facts.",
@@ -457,7 +457,7 @@ Please summarise the case in five sentences and draft a short reply to the perso
 };
 
 let lang = "de";
-try { if (localStorage.getItem("lp7-lang") === "en") lang = "en"; } catch {}
+try { if (localStorage.getItem("horus-lang") === "en") lang = "en"; } catch {}
 // Text in der aktuellen Sprache; {name} wird durch vars.name ersetzt.
 function t(key, vars = {}) {
   return I18N[lang][key].replace(/\{(\w+)\}/g, (_, name) => vars[name]);
@@ -1124,7 +1124,7 @@ function applyLanguage() {
 for (const button of document.querySelectorAll(".lang-switch button")) {
   button.addEventListener("click", () => {
     lang = button.dataset.lang;
-    try { localStorage.setItem("lp7-lang", lang); } catch {}
+    try { localStorage.setItem("horus-lang", lang); } catch {}
     applyLanguage();
   });
 }
