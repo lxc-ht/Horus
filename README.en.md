@@ -48,4 +48,4 @@ In a sample of 12 fictional documents, Horus fully replaced 32 of 36 annotated v
 
 ## Credits and license
 
-Built by Team Horus at the Leuphana AI Hackathon 2026. [Acknowledgments](README.md#danksagung) · [MIT license](LICENSE)
+Built by Team Horus at the Leuphana AI Hackathon 2026. [MIT license](LICENSE)

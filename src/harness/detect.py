@@ -80,7 +80,7 @@ _LABELED_ID = re.compile(
     r"|SV-?(?:Nr\.?|Nummer)|Sozialversicherungsnummer|Versicherten-?(?:Nr\.?|Nummer)"
     r"|Aktenzeichen|Az\.?|Gesch[äa]ftszeichen|Mandanten-?(?:Nr\.?|Nummer)|Patienten-?(?:Nr\.?|Nummer)"
     r"|(?:Personal)?Ausweis(?:-?(?:Nr\.?|Nummer))?|Kundenkonto|Kennzeichen|BLZ|Bankleitzahl|(?:Unser|Ihr)\s+Zeichen"
-    # Bezeichner nach den deutschen Erkennern von Presidio (MIT-Lizenz), siehe README unter „Danksagung“.
+    # Bezeichner nach den deutschen Erkennern von Presidio (MIT-Lizenz), siehe THIRD_PARTY_NOTICES.md.
     r"|Reisepass(?:nummer)?|F[üu]hrerschein(?:nummer)?|USt\.?-?Id(?:Nr\.?)?|Umsatzsteuer-?ID"
     r"|(?:Konto|Kunden|Fall|Vertrags|Rechnungs|Policen|Versicherungs|Beleg|Auftrags|Reisepass)-?(?:Nr\.?|Nummer))"
     # Wert: Blöcke aus Großbuchstaben und Ziffern. Ein Punkt am Blockende beendet ihn, sonst käme der nächste Satz mit.
