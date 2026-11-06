@@ -47,6 +47,8 @@ Beide:
 
 **Erledigt**
 
+- [x] Codex für Loc: ausgewählten Horus Banner, Ablaufgrafik und englische README zur Prüfung auf [`codex/horus-readme-grafiken`](https://github.com/lxc-ht/Horus/tree/codex/horus-readme-grafiken) bereitgestellt.
+
 - [x] Auf Locs Wunsch am 06.11. gegen 11:20 UTC gemergt: #65, #62 (Horus-Umbenennung), #64 (englischer Einstieg, macOS-Download), #38 (Freigabe-Nachweis, jetzt „Horus“). Konflikte nur in `docs/DEMO-ABLAUF.md` (bleibt gelöscht) und hier. #63 (Audio) bewusst nicht gemergt. Auf main 246 Tests, `web.test_app`, Browserprüfung grün (`lxc-ht`, Claude).
 - [x] Auswahl „Aufgabe für LLM“ entfernt, `docs/DEMO-ABLAUF.md` (Pitch-Drehbuch) aus dem Repo genommen, damit es nach dem Pitch öffentlich werden kann ([PR #65](https://github.com/lxc-ht/Horus/pull/65), `lxc-ht`, Claude). Offen, Prüfung durch Paul. Behalten und im PR genannt: `PROJEKTSTAND.md` (Pitch-Notizen nach dem Pitch kürzen), `web/ui-kit/`. PR #63 (audio-loc) nicht auf main mergen.
 - [x] Codex für Loc: Projektnamen in Dokumentation, Startdatei, App, UI Kit und Grafiken auf Horus umgestellt ([PR #62](https://github.com/lxc-ht/Horus/pull/62)).

@@ -1,10 +1,10 @@
+![Horus Schriftzug mit Horusauge auf einer mintfarbenen Glaskachel](docs/images/horus-header.jpg)
+
 # Horus · KI nutzen. Daten behalten.
 
 **Horus ersetzt sensible Angaben lokal durch Platzhalter.** Aus „Erika Musterfrau“ wird zum Beispiel `[PERSON_1]`. Du prüfst den maskierten Text, bevor du ihn an einen Chatbot weitergibst. Horus setzt die Originalwerte in der Antwort anschließend lokal wieder ein.
 
-[Auf dem Mac starten](#schnellstart) · [Ablauf ansehen](#so-funktioniert-es) · [Grenzen kennen](#grenzen)
-
-![Horus: Analysieren, Vorschau und Ausgabe. Klar. Lokal. Unter deiner Kontrolle.](web/assets/horus-banner.png)
+[English](README.en.md) · [Auf dem Mac starten](#schnellstart) · [Ablauf ansehen](#so-funktioniert-es) · [Grenzen kennen](#grenzen)
 
 ## Schnellstart
 
@@ -43,6 +43,8 @@ Die Oberfläche ist nur auf diesem Rechner erreichbar (127.0.0.1), nicht im Netz
 </details>
 
 ## So funktioniert es
+
+![Erika Musterfrau im Original wird zu \[PERSON_1\] in der freigegebenen Vorschau und in der lokalen Antwort wieder zu Erika Musterfrau](docs/images/horus-workflow-de.jpg)
 
 1. **Einfügen und analysieren.** Gib deinen Text ein oder lade eine PDF, Word Datei oder E-Mail. Horus ersetzt erkannte Namen, Adressen, Kontodaten und andere sensible Angaben durch Platzhalter.
 2. **Prüfen und freigeben.** Kontrolliere die Vorschau und ergänze fehlende Stellen. Gelbe Markierungen zeigen unsichere Treffer. Erst nach deiner Freigabe lässt sich die Vorschau kopieren.
