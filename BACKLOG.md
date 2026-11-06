@@ -53,6 +53,13 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Schreibweisen und Genitiv-s gelten nur für großgeschriebene ganze Wörter. Am Satzanfang wird bei „Anna Link“ auch „Links“ maskiert, bei Herrn Koenig auch „Der König“. Sicher, verfälscht aber die Antwort.
 - Kleingeschriebene Schreibweisen („weiß“ bei „Hans Weiss“) bleiben im Text, die Warnung nennt sie. Der Leck-Check prüft bewusst nur die exakte Schreibweise, sonst könnte „ich weiß es“ jede Freigabe blockieren.
 
+- Englische Texte, aus dem Block „Englische Anreden“ (06.11.) bewusst herausgelassen:
+  - Kennungen mit englischem Bezeichner wie „client number C-26-0815“ werden nur als unsicher markiert, nicht ersetzt. Eigener Auftrag: Bezeichner der Kennungen um englische Wörter erweitern.
+  - Straßen ohne Hausnummer wie „Mill Road“ werden nicht erkannt, im Deutschen genauso („Bardowicker Straße“).
+  - Datum: „14 September 2026“ wird ersetzt, „2 October 2026“ nicht. Englische Monatsnamen fehlen in `_DATE`, „September“ passt nur, weil er deutsch gleich heißt.
+  - `api.py` kennt die englischen Anreden noch nicht (`_AFTER_SALUTATION`, `_SALUTATION_BEFORE`, Vertrag, deshalb nicht angefasst). Folge: „Mrs [PERSON_3]“ wird als „Nur ein Namensteil“ unsicher markiert, und die Rückübersetzung warnt bei „Mr [PERSON_2]“, wenn der Platzhalter sonst auch allein für den Nachnamen stand. Bei „Frau“ und „Herr“ unterbleibt das. Nur zusätzliche Hinweise, kein Leck; beide Ausdrücke um Mr, Mrs, Ms, Miss, Mx, Sir erweitern.
+  - Der Regex-Detektor findet „Mr X“ und „Ms X“ in jeder Schreibweise, „Miss“ und „Sir“ nur großgeschrieben (sonst wäre „you miss Paris“ ein Name). Englische Berufswörter vor dem Namen („Mr Justice Whitaker“, „Doctor“) kennt er nicht.
+
 ## Später
 
 - Aus dem Vergleich mit Presidio (MIT-Lizenz), noch nicht übernommen: Positivliste für Begriffe, die nie maskiert werden sollen (z. B. „Landgericht Lüneburg“), Prüfziffern für Personalausweis und Reisepass ohne Bezeichner (ICAO 9303), MAC-Adressen, UUIDs, Krypto-Adressen, und eine Erklärung je Fundstelle, welches Muster und welches Kontextwort gegriffen hat.
