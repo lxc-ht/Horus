@@ -39,6 +39,11 @@
   .card-subtitle { color: var(--muted); font-size: 12px; margin: -5px 0 0; }
   .editor-wrap { flex: 1; position: relative; display: flex; min-height: 0; }
   textarea::placeholder { color: #60665c; opacity: 1; }
+  /* Leerer Hinweis mittig wie in den anderen Spalten. Der Platzhalter bleibt für Screenreader, ist aber unsichtbar. */
+  #original::placeholder { color: transparent; }
+  .original-empty { position: absolute; inset: 0; display: grid; place-items: center; padding: 28px 10px; text-align: center; pointer-events: none; }
+  .original-empty .empty { margin: 0; }
+  .editor-wrap:has(#original:not(:placeholder-shown)) .original-empty { display: none; }
   #original { flex: 1; min-height: 0; overflow-y: auto; }
   /* Beim Darüberziehen einer Datei nur dezent anzeigen, dass das Feld sie annimmt. */
   #original.drop-target { box-shadow: inset 0 0 0 2px var(--accent); background: #c6ff3d14; }
@@ -173,7 +178,7 @@
     <section class="work-card" data-step="stepOriginal" aria-labelledby="h-original">
       <div class="card-heading"><h2 id="h-original"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M8 12h8m-8 4h6"/></svg>Dein Original</h2><span class="status-badge">Lokal</span></div>
       <p class="card-subtitle" id="originalHelp">Bleibt auf diesem Rechner.</p>
-      <div class="editor-wrap scroll-frame"><textarea id="original" aria-labelledby="h-original" aria-describedby="originalHelp" spellcheck="false" placeholder="Füge hier deinen Text ein …&#10;&#10;Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.&#10;&#10;Noch keinen Text zur Hand? Starte mit unserem erfundenen Kanzleibeispiel.&#10;&#10;Oder zieh eine PDF, Word-Datei oder E-Mail hierher."></textarea></div>
+      <div class="editor-wrap scroll-frame"><textarea id="original" aria-labelledby="h-original" aria-describedby="originalHelp" spellcheck="false" placeholder="Füge hier deinen Text ein …&#10;&#10;Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.&#10;&#10;Noch keinen Text zur Hand? Starte mit unserem erfundenen Kanzleibeispiel.&#10;&#10;Oder zieh eine PDF, Word-Datei oder E-Mail hierher."></textarea><div class="original-empty" aria-hidden="true"><p class="empty">Füge hier deinen Text ein.<br>Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.<br><br>Noch keinen Text zur Hand? Starte mit dem erfundenen Kanzleibeispiel oder zieh eine PDF, Word-Datei oder E-Mail hierher.</p></div></div>
       <div class="row actions">
         <button id="btnExample" type="button"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M8 12h8m-8 4h6"/></svg>Beispiel laden</button>
         <button id="btnPdf" type="button"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M12 18v-7m-3 3 3-3 3 3"/></svg>Datei laden</button>
