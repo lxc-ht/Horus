@@ -167,19 +167,29 @@
     .headline { font-size: min(5.2vw, 22px); gap: .6em; letter-spacing: 0; }
   }
   @media (pointer: coarse) { .chip button { min-width: 44px; min-height: 44px; } }
+  /* Sprachumschalter: klein und ruhig rechts in der Kopfzeile, ohne sie höher zu machen. */
+  .intro { position: relative; }
+  .lang-switch { position: absolute; top: 50%; right: 0; transform: translateY(-50%); display: inline-flex; gap: 2px; padding: 3px; border: 1px solid #dce5e8; border-radius: 12px; background: #ffffffc9; }
+  .lang-switch button { min-height: 0; padding: 4px 9px; border: 0; border-radius: 9px; background: transparent; color: #59614f; font-size: 11px; font-weight: 600; letter-spacing: .04em; }
+  .lang-switch button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  @media (max-width: 600px) {
+    /* Auf dem Handy füllt der Slogan die Breite: Der Umschalter steht darüber rechts. */
+    .intro { flex-direction: column; align-items: center; gap: 6px; }
+    .lang-switch { position: static; transform: none; align-self: flex-end; }
+  }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
-<div id="fakeBand" role="alert" hidden>Testmodus: Attrappe aktiv. Keine vollständige Erkennung sensibler Angaben.</div>
+<div id="fakeBand" role="alert" hidden data-i18n="fakeBand">Testmodus: Attrappe aktiv. Keine vollständige Erkennung sensibler Angaben.</div>
 <div class="workspace">
   <div class="intro">
-    <h1 class="sr-only">Text pseudonymisieren</h1>
+    <h1 class="sr-only" data-i18n="pageTitle">Text pseudonymisieren</h1>
     <p class="headline" aria-label="Ask Anything, Reveal Nothing">
       <!-- Die Wörter bleiben lesbar: Ein Absatz darf laut ARIA keinen eigenen Namen tragen, manche Screenreader übergehen das aria-label. -->
       <span>Ask Anything</span>
       <!-- Inhalt von web/assets/horus-auge.svg unverändert eingebettet: Der Server liefert nur diese Datei aus. -->
-      <span class="headline-eye" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="98 94 834 552" role="img" aria-label="Horus-Auge">
+      <span class="headline-eye" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="98 94 834 552" role="img" aria-label="Horus-Auge" data-i18n-aria="eyeLabel">
   <!-- Horus-Auge (Udjat), Tinte über currentColor, nach Pauls Vorlage nachgezeichnet -->
   <path fill="currentColor" d="M104 228 C103.8 223.2 106.2 218.8 108 216 C109.8 213.2 110.5 212.7 115 211 C119.5 209.3 128.3 207.5 135 206 C141.7 204.5 148.3 203.8 155 202 C161.7 200.2 168.3 197.7 175 195 C181.7 192.3 188.3 189.2 195 186 C201.7 182.8 208.3 179.5 215 176 C221.7 172.5 228.3 168.8 235 165 C241.7 161.2 248.3 157 255 153 C261.7 149 268.3 144.7 275 141 C281.7 137.3 288.3 134 295 131 C301.7 128 308.3 125.7 315 123 C321.7 120.3 328.3 117.2 335 115 C341.7 112.8 348.3 111.7 355 110 C361.7 108.3 368.3 106.2 375 105 C381.7 103.8 388.3 103.7 395 103 C401.7 102.3 408.3 101.5 415 101 C421.7 100.5 428.3 100 435 100 C441.7 100 448.3 100.5 455 101 C461.7 101.5 468.3 102.2 475 103 C481.7 103.8 488.3 105 495 106 C501.7 107 508.3 107.7 515 109 C521.7 110.3 528.3 112.2 535 114 C541.7 115.8 548.3 118 555 120 C561.7 122 568.3 124 575 126 C581.7 128 588.3 129.8 595 132 C601.7 134.2 608.3 136.7 615 139 C621.7 141.3 628.3 143.8 635 146 C641.7 148.2 648.3 150.3 655 152 C661.7 153.7 668.3 154.5 675 156 C681.7 157.5 688.3 159.7 695 161 C701.7 162.3 708.3 163.2 715 164 C721.7 164.8 728.3 165.5 735 166 C741.7 166.5 748.3 166.8 755 167 C761.7 167.2 768.3 167.3 775 167 C781.7 166.7 788.3 165.8 795 165 C801.7 164.2 808.3 163.2 815 162 C821.7 160.8 828.3 159.8 835 158 C841.7 156.2 848.3 153.5 855 151 C861.7 148.5 868.3 146.2 875 143 C881.7 139.8 888.8 135.7 895 132 C901.2 128.3 907 124.2 912 121 C917 117.8 924.3 112.3 925 113 C925.7 113.7 921 119.3 916 125 C911 130.7 901.8 141 895 147 C888.2 153 881.7 156.7 875 161 C868.3 165.3 861.7 169.5 855 173 C848.3 176.5 841.7 179.5 835 182 C828.3 184.5 821.7 186.3 815 188 C808.3 189.7 801.7 191 795 192 C788.3 193 781.7 193.5 775 194 C768.3 194.5 761.7 194.8 755 195 C748.3 195.2 741.7 195.2 735 195 C728.3 194.8 721.7 194.7 715 194 C708.3 193.3 701.7 192.2 695 191 C688.3 189.8 681.7 188.5 675 187 C668.3 185.5 661.7 183.7 655 182 C648.3 180.3 641.7 178.8 635 177 C628.3 175.2 621.7 173 615 171 C608.3 169 601.7 167.2 595 165 C588.3 162.8 581.7 160.2 575 158 C568.3 155.8 561.7 153.8 555 152 C548.3 150.2 541.7 148.7 535 147 C528.3 145.3 521.7 143.5 515 142 C508.3 140.5 501.7 139.2 495 138 C488.3 136.8 481.7 135.8 475 135 C468.3 134.2 461.7 133.5 455 133 C448.3 132.5 441.7 132.2 435 132 C428.3 131.8 421.7 131.7 415 132 C408.3 132.3 401.7 133 395 134 C388.3 135 381.7 136.7 375 138 C368.3 139.3 361.7 140.3 355 142 C348.3 143.7 341.7 145.7 335 148 C328.3 150.3 321.7 153.2 315 156 C308.3 158.8 301.7 161.7 295 165 C288.3 168.3 281.7 172.3 275 176 C268.3 179.7 261.7 183 255 187 C248.3 191 241.7 195.3 235 200 C228.3 204.7 221.7 210.5 215 215 C208.3 219.5 201.7 223.2 195 227 C188.3 230.8 181.7 234.8 175 238 C168.3 241.2 161.7 244 155 246 C148.3 248 140.8 249.2 135 250 C129.2 250.8 124.3 251.8 120 251 C115.7 250.2 111.7 248.8 109 245 C106.3 241.2 104.2 232.8 104 228 Z"/>
   <path fill="currentColor" fill-rule="evenodd" d="M125 316 C126.7 310.8 130 316.2 135 315 C140 313.8 148.3 311.3 155 309 C161.7 306.7 168.3 304 175 301 C181.7 298 188.3 294.3 195 291 C201.7 287.7 208.3 284.5 215 281 C221.7 277.5 228.3 273.7 235 270 C241.7 266.3 248.3 262.8 255 259 C261.7 255.2 268.3 250.7 275 247 C281.7 243.3 288.3 240.3 295 237 C301.7 233.7 308.3 230.2 315 227 C321.7 223.8 328.3 220.7 335 218 C341.7 215.3 348.3 213.2 355 211 C361.7 208.8 368.3 206.7 375 205 C381.7 203.3 388.3 202 395 201 C401.7 200 408.3 199.5 415 199 C421.7 198.5 428.3 198 435 198 C441.7 198 448.3 198.5 455 199 C461.7 199.5 468.3 200 475 201 C481.7 202 488.3 203.5 495 205 C501.7 206.5 508.3 208.2 515 210 C521.7 211.8 528.3 213.8 535 216 C541.7 218.2 548.3 220.7 555 223 C561.7 225.3 568.3 227.5 575 230 C581.7 232.5 588.3 235.5 595 238 C601.7 240.5 608.3 242.7 615 245 C621.7 247.3 628.3 249.8 635 252 C641.7 254.2 648.3 256 655 258 C661.7 260 668.3 262.2 675 264 C681.7 265.8 688.3 267.5 695 269 C701.7 270.5 708.3 271.8 715 273 C721.7 274.2 728.3 275 735 276 C741.7 277 748.3 278.3 755 279 C761.7 279.7 768.3 279.7 775 280 C781.7 280.3 788.3 281 795 281 C801.7 281 808.3 280.7 815 280 C821.7 279.3 828.3 278.2 835 277 C841.7 275.8 848.3 274.7 855 273 C861.7 271.3 868.3 269.7 875 267 C881.7 264.3 888.8 260.7 895 257 C901.2 253.3 906.7 249 912 245 C917.3 241 926.3 231.2 927 233 C927.7 234.8 921.3 249 916 256 C910.7 263 901.8 269.8 895 275 C888.2 280.2 881.7 283.7 875 287 C868.3 290.3 861.7 292.8 855 295 C848.3 297.2 841.7 298.5 835 300 C828.3 301.5 821.7 302.8 815 304 C808.3 305.2 801.7 306.2 795 307 C788.3 307.8 781.7 308.3 775 309 C768.3 309.7 761.7 310.5 755 311 C748.3 311.5 741.7 311.5 735 312 C728.3 312.5 721.7 313.3 715 314 C708.3 314.7 701.7 315.2 695 316 C688.3 316.8 681.7 317.5 675 319 C668.3 320.5 661.7 322.7 655 325 C648.3 327.3 641.7 330.2 635 333 C628.3 335.8 621.7 339 615 342 C608.3 345 601.7 348 595 351 C588.3 354 581.7 357.2 575 360 C568.3 362.8 561.7 365.7 555 368 C548.3 370.3 541.7 372.2 535 374 C528.3 375.8 521.7 377.5 515 379 C508.3 380.5 501.7 382 495 383 C488.3 384 481.7 384.3 475 385 C468.3 385.7 461.7 386.7 455 387 C448.3 387.3 441.7 387 435 387 C428.3 387 420.2 386.5 415 387 C409.8 387.5 405.8 387.5 404 390 C402.2 392.5 402.5 397.8 404 402 C405.5 406.2 409.7 410.3 413 415 C416.3 419.7 420 425 424 430 C428 435 432.7 440 437 445 C441.3 450 445.3 455 450 460 C454.7 465 459.8 470 465 475 C470.2 480 475.3 485 481 490 C486.7 495 492.7 500 499 505 C505.3 510 511.8 515 519 520 C526.2 525 533.7 530 542 535 C550.3 540 558.7 545 569 550 C579.3 555 589.3 560 604 565 C618.7 570 641.8 576.8 657 580 C672.2 583.2 682 583.8 695 584 C708 584.2 720.7 584.2 735 581 C749.3 577.8 769.3 570.2 781 565 C792.7 559.8 798.2 555 805 550 C811.8 545 817.3 540 822 535 C826.7 530 830.2 525 833 520 C835.8 515 837.5 510 839 505 C840.5 500 841.5 495 842 490 C842.5 485 842.7 480 842 475 C841.3 470 840.2 464.8 838 460 C835.8 455.2 833 450.2 829 446 C825 441.8 819.7 437.8 814 435 C808.3 432.2 801.3 429.3 795 429 C788.7 428.7 781.7 430.5 776 433 C770.3 435.5 764.7 439.5 761 444 C757.3 448.5 755 454.8 754 460 C753 465.2 753.7 470.7 755 475 C756.3 479.3 759.2 483.5 762 486 C764.8 488.5 768.5 490.3 772 490 C775.5 489.7 779.8 486.7 783 484 C786.2 481.3 788.7 476.3 791 474 C793.3 471.7 795.7 468.3 797 470 C798.3 471.7 799.5 479.2 799 484 C798.5 488.8 796.5 495 794 499 C791.5 503 788 505.7 784 508 C780 510.3 774.8 512.5 770 513 C765.2 513.5 759.5 512.7 755 511 C750.5 509.3 746.7 506.5 743 503 C739.3 499.5 735.5 494.7 733 490 C730.5 485.3 728.8 480 728 475 C727.2 470 727.3 465 728 460 C728.7 455 729.8 450 732 445 C734.2 440 736.8 434.8 741 430 C745.2 425.2 751.3 419.8 757 416 C762.7 412.2 768.7 409.2 775 407 C781.3 404.8 788.3 403.3 795 403 C801.7 402.7 807.5 403.2 815 405 C822.5 406.8 833 410.2 840 414 C847 417.8 852.5 422.8 857 428 C861.5 433.2 864.3 439.7 867 445 C869.7 450.3 871.7 455 873 460 C874.3 465 874.7 470 875 475 C875.3 480 875.3 485 875 490 C874.7 495 874 500 873 505 C872 510 870.8 515 869 520 C867.2 525 864.7 530 862 535 C859.3 540 856.7 545 853 550 C849.3 555 845 560 840 565 C835 570 829.8 575.2 823 580 C816.2 584.8 810 589.2 799 594 C788 598.8 769.3 605.5 757 609 C744.7 612.5 735.3 613.8 725 615 C714.7 616.2 709.2 616.8 695 616 C680.8 615.2 657.5 613.5 640 610 C622.5 606.5 604.2 600 590 595 C575.8 590 565.3 585 555 580 C544.7 575 536.5 570 528 565 C519.5 560 511.3 555 504 550 C496.7 545 490.5 540 484 535 C477.5 530 470.8 525 465 520 C459.2 515 454.2 510 449 505 C443.8 500 438.8 495 434 490 C429.2 485 424.7 480 420 475 C415.3 470 410.3 465 406 460 C401.7 455 398 450 394 445 C390 440 385.8 435 382 430 C378.2 425 374.3 419.8 371 415 C367.7 410.2 364.5 404.7 362 401 C359.5 397.3 358 393.7 356 393 C354 392.3 351.3 393.3 350 397 C348.7 400.7 348.5 409.5 348 415 C347.5 420.5 347.3 425 347 430 C346.7 435 346.2 440 346 445 C345.8 450 345.8 455 346 460 C346.2 465 346.8 470 347 475 C347.2 480 346.7 485 347 490 C347.3 495 348.5 500 349 505 C349.5 510 349.5 515 350 520 C350.5 525 351.3 530 352 535 C352.7 540 353.2 545 354 550 C354.8 555 356 560 357 565 C358 570 359 575 360 580 C361 585 362 590 363 595 C364 600 365 605.2 366 610 C367 614.8 368.5 619.8 369 624 C369.5 628.2 369.5 632.3 369 635 C368.5 637.7 367.3 639.7 366 640 C364.7 640.3 362.5 639.5 361 637 C359.5 634.5 358.5 629.5 357 625 C355.5 620.5 353.8 615 352 610 C350.2 605 348.2 600 346 595 C343.8 590 341.5 585 339 580 C336.5 575 334 570 331 565 C328 560 325 555 321 550 C317 545 312.7 539.8 307 535 C301.3 530.2 293.2 525 287 521 C280.8 517 274.2 514.7 270 511 C265.8 507.3 262.5 502.8 262 499 C261.5 495.2 263.8 492 267 488 C270.2 484 277 479.7 281 475 C285 470.3 288 465 291 460 C294 455 297 450 299 445 C301 440 302 435 303 430 C304 425 305.2 420 305 415 C304.8 410 303.5 405 302 400 C300.5 395 298.5 390 296 385 C293.5 380 290.5 374.5 287 370 C283.5 365.5 280.3 362 275 358 C269.7 354 261.7 349.2 255 346 C248.3 342.8 241.7 340.7 235 339 C228.3 337.3 221.7 336.7 215 336 C208.3 335.3 201.7 335 195 335 C188.3 335 181.7 335.3 175 336 C168.3 336.7 161.2 337.7 155 339 C148.8 340.3 143 342.8 138 344 C133 345.2 127.2 350.7 125 346 C122.8 341.3 123.3 321.2 125 316 Z M205 310 C205 308.5 210 306.8 215 304 C220 301.2 228.3 296.5 235 293 C241.7 289.5 248.3 286.5 255 283 C261.7 279.5 268.3 275.7 275 272 C281.7 268.3 288.3 264.5 295 261 C301.7 257.5 308.3 254 315 251 C321.7 248 328.3 245.5 335 243 C341.7 240.5 346.7 238.3 355 236 C363.3 233.7 375 230.8 385 229 C395 227.2 405 226.2 415 225 C425 223.8 435 222.5 445 222 C455 221.5 466.7 221.3 475 222 C483.3 222.7 488.3 224.5 495 226 C501.7 227.5 508.3 229 515 231 C521.7 233 528.3 235.5 535 238 C541.7 240.5 548.3 243.3 555 246 C561.7 248.7 568.3 251.2 575 254 C581.7 256.8 588.3 260.2 595 263 C601.7 265.8 608.3 268.3 615 271 C621.7 273.7 628.3 276.3 635 279 C641.7 281.7 649.5 284.7 655 287 C660.5 289.3 668 291.5 668 293 C668 294.5 660.5 294.2 655 296 C649.5 297.8 641.7 301.2 635 304 C628.3 306.8 621.7 310 615 313 C608.3 316 601.7 319 595 322 C588.3 325 581.7 328.2 575 331 C568.3 333.8 561.7 336.7 555 339 C548.3 341.3 541.7 343.2 535 345 C528.3 346.8 521.7 348.5 515 350 C508.3 351.5 501.7 352.8 495 354 C488.3 355.2 481.7 356.2 475 357 C468.3 357.8 461.7 358.5 455 359 C448.3 359.5 441.7 360 435 360 C428.3 360 421.7 359.5 415 359 C408.3 358.5 401.7 357.8 395 357 C388.3 356.2 381.7 355.3 375 354 C368.3 352.7 361.7 350.7 355 349 C348.3 347.3 341.7 345.7 335 344 C328.3 342.3 321.7 340.8 315 339 C308.3 337.2 301.7 335 295 333 C288.3 331 281.7 329 275 327 C268.3 325 261.7 322.8 255 321 C248.3 319.2 241.7 317.3 235 316 C228.3 314.7 220 314 215 313 C210 312 205 311.5 205 310 Z"/>
@@ -187,82 +197,279 @@
 </svg></span>
       <span>Reveal Nothing</span>
     </p>
+    <div class="lang-switch" role="group" aria-label="Sprache" data-i18n-aria="langLabel">
+      <button type="button" id="langDe" data-lang="de" lang="de" aria-pressed="true">DE</button>
+      <button type="button" id="langEn" data-lang="en" lang="en" aria-pressed="false">EN</button>
+    </div>
   </div>
-  <main id="workspace" aria-label="Dokument bearbeiten">
+  <main id="workspace" aria-label="Dokument bearbeiten" data-i18n-aria="workspaceLabel">
     <section class="work-card" data-step="stepOriginal" aria-labelledby="h-original">
-      <div class="card-heading"><h2 id="h-original"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M8 12h8m-8 4h6"/></svg>Dein Original</h2><span class="status-badge">Lokal</span></div>
-      <p class="card-subtitle" id="originalHelp">Bleibt auf diesem Rechner.</p>
-      <div class="editor-wrap scroll-frame"><textarea id="original" aria-labelledby="h-original" aria-describedby="originalHelp" spellcheck="false" placeholder="Füge hier deinen Text ein …&#10;&#10;Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.&#10;&#10;Noch keinen Text zur Hand? Starte mit unserem erfundenen Kanzleibeispiel.&#10;&#10;Oder zieh eine PDF, Word-Datei oder E-Mail hierher."></textarea><div class="original-empty" aria-hidden="true"><p class="empty">Füge hier deinen Text ein.<br>Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.<br><br>Noch keinen Text zur Hand? Starte mit dem erfundenen Kanzleibeispiel oder zieh eine PDF, Word-Datei oder E-Mail hierher.</p></div></div>
+      <div class="card-heading"><h2 id="h-original"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M8 12h8m-8 4h6"/></svg><span data-i18n="originalTitle">Dein Original</span></h2><span class="status-badge" data-i18n="badgeLocal">Lokal</span></div>
+      <p class="card-subtitle" id="originalHelp" data-i18n="originalSub">Bleibt auf diesem Rechner.</p>
+      <div class="editor-wrap scroll-frame"><textarea id="original" aria-labelledby="h-original" aria-describedby="originalHelp" spellcheck="false" data-i18n-placeholder="originalPlaceholder" placeholder="Füge hier deinen Text ein …&#10;&#10;Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.&#10;&#10;Noch keinen Text zur Hand? Starte mit unserem erfundenen Kanzleibeispiel.&#10;&#10;Oder zieh eine PDF, Word-Datei oder E-Mail hierher."></textarea><div class="original-empty" aria-hidden="true"><p class="empty"><span data-i18n="emptyOriginal1">Füge hier deinen Text ein.</span><br><span data-i18n="emptyOriginal2">Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.</span><br><br><span data-i18n="emptyOriginal3">Noch keinen Text zur Hand? Starte mit dem erfundenen Kanzleibeispiel oder zieh eine PDF, Word-Datei oder E-Mail hierher.</span></p></div></div>
       <div class="row task-row">
-        <label for="taskTemplate">Aufgabe für LLM</label>
+        <label for="taskTemplate" data-i18n="taskLabel">Aufgabe für LLM</label>
         <select id="taskTemplate" aria-describedby="taskHelp">
-          <option value="">Vorlage anhängen …</option>
-          <option value="summary">Sachverhalt zusammenfassen</option>
-          <option value="deadlines">Fristen und Termine herausziehen</option>
-          <option value="reply">Antwortschreiben entwerfen</option>
-          <option value="risks">Risiken und offene Fragen nennen</option>
-          <option value="plain">In einfacher Sprache erklären</option>
+          <option value="" data-i18n="taskNone">Vorlage anhängen …</option>
+          <option value="summary" data-i18n="taskSummary">Sachverhalt zusammenfassen</option>
+          <option value="deadlines" data-i18n="taskDeadlines">Fristen und Termine herausziehen</option>
+          <option value="reply" data-i18n="taskReply">Antwortschreiben entwerfen</option>
+          <option value="risks" data-i18n="taskRisks">Risiken und offene Fragen nennen</option>
+          <option value="plain" data-i18n="taskPlain">In einfacher Sprache erklären</option>
         </select>
-        <span id="taskHelp" hidden>Hängt eine Aufgabe an das Original an. Sie wird mit analysiert und steht in der Vorschau.</span>
+        <span id="taskHelp" hidden data-i18n="taskHelp">Hängt eine Aufgabe an das Original an. Sie wird mit analysiert und steht in der Vorschau.</span>
       </div>
       <div class="row actions">
-        <button id="btnExample" type="button"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M8 12h8m-8 4h6"/></svg>Beispiel laden</button>
-        <button id="btnPdf" type="button"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M12 18v-7m-3 3 3-3 3 3"/></svg>Datei laden</button>
+        <button id="btnExample" type="button"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M8 12h8m-8 4h6"/></svg><span data-i18n="btnExample">Beispiel laden</span></button>
+        <button id="btnPdf" type="button"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v13H5V3Z M14 3v5h5M12 18v-7m-3 3 3-3 3 3"/></svg><span data-i18n="btnFile">Datei laden</span></button>
         <input id="pdfInput" type="file" accept=".pdf,application/pdf,.docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document,.eml,message/rfc822" hidden>
         <button id="btnAnalyze" type="button" class="primary"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3M7 8h10M7 12h7M7 16h10"/></svg><span id="analyzeLabel">Text analysieren</span></button>
       </div>
       <p id="fileError" class="note error" role="alert" hidden></p>
-      <p class="card-foot">Erkennung und Ersetzung erfolgen lokal.</p>
+      <p class="card-foot" data-i18n="originalFoot">Erkennung und Ersetzung erfolgen lokal.</p>
     </section>
     <section class="work-card review-card" data-step="stepReview" aria-labelledby="h-masked">
-      <div class="card-heading"><h2 id="h-masked"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>Vorschau für LLM</h2><span id="releaseStatus" class="status-badge" role="status" aria-live="polite">Gesperrt</span></div>
-      <p class="card-subtitle">Nur diese Fassung kannst du nach Freigabe kopieren.</p>
+      <div class="card-heading"><h2 id="h-masked"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span data-i18n="reviewTitle">Vorschau für LLM</span></h2><span id="releaseStatus" class="status-badge" role="status" aria-live="polite">Gesperrt</span></div>
+      <p class="card-subtitle" data-i18n="reviewSub">Nur diese Fassung kannst du nach Freigabe kopieren.</p>
       <div id="notes" class="stack" aria-live="polite"></div>
       <div class="scroll-frame"><div id="masked" class="pane" tabindex="-1" aria-labelledby="h-masked"></div></div>
       <p id="counter" class="hint" role="status"></p>
-      <div id="legend" class="legend" aria-label="Erkannte Datentypen mit Anzahl"></div>
+      <div id="legend" class="legend" aria-label="Erkannte Datentypen mit Anzahl" data-i18n-aria="legendLabel"></div>
       <div class="row actions">
         <button id="btnRelease" type="button" class="primary" disabled><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 20 6v6c0 4.5-4 7.8-8 9.5C8 19.8 4 16.5 4 12V6l8-3.5Z M8.5 11.8l2.4 2.4 4.8-4.8"/></svg><svg class="icon locked-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg><span id="releaseLabel">Vorschau freigeben</span></button>
-        <button id="btnCopy" type="button" disabled><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="13" rx="2.5"/><path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg><svg class="icon locked-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg>Kopieren</button>
+        <button id="btnCopy" type="button" disabled><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="13" rx="2.5"/><path d="M16 8V5a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2"/></svg><svg class="icon locked-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg><span data-i18n="btnCopy">Kopieren</span></button>
         <span id="copied" class="hint" role="status" aria-live="polite"></span>
       </div>
-      <p id="dispatchStatus" class="dispatch-status" role="status"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg><span>Kopieren bis zur Freigabe gesperrt</span></p>
+      <p id="dispatchStatus" class="dispatch-status" role="status"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 5v2"/></svg><span data-i18n="dispatchLocked">Kopieren bis zur Freigabe gesperrt</span></p>
       <p id="hint" class="hint" aria-live="polite"></p>
-      <p class="card-foot">Prüfe die gesamte Vorschau. Die Erkennung kann Angaben übersehen.</p>
+      <p class="card-foot" data-i18n="reviewFoot">Prüfe die gesamte Vorschau. Die Erkennung kann Angaben übersehen.</p>
     </section>
     <section class="work-card" data-step="stepAnswer" aria-labelledby="h-answer">
-      <div class="card-heading"><h2 id="h-answer"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v4M14 3v5h5M5 3v18h7m0-5h9m-3-3 3 3-3 3"/></svg>Deine Antwort</h2><span id="answerStatus" class="status-badge" role="status" aria-live="polite">Ausstehend</span></div>
-      <p class="card-subtitle">Originale Angaben werden lokal wieder eingesetzt.</p>
+      <div class="card-heading"><h2 id="h-answer"><svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h9l5 5v4M14 3v5h5M5 3v18h7m0-5h9m-3-3 3 3-3 3"/></svg><span data-i18n="answerTitle">Deine Antwort</span></h2><span id="answerStatus" class="status-badge" role="status" aria-live="polite">Ausstehend</span></div>
+      <p class="card-subtitle" data-i18n="answerSub">Originale Angaben werden lokal wieder eingesetzt.</p>
       <div id="copyPanel" class="stack" style="max-height:none" hidden>
-        <p class="note warn">Kopiere die freigegebene Fassung nach Claude. Füge die Antwort mit unveränderten Platzhaltern hier ein.</p>
-        <label for="answerInput">Antwort von Claude</label>
-        <textarea rows="3" id="answerInput" placeholder="Antwort mit Platzhaltern einfügen …" spellcheck="false"></textarea>
-        <div class="row"><button id="btnRestore" type="button" class="primary"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h11a5 5 0 0 1 0 10h-3M8 5 4 9l4 4M6 19h2"/></svg>Lokal zurückübersetzen</button><a id="linkClaude" class="button-link" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Kopieren und Claude öffnen</a></div>
+        <p class="note warn" data-i18n="copyNote">Kopiere die freigegebene Fassung nach Claude. Füge die Antwort mit unveränderten Platzhaltern hier ein.</p>
+        <label for="answerInput" data-i18n="answerLabel">Antwort von Claude</label>
+        <textarea rows="3" id="answerInput" data-i18n-placeholder="answerPlaceholder" placeholder="Antwort mit Platzhaltern einfügen …" spellcheck="false"></textarea>
+        <div class="row"><button id="btnRestore" type="button" class="primary"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h11a5 5 0 0 1 0 10h-3M8 5 4 9l4 4M6 19h2"/></svg><span data-i18n="btnRestore">Lokal zurückübersetzen</span></button><a id="linkClaude" class="button-link" href="https://claude.ai/new" target="_blank" rel="noopener noreferrer"><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span data-i18n="linkClaude">Kopieren und Claude öffnen</span></a></div>
         <span id="claudeCopied" class="hint" role="status" aria-live="polite"></span>
-        <button id="btnNewAnswer" type="button" hidden><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Andere Antwort einfügen</button>
+        <button id="btnNewAnswer" type="button" hidden><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span data-i18n="btnNewAnswer">Andere Antwort einfügen</span></button>
       </div>
       <div id="answer" class="pane" aria-labelledby="h-answer" aria-live="polite"></div>
       <div id="report" class="stack" aria-live="polite"></div>
-      <div id="forgetRow" class="row" hidden><button id="btnForget" type="button" title="Löscht die Zuordnung von Platzhaltern zu Originalen auf diesem Rechner. Danach lässt sich nichts mehr zurückübersetzen."><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v6m4-6v6"/></svg>Zuordnung jetzt löschen</button></div>
-      <p class="card-foot">Wieder eingesetzte Angaben erscheinen grün.</p>
+      <div id="forgetRow" class="row" hidden><button id="btnForget" type="button" data-i18n-title="forgetTitle" title="Löscht die Zuordnung von Platzhaltern zu Originalen auf diesem Rechner. Danach lässt sich nichts mehr zurückübersetzen."><svg class="icon action-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v6m4-6v6"/></svg><span data-i18n="btnForget">Zuordnung jetzt löschen</span></button></div>
+      <p class="card-foot" data-i18n="answerFoot">Wieder eingesetzte Angaben erscheinen grün.</p>
     </section>
   </main>
 </div>
-<div id="typeMenu" role="group" aria-label="Typ für die Markierung wählen" hidden></div>
+<div id="typeMenu" role="group" aria-label="Typ für die Markierung wählen" data-i18n-aria="menuLabel" hidden></div>
 <div id="tooltip" role="tooltip" hidden></div>
 
 <script>
 const TYPES = ["PERSON", "FIRMA", "ADRESSE", "ORT", "EMAIL", "TELEFON", "IBAN", "DATUM", "KENNUNG"];
-const TYPE_LABELS = ["Person", "Firma", "Adresse", "Ort", "E-Mail", "Telefon", "IBAN", "Datum", "Kennung"];
+// Alle Texte der Oberfläche an einer Stelle. Deutsch ist der Standard und entspricht wörtlich der bisherigen Seite.
+// Nicht hier: Platzhalter wie [PERSON_1], ihre Typen und alle Meldungen aus dem Kern. Die bleiben in beiden Sprachen gleich.
+const I18N = {
+  de: {
+    fakeBand: "Testmodus: Attrappe aktiv. Keine vollständige Erkennung sensibler Angaben.",
+    pageTitle: "Text pseudonymisieren",
+    eyeLabel: "Horus-Auge",
+    langLabel: "Sprache",
+    workspaceLabel: "Dokument bearbeiten",
+    originalTitle: "Dein Original",
+    badgeLocal: "Lokal",
+    originalSub: "Bleibt auf diesem Rechner.",
+    originalPlaceholder: "Füge hier deinen Text ein …\n\nZum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.\n\nNoch keinen Text zur Hand? Starte mit unserem erfundenen Kanzleibeispiel.\n\nOder zieh eine PDF, Word-Datei oder E-Mail hierher.",
+    btnExample: "Beispiel laden",
+    btnFile: "Datei laden",
+    analyze: "Text analysieren",
+    analyzeAgain: "Erneut analysieren",
+    originalFoot: "Erkennung und Ersetzung erfolgen lokal.",
+    reviewTitle: "Vorschau für LLM",
+    reviewSub: "Nur diese Fassung kannst du nach Freigabe kopieren.",
+    statusLocked: "Gesperrt",
+    statusReview: "Prüfung nötig",
+    statusReleased: "Freigegeben",
+    emptyMasked: "Hier erscheint deine Fassung mit Platzhaltern. Starte zuerst die Analyse.",
+    legendLabel: "Erkannte Datentypen mit Anzahl",
+    legendUnsure: "Unsicher, bitte prüfen",
+    counterBusy: "Lokale Verarbeitung läuft …",
+    counter: "{n} Angaben ersetzt",
+    counterOne: "1 Angaben ersetzt",
+    uncertainOne: "1 unsichere Stelle markiert. Bitte prüfen.",
+    uncertainMany: "{n} unsichere Stellen markiert. Bitte prüfen.",
+    suspectLabel: "Unsichere Stelle: {text}. {reason}",
+    chipUndoLabel: "{placeholder} zurücknehmen, Original: {original}",
+    btnRelease: "Vorschau freigeben",
+    btnReleased: "Vorschau freigegeben",
+    btnCopy: "Kopieren",
+    copied: "Kopiert.",
+    dispatchLocked: "Kopieren bis zur Freigabe gesperrt",
+    hintReleased: "Freigegeben. Ändert sich etwas, ist eine neue Freigabe nötig.",
+    hintResult: "Text markieren, um weitere Angaben zu ersetzen. × nimmt eine Ersetzung zurück.",
+    reviewFoot: "Prüfe die gesamte Vorschau. Die Erkennung kann Angaben übersehen.",
+    answerTitle: "Deine Antwort",
+    statusPending: "Ausstehend",
+    statusRestored: "Zurückübersetzt",
+    answerSub: "Originale Angaben werden lokal wieder eingesetzt.",
+    copyNote: "Kopiere die freigegebene Fassung nach Claude. Füge die Antwort mit unveränderten Platzhaltern hier ein.",
+    answerLabel: "Antwort von Claude",
+    answerPlaceholder: "Antwort mit Platzhaltern einfügen …",
+    btnRestore: "Lokal zurückübersetzen",
+    emptyAnswer: "Die Antwort von Claude erscheint hier. Platzhalter werden lokal durch die ursprünglichen Angaben ersetzt.",
+    answerFoot: "Wieder eingesetzte Angaben erscheinen grün.",
+    reportUnknown: "Unbekannt, nicht ersetzt",
+    reportChanged: "Möglicherweise verändert",
+    reportMissing: "Nicht in der Antwort",
+    menuLabel: "Typ für die Markierung wählen",
+    menuKeep: "Passt so",
+    errServer: "Der Server hat die Anfrage abgelehnt.",
+    errNoText: "Bitte erst einen Text eingeben.",
+    errTextChanged: "Der Text hat sich während der Analyse geändert. Bitte erneut analysieren.",
+    errSelection: "Bitte nur Text zwischen zwei Platzhaltern markieren.",
+    errClipboard: "Kopieren hat nicht geklappt. Bitte erlaube den Zugriff auf die Zwischenablage.",
+    fileDoc: "Ältere Word-Dateien (.doc) kann LP7 nicht lesen. Speichere sie in Word als .docx und lade sie erneut.",
+    fileMsg: "Outlook-Dateien (.msg) kann LP7 noch nicht lesen. Speichere die E-Mail als .eml oder kopiere ihren Text hierher.",
+    fileUnsupported: "Diese Datei kann LP7 nicht lesen. Möglich sind PDF, Word (.docx) und E-Mail (.eml).",
+    typeLabels: ["Person", "Firma", "Adresse", "Ort", "E-Mail", "Telefon", "IBAN", "Datum", "Kennung"],
+    emptyOriginal1: "Füge hier deinen Text ein.",
+    emptyOriginal2: "Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.",
+    emptyOriginal3: "Noch keinen Text zur Hand? Starte mit dem erfundenen Kanzleibeispiel oder zieh eine PDF, Word-Datei oder E-Mail hierher.",
+    taskLabel: "Aufgabe für LLM",
+    taskNone: "Vorlage anhängen …",
+    taskSummary: "Sachverhalt zusammenfassen",
+    taskDeadlines: "Fristen und Termine herausziehen",
+    taskReply: "Antwortschreiben entwerfen",
+    taskRisks: "Risiken und offene Fragen nennen",
+    taskPlain: "In einfacher Sprache erklären",
+    taskHelp: "Hängt eine Aufgabe an das Original an. Sie wird mit analysiert und steht in der Vorschau.",
+    linkClaude: "Kopieren und Claude öffnen",
+    claudeCopied: "Kopiert. In Claude einfügen.",
+    btnNewAnswer: "Andere Antwort einfügen",
+    btnForget: "Zuordnung jetzt löschen",
+    forgetTitle: "Löscht die Zuordnung von Platzhaltern zu Originalen auf diesem Rechner. Danach lässt sich nichts mehr zurückübersetzen.",
+    forgotten: "Zuordnung gelöscht. Diese Platzhalter lassen sich nicht mehr zurückübersetzen.",
+  },
+  en: {
+    fakeBand: "Test mode: stand-in core active. Sensitive details are not fully detected.",
+    pageTitle: "Pseudonymize text",
+    eyeLabel: "Eye of Horus",
+    langLabel: "Language",
+    workspaceLabel: "Edit document",
+    originalTitle: "Your original",
+    badgeLocal: "Local",
+    originalSub: "Stays on this computer.",
+    originalPlaceholder: "Paste your text here …\n\nFor example a letter, an email or a statement of facts.\n\nNo text at hand? Start with our made-up law firm example.\n\nOr drop a PDF, Word file or email here.",
+    btnExample: "Load example",
+    btnFile: "Load file",
+    analyze: "Analyze text",
+    analyzeAgain: "Analyze again",
+    originalFoot: "Detection and replacement happen locally.",
+    reviewTitle: "Preview for the AI",
+    reviewSub: "Only this version can be copied, after you approve it.",
+    statusLocked: "Locked",
+    statusReview: "Needs review",
+    statusReleased: "Approved",
+    emptyMasked: "Your version with placeholders appears here. Run the analysis first.",
+    legendLabel: "Detected data types with counts",
+    legendUnsure: "Unsure, please check",
+    counterBusy: "Processing locally …",
+    counter: "{n} details replaced",
+    counterOne: "1 detail replaced",
+    uncertainOne: "1 unsure spot marked. Please check.",
+    uncertainMany: "{n} unsure spots marked. Please check.",
+    suspectLabel: "Unsure spot: {text}. {reason}",
+    chipUndoLabel: "Undo {placeholder}, original: {original}",
+    btnRelease: "Approve preview",
+    btnReleased: "Preview approved",
+    btnCopy: "Copy",
+    copied: "Copied.",
+    dispatchLocked: "Copying is locked until you approve",
+    hintReleased: "Approved. Any change needs a new approval.",
+    hintResult: "Select text to replace more details. × undoes a replacement.",
+    reviewFoot: "Check the whole preview. Detection can miss details.",
+    answerTitle: "Your answer",
+    statusPending: "Pending",
+    statusRestored: "Restored",
+    answerSub: "Original details are put back locally.",
+    copyNote: "Copy the approved version to Claude. Paste the answer here with the placeholders unchanged.",
+    answerLabel: "Answer from Claude",
+    answerPlaceholder: "Paste the answer with placeholders …",
+    btnRestore: "Restore locally",
+    emptyAnswer: "Claude's answer appears here. Placeholders are replaced locally with the original details.",
+    answerFoot: "Restored details are shown in green.",
+    reportUnknown: "Unknown, not replaced",
+    reportChanged: "Possibly altered",
+    reportMissing: "Not in the answer",
+    menuLabel: "Choose a type for the selection",
+    menuKeep: "Looks fine",
+    errServer: "The server rejected the request.",
+    errNoText: "Please enter a text first.",
+    errTextChanged: "The text changed during the analysis. Please analyze again.",
+    errSelection: "Please select only text between two placeholders.",
+    errClipboard: "Copying didn't work. Please allow access to the clipboard.",
+    fileDoc: "LP7 can't read older Word files (.doc). Save the file as .docx in Word and load it again.",
+    fileMsg: "LP7 can't read Outlook files (.msg) yet. Save the email as .eml or copy its text in here.",
+    fileUnsupported: "LP7 can't read this file. Supported are PDF, Word (.docx) and email (.eml).",
+    typeLabels: ["Person", "Company", "Address", "Place", "Email", "Phone", "IBAN", "Date", "ID"],
+    emptyOriginal1: "Paste your text here.",
+    emptyOriginal2: "For example a letter, an email or a statement of facts.",
+    emptyOriginal3: "No text at hand? Start with the made-up law firm example or drop a PDF, Word file or email here.",
+    taskLabel: "Task for the AI",
+    taskNone: "Attach a template …",
+    taskSummary: "Summarise the facts",
+    taskDeadlines: "List deadlines and dates",
+    taskReply: "Draft a reply",
+    taskRisks: "Name risks and open questions",
+    taskPlain: "Explain in plain language",
+    taskHelp: "Adds a task to the original. It is analyzed too and shows up in the preview.",
+    linkClaude: "Copy and open Claude",
+    claudeCopied: "Copied. Paste it into Claude.",
+    btnNewAnswer: "Paste another answer",
+    btnForget: "Delete mapping now",
+    forgetTitle: "Deletes the mapping from placeholders to originals on this computer. Nothing can be restored afterwards.",
+    forgotten: "Mapping deleted. These placeholders can no longer be restored.",
+  },
+};
 // Erfunden. Enthält absichtlich Angaben, die die Attrappe nicht erkennt.
-const EXAMPLE = `Kanzlei Sommerfeld & Partner, Aktenzeichen 123/26
+const EXAMPLES = {
+  de: `Kanzlei Sommerfeld & Partner, Aktenzeichen 123/26
 
 Unsere Mandantin Erika Musterfrau (erika.musterfrau@example.org, Tel. 040 5550123), wohnhaft Musterweg 12, 21335 Lüneburg, wurde am 14.03.2026 von der Nordlicht Bau GmbH gekündigt. Ihr Vorgesetzter Max Mustermann begründet das mit Auftragsmangel. Frau Musterfrau zweifelt daran, weil kurz zuvor neue Stellen ausgeschrieben wurden. Das letzte Gehalt ging auf die IBAN DE00 1234 5678 9012 3456 78. Intern läuft der Fall als Vorgang 4471-B.
 
-Bitte fasse den Sachverhalt kurz zusammen, nenne die Frist für eine Kündigungsschutzklage und entwirf ein kurzes Schreiben an Max Mustermann. Übernimm alle Platzhalter in eckigen Klammern unverändert.`;
+Bitte fasse den Sachverhalt kurz zusammen, nenne die Frist für eine Kündigungsschutzklage und entwirf ein kurzes Schreiben an Max Mustermann. Übernimm alle Platzhalter in eckigen Klammern unverändert.`,
+  // Erfunden, mit dem echten Kern geprüft. Der letzte Absatz ist die Aufgabe an Claude.
+  en: `From: Emily Hartwell (e.hartwell@example.org)
+Subject: Termination of employment
+
+Dear Ms Caldwell,
+
+On 28 October 2026 my employer, Northbridge Logistics Ltd, dismissed me. I have worked there as a dispatcher since 2019. The letter was signed by Thomas Reynolds from HR. He had promised me a promotion in the summer.
+
+I live at 14 Elm Street, Cambridge CB2 1TN, and can be reached on +44 7700 900123. My salary is paid into account GB33 BUKB 2020 1555 5555 55.
+
+Could you please advise whether I should challenge the dismissal?
+
+Kind regards
+Emily Hartwell
+
+Please summarise the case in five sentences and draft a short reply to the person concerned. Keep every placeholder in square brackets exactly as it is.`,
+};
+
+let lang = "de";
+try { if (localStorage.getItem("lp7-lang") === "en") lang = "en"; } catch {}
+// Text in der aktuellen Sprache; {name} wird durch vars.name ersetzt.
+function t(key, vars = {}) {
+  return I18N[lang][key].replace(/\{(\w+)\}/g, (_, name) => vars[name]);
+}
+// Fehler der Oberfläche merken sich ihren Schlüssel, damit sie beim Umschalten mitwechseln.
+class UiError extends Error {
+  constructor(key) { super(t(key)); this.key = key; }
+}
+const message = (m) => (m && typeof m === "object" ? t(m.key) : m);
 
 const $ = (id) => document.getElementById(id);
-const state = { result: null, release: null, busy: false, restored: false, answerOpen: false, error: "", fileError: "", accepted: new Set() };
+const state = { result: null, release: null, busy: false, restored: false, restoredData: null, answerOpen: false, copied: false, claudeCopied: "", forgotten: false, error: "", fileError: "", accepted: new Set() };
 
 const workCards = [...$("workspace").querySelectorAll(".work-card")];
 const mouseHover = matchMedia("(hover: hover) and (pointer: fine)");
@@ -289,7 +496,7 @@ async function api(path, body) {
   const response = await fetch(path, options);
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data.error || "Der Server hat die Anfrage abgelehnt.");
+    throw data.error ? new Error(data.error) : new UiError("errServer");
   }
   return data;
 }
@@ -299,7 +506,7 @@ async function apiFile(path, file) {
   const response = await fetch(path, { method: "POST", headers: { "Content-Type": file.type || "application/octet-stream" }, body: await file.arrayBuffer() });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data.error || "Der Server hat die Anfrage abgelehnt.");
+    throw data.error ? new Error(data.error) : new UiError("errServer");
   }
   return data;
 }
@@ -314,7 +521,7 @@ async function run(action) {
   try {
     await action();
   } catch (e) {
-    state.error = e.message;
+    state.error = e.key ? { key: e.key } : e.message;
   } finally {
     state.busy = false;
     render();
@@ -322,8 +529,10 @@ async function run(action) {
 }
 
 function clearAnswer() {
-  $("claudeCopied").textContent = "";
+  state.claudeCopied = "";
   state.restored = false;
+  state.restoredData = null;
+  state.forgotten = false;
   $("answer").replaceChildren();
   $("report").replaceChildren();
   $("answerInput").value = "";
@@ -332,7 +541,7 @@ function clearAnswer() {
 function applyResult(result) {
   state.result = result;
   state.release = null;
-  $("copied").textContent = "";
+  state.copied = false;
   clearAnswer();
 }
 
@@ -341,7 +550,7 @@ function renderMasked() {
   box.replaceChildren();
   const result = state.result;
   if (!result) {
-    box.append(emptyNote("Hier erscheint deine Fassung mit Platzhaltern. Starte zuerst die Analyse."));
+    box.append(emptyNote(t("emptyMasked")));
     return;
   }
   const appendPlain = (start, end) => {
@@ -374,7 +583,7 @@ function suspect(u) {
   el.textContent = u.text;
   el.dataset.original = u.reason;
   el.disabled = state.busy;
-  el.setAttribute("aria-label", `Unsichere Stelle: ${u.text}. ${u.reason}`);
+  el.setAttribute("aria-label", t("suspectLabel", { text: u.text, reason: u.reason }));
   el.addEventListener("click", () => openMenu(u.text, el.getBoundingClientRect(), u.typ));
   return el;
 }
@@ -393,7 +602,7 @@ function chip(r) {
   close.type = "button";
   close.innerHTML = '<svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m6 6 12 12M18 6 6 18"/></svg>';
   close.disabled = state.busy;
-  close.setAttribute("aria-label", `${r.placeholder} zurücknehmen, Original: ${r.original}`);
+  close.setAttribute("aria-label", t("chipUndoLabel", { placeholder: r.placeholder, original: r.original }));
   close.addEventListener("click", () => run(async () => {
     hideTooltip();
     applyResult(await api("/api/mask/remove", { session_id: state.result.session_id, placeholder: r.placeholder }));
@@ -429,7 +638,7 @@ function renderLegend() {
     item.className = "t-" + typ;
     const dot = document.createElement("i");
     dot.setAttribute("aria-hidden", "true");
-    item.append(dot, `${TYPE_LABELS[index]} ${counts.get(typ)}`);
+    item.append(dot, `${I18N[lang].typeLabels[index]} ${counts.get(typ)}`);
     return [item];
   }));
   if (state.result && openUncertain(state.result).length) {
@@ -437,7 +646,7 @@ function renderLegend() {
     const dot = document.createElement("i");
     dot.className = "uncertain-key";
     dot.setAttribute("aria-hidden", "true");
-    item.append(dot, "Unsicher, bitte prüfen");
+    item.append(dot, t("legendUnsure"));
     $("legend").append(item);
   }
 }
@@ -462,29 +671,31 @@ function render() {
   renderLegend();
   $("workspace").classList.toggle("restored", state.restored);
   requestAnimationFrame(updateScrollFades);
-  if (!$("answer").childNodes.length) $("answer").append(emptyNote("Die Antwort von Claude erscheint hier. Platzhalter werden lokal durch die ursprünglichen Angaben ersetzt."));
+  // Ohne Antwort steht der Hinweis da, in der aktuellen Sprache. Eine Antwort wird nie neu gezeichnet.
+  if (!state.restored) $("answer").replaceChildren(emptyNote(t("emptyAnswer")));
+  renderReport();
 
   const notes = [];
-  if (error) notes.push(note(error, "error"));
+  if (error) notes.push(note(message(error), "error"));
   if (result) {
     const open = openUncertain(result).length;
-    if (open) notes.push(note(open === 1 ? "1 unsichere Stelle markiert. Bitte prüfen." : `${open} unsichere Stellen markiert. Bitte prüfen.`, "warn"));
+    if (open) notes.push(note(open === 1 ? t("uncertainOne") : t("uncertainMany", { n: open }), "warn"));
     result.warnings.forEach((w) => notes.push(note(w, "warn")));
   }
   $("notes").replaceChildren(...notes);
-  $("fileError").textContent = state.fileError;
+  $("fileError").textContent = message(state.fileError);
   $("fileError").hidden = !state.fileError;
 
   const counter = $("counter");
-  counter.textContent = busy ? "Lokale Verarbeitung läuft …" : result
-    ? `${result.replacements.length} Angaben ersetzt`
+  counter.textContent = busy ? t("counterBusy") : result
+    ? (result.replacements.length === 1 ? t("counterOne") : t("counter", { n: result.replacements.length }))
     : "";
   $("workspace").setAttribute("aria-busy", String(busy));
-  $("releaseStatus").textContent = release ? "Freigegeben" : result ? "Prüfung nötig" : "Gesperrt";
+  $("releaseStatus").textContent = release ? t("statusReleased") : result ? t("statusReview") : t("statusLocked");
   $("releaseStatus").classList.toggle("ready", Boolean(release));
   $("releaseStatus").classList.toggle("review", Boolean(result) && !release);
   $("dispatchStatus").hidden = Boolean(release);
-  $("answerStatus").textContent = state.restored ? "Zurückübersetzt" : "Ausstehend";
+  $("answerStatus").textContent = state.restored ? t("statusRestored") : t("statusPending");
   $("answerStatus").classList.toggle("ready", state.restored);
   const showCopy = Boolean(release);
   $("btnExample").disabled = busy;
@@ -492,9 +703,9 @@ function render() {
   $("taskTemplate").disabled = busy;
   $("btnAnalyze").disabled = busy;
   $("btnAnalyze").classList.toggle("primary", !result);
-  $("analyzeLabel").textContent = result ? "Erneut analysieren" : "Text analysieren";
+  $("analyzeLabel").textContent = result ? t("analyzeAgain") : t("analyze");
   $("btnRelease").classList.toggle("released", Boolean(release));
-  $("releaseLabel").textContent = release ? "Vorschau freigegeben" : "Vorschau freigeben";
+  $("releaseLabel").textContent = release ? t("btnReleased") : t("btnRelease");
   $("btnRelease").disabled = busy || !result || Boolean(release);
   $("btnCopy").disabled = busy || !release;
   $("btnCopy").className = release ? "primary" : "";
@@ -505,14 +716,15 @@ function render() {
   $("btnNewAnswer").hidden = !collapsed;
   $("forgetRow").hidden = !(result && state.restored);
   $("btnForget").disabled = busy;
-  $("hint").textContent = release
-    ? "Freigegeben. Ändert sich etwas, ist eine neue Freigabe nötig."
-    : result ? "Text markieren, um weitere Angaben zu ersetzen. × nimmt eine Ersetzung zurück." : "";
+  $("hint").textContent = release ? t("hintReleased") : result ? t("hintResult") : "";
+  $("copied").textContent = state.copied ? t("copied") : "";
+  $("claudeCopied").textContent = message(state.claudeCopied);
 }
 
 function renderAnswer(restored) {
   state.restored = true;
   state.answerOpen = false;
+  state.restoredData = restored;
   const box = $("answer");
   box.replaceChildren();
   const originals = [...new Set(state.result.replacements.map((r) => r.original))];
@@ -535,17 +747,24 @@ function renderAnswer(restored) {
     }
   }
   box.append(document.createTextNode(restored.text.slice(position)));
+  renderReport();
+}
 
+// Bericht nach dem Zurückübersetzen. Eigene Funktion, damit er beim Umschalten in der neuen Sprache erscheint.
+function renderReport() {
+  const restored = state.restoredData;
+  if (!restored) return;
   const report = [];
   const add = (label, items, kind) => {
     if (items.length) report.push(note(`${label}: ${items.join(", ")}`, kind));
   };
-  add("Unbekannt, nicht ersetzt", restored.unknown, "error");
-  add("Möglicherweise verändert", restored.changed, "warn");
-  add("Nicht in der Antwort", restored.missing, "warn");
+  add(t("reportUnknown"), restored.unknown, "error");
+  add(t("reportChanged"), restored.changed, "warn");
+  add(t("reportMissing"), restored.missing, "warn");
   // Der Kern nennt dieselben Funde auch in warnings. Hier nur zeigen, was die Listen oben nicht schon sagen.
   const listed = [...restored.unknown, ...restored.changed, ...restored.missing];
   restored.warnings.filter((w) => !listed.some((item) => w.includes(item))).forEach((w) => report.push(note(w, "warn")));
+  if (state.forgotten) report.push(note(t("forgotten"), "done"));
   $("report").replaceChildren(...report);
 }
 
@@ -554,7 +773,7 @@ async function restoreAnswer(answer) {
 }
 
 $("btnExample").addEventListener("click", () => {
-  loadOriginal(EXAMPLE);
+  loadOriginal(EXAMPLES[lang]);
   state.fileError = "";
   render();
 });
@@ -574,25 +793,38 @@ const FILE_KINDS = [
   { path: "/api/eml", ext: /\.eml$/i, type: "message/rfc822" },
 ];
 const FILE_HINTS = [
-  { ext: /\.doc$/i, error: "Ältere Word-Dateien (.doc) kann LP7 nicht lesen. Speichere sie in Word als .docx und lade sie erneut." },
-  { ext: /\.msg$/i, error: "Outlook-Dateien (.msg) kann LP7 noch nicht lesen. Speichere die E-Mail als .eml oder kopiere ihren Text hierher." },
+  { ext: /\.doc$/i, error: "fileDoc" },
+  { ext: /\.msg$/i, error: "fileMsg" },
 ];
-const NOT_SUPPORTED = "Diese Datei kann LP7 nicht lesen. Möglich sind PDF, Word (.docx) und E-Mail (.eml).";
 
 // Vorlagen für die Aufgabe an das LLM (Claude, ChatGPT, Codex …). Sie werden Teil des Originals, also mit analysiert, geprüft und freigegeben.
 // Kein Platzhalter wörtlich im Text: „[PERSON_1]“ wäre sonst reserviert und käme bei der Rückübersetzung als unbekannt zurück.
-const KEEP_PLACEHOLDERS = "Übernimm alle Platzhalter in eckigen Klammern unverändert.";
-const TASKS = {
-  summary: "Bitte fasse den Sachverhalt in fünf Sätzen zusammen.",
-  deadlines: "Bitte zieh alle Fristen und Termine als Liste heraus: Datum, worum es geht, wer handeln muss. Nenne auch Fristen, die sich erst aus dem Gesetz ergeben, und kennzeichne sie.",
-  reply: "Bitte entwirf ein kurzes, sachliches Antwortschreiben an die Gegenseite.",
-  risks: "Bitte nenne die wichtigsten rechtlichen Risiken und offenen Fragen in Stichpunkten.",
-  plain: "Bitte erkläre den Stand der Sache in einfacher Sprache, ohne Fachbegriffe, in höchstens zehn Sätzen.",
+// Vorlagen in beiden Sprachen. Jede endet mit der Bitte, die Platzhalter unverändert zu lassen.
+const KEEP_PLACEHOLDERS = {
+  de: "Übernimm alle Platzhalter in eckigen Klammern unverändert.",
+  en: "Keep every placeholder in square brackets exactly as it is.",
 };
-const TASK_TEXTS = Object.values(TASKS).map((t) => `${t} ${KEEP_PLACEHOLDERS}`);
+const TASKS = {
+  de: {
+    summary: "Bitte fasse den Sachverhalt in fünf Sätzen zusammen.",
+    deadlines: "Bitte zieh alle Fristen und Termine als Liste heraus: Datum, worum es geht, wer handeln muss. Nenne auch Fristen, die sich erst aus dem Gesetz ergeben, und kennzeichne sie.",
+    reply: "Bitte entwirf ein kurzes, sachliches Antwortschreiben an die Gegenseite.",
+    risks: "Bitte nenne die wichtigsten rechtlichen Risiken und offenen Fragen in Stichpunkten.",
+    plain: "Bitte erkläre den Stand der Sache in einfacher Sprache, ohne Fachbegriffe, in höchstens zehn Sätzen.",
+  },
+  en: {
+    summary: "Please summarise the facts of the case in five sentences.",
+    deadlines: "Please list all deadlines and dates: the date, what it is about and who has to act. Include deadlines that follow from the law, and mark them as such.",
+    reply: "Please draft a short, factual reply to the other side.",
+    risks: "Please list the main legal risks and open questions as bullet points.",
+    plain: "Please explain where things stand in plain language, without jargon, in no more than ten sentences.",
+  },
+};
+// Auch eine Vorlage der anderen Sprache wird erkannt und ersetzt.
+const TASK_TEXTS = Object.entries(TASKS).flatMap(([l, tasks]) => Object.values(tasks).map((t) => `${t} ${KEEP_PLACEHOLDERS[l]}`));
 
 function appendTask(key) {
-  const task = `${TASKS[key]} ${KEEP_PLACEHOLDERS}`;
+  const task = `${TASKS[lang][key]} ${KEEP_PLACEHOLDERS[lang]}`;
   let text = $("original").value.trimEnd();
   // Eine zuvor gewählte Vorlage am Ende wird ersetzt, nicht doppelt angehängt.
   const previous = TASK_TEXTS.find((t) => text.endsWith(t));
@@ -618,7 +850,7 @@ function resetAnalysis() {
   state.result = null;
   state.release = null;
   state.accepted.clear();
-  $("copied").textContent = "";
+  state.copied = false;
   clearAnswer();
 }
 
@@ -637,12 +869,12 @@ function loadFile(file) {
     // Die Meldung steht beim Knopf unter „Dein Original“, nicht in der Vorschau.
     try {
       const hint = FILE_HINTS.find((h) => h.ext.test(file.name));
-      if (hint) throw new Error(hint.error);
+      if (hint) throw new UiError(hint.error);
       const kind = FILE_KINDS.find((k) => k.ext.test(file.name)) || FILE_KINDS.find((k) => k.type === file.type);
-      if (!kind) throw new Error(NOT_SUPPORTED);
+      if (!kind) throw new UiError("fileUnsupported");
       loadOriginal((await apiFile(kind.path, file)).text);
     } catch (e) {
-      state.fileError = e.message;
+      state.fileError = e.key ? { key: e.key } : e.message;
     }
   });
 }
@@ -677,10 +909,10 @@ for (const type of ["dragover", "drop"]) {
 
 $("btnAnalyze").addEventListener("click", () => run(async () => {
   const text = $("original").value;
-  if (!text.trim()) throw new Error("Bitte erst einen Text eingeben.");
+  if (!text.trim()) throw new UiError("errNoText");
   const result = await api("/api/analyze", { text });
   // Wurde während der Analyse weitergetippt, passt das Ergebnis nicht mehr zum Text im Feld.
-  if ($("original").value !== text) throw new Error("Der Text hat sich während der Analyse geändert. Bitte erneut analysieren.");
+  if ($("original").value !== text) throw new UiError("errTextChanged");
   applyResult(result);
   state.accepted.clear();
   $("masked").focus();
@@ -694,7 +926,7 @@ $("btnRelease").addEventListener("click", () => run(async () => {
 $("btnCopy").addEventListener("click", () => run(async () => {
   // Kopiert wird der Text vom Server, also genau die gespeicherte Freigabe.
   await copyText(state.release.text);
-  $("copied").textContent = "Kopiert.";
+  state.copied = true;
 }));
 
 // Kopiert die Freigabe und lässt den Link Claude in einem neuen Tab öffnen. Gesendet wird nichts, einfügen muss der Mensch selbst.
@@ -705,8 +937,8 @@ $("linkClaude").addEventListener("click", (e) => {
   }
   // Ohne await: Der Browser öffnet den Tab nur direkt in der Klick-Behandlung.
   copyText(state.release.text).then(
-    () => { $("claudeCopied").textContent = "Kopiert. In Claude einfügen."; $("copied").textContent = "Kopiert."; },
-    (err) => { $("claudeCopied").textContent = err.message; },
+    () => { state.claudeCopied = { key: "claudeCopied" }; state.copied = true; render(); },
+    (err) => { state.claudeCopied = err.key ? { key: err.key } : err.message; render(); },
   );
 });
 
@@ -721,7 +953,7 @@ async function copyText(text) {
     area.select();
     const copied = document.execCommand("copy");
     area.remove();
-    if (!copied) throw new Error("Kopieren hat nicht geklappt. Bitte erlaube den Zugriff auf die Zwischenablage.");
+    if (!copied) throw new UiError("errClipboard");
   }
 }
 
@@ -742,9 +974,9 @@ $("btnForget").addEventListener("click", () => run(async () => {
   state.result = null;
   state.release = null;
   state.accepted.clear();
-  $("copied").textContent = "";
+  state.copied = false;
+  state.forgotten = true;
   $("answerInput").value = "";
-  $("report").append(note("Zuordnung gelöscht. Diese Platzhalter lassen sich nicht mehr zurückübersetzen.", "done"));
 }));
 
 // Markieren mit der Maus
@@ -770,7 +1002,7 @@ for (const typ of TYPES) {
 const keepButton = document.createElement("button");
 keepButton.type = "button";
 keepButton.id = "menuKeep";
-keepButton.textContent = "Passt so";
+keepButton.textContent = t("menuKeep");
 keepButton.addEventListener("mousedown", (e) => e.preventDefault());
 keepButton.addEventListener("click", () => {
   state.accepted.add(selectedTerm);
@@ -807,7 +1039,7 @@ $("masked").addEventListener("mouseup", () => {
       && range.startContainer.nodeType === Node.TEXT_NODE
       && range.startContainer.parentNode === $("masked");
     if (!insideOneText) {
-      state.error = "Bitte nur Text zwischen zwei Platzhaltern markieren.";
+      state.error = { key: "errSelection" };
       selection.removeAllRanges();
       render();
       return;
@@ -842,8 +1074,29 @@ for (const [on, off] of [["mouseover", "mouseout"], ["focusin", "focusout"]]) {
   $("masked").addEventListener(off, hideTooltip);
 }
 
-(async () => {
+// Umschalten ändert nur Beschriftungen: kein Aufruf an den Server, nichts wird zurückgesetzt.
+function applyLanguage() {
+  document.documentElement.lang = lang;
+  for (const el of document.querySelectorAll("[data-i18n]")) el.textContent = t(el.dataset.i18n);
+  for (const el of document.querySelectorAll("[data-i18n-aria]")) el.setAttribute("aria-label", t(el.dataset.i18nAria));
+  for (const el of document.querySelectorAll("[data-i18n-placeholder]")) el.setAttribute("placeholder", t(el.dataset.i18nPlaceholder));
+  for (const el of document.querySelectorAll("[data-i18n-title]")) el.setAttribute("title", t(el.dataset.i18nTitle));
+  for (const button of document.querySelectorAll(".lang-switch button")) {
+    button.setAttribute("aria-pressed", String(button.dataset.lang === lang));
+  }
+  keepButton.textContent = t("menuKeep");
   render();
+}
+for (const button of document.querySelectorAll(".lang-switch button")) {
+  button.addEventListener("click", () => {
+    lang = button.dataset.lang;
+    try { localStorage.setItem("lp7-lang", lang); } catch {}
+    applyLanguage();
+  });
+}
+
+(async () => {
+  applyLanguage();
   try {
     const status = await api("/api/status");
     $("fakeBand").hidden = !status.fake;

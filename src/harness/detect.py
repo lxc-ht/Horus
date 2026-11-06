@@ -178,7 +178,8 @@ _NAME_WORD = r"[^\W\d_]+(?:['’\-][^\W\d_]+)*"   # alle Schriften: Nguyễn, Ç
 _NAME_PARTICLES = {"von", "van", "de", "der", "den", "zu", "la", "di", "da", "del", "ten", "ter"}
 # Anrede oder Titel, dahinter bis zu vier Wörter. Welche davon zum Namen gehören, entscheidet _salutation_name().
 _SALUTATION = re.compile(
-    r"(?<!\w)(?:(?i:Herrn?|Frau)|Dr\.|Prof\.)\s+(?:(?:Dr\.|Prof\.|med\.|jur\.|rer\.|nat\.)\s+)*"
+    # Englisch: Mr, Mrs, Ms, Mx in jeder Schreibweise, „Miss“ und „Sir“ nur groß, sonst wäre „you miss Paris“ ein Name.
+    r"(?<!\w)(?:(?i:Herrn?|Frau)|(?i:Mrs?|Ms|Mx)\.?|(?:Miss|Sir)|Dr\.|Prof\.)\s+(?:(?:Dr\.|Prof\.|med\.|jur\.|rer\.|nat\.)\s+)*"
     # Nur vorausschauen: Die Wörter dürfen die nächste Anrede nicht verbrauchen („Frau Çelik schreibt Herrn Šimić“).
     rf"(?=(?P<name>{_NAME_WORD}(?: {_NAME_WORD}){{0,3}}))"
 )
@@ -360,7 +361,9 @@ _ROLE_WORDS = {
     "doktor", "rechtsanwalt", "rechtsanwältin", "anwalt", "anwältin", "richter", "richterin", "notar", "notarin",
     "professor", "professorin", "steuerberater", "steuerberaterin", "vorsitzender", "vorsitzende",
 }
-_NOT_A_NAME = _ROLE_WORDS | {"herr", "herrn", "frau"}
+# Anreden gehören nie zum Namen. Englische wie „Mr“ verhalten sich genau wie „Herr“, auch mit Punkt („Mr.“).
+_SALUTATIONS = {"herr", "herrn", "frau", "mr", "mrs", "ms", "miss", "mx", "sir"}
+_NOT_A_NAME = _ROLE_WORDS | _SALUTATIONS
 
 _gliner_cache: dict[str, object] = {}
 # Vorladen beim Start und der erste Klick dürfen das Modell nicht zweimal gleichzeitig laden.
@@ -517,9 +520,10 @@ def _trim(f: Finding, text: str) -> Finding | None:
         end -= 1
     if f.typ == "PERSON":
         # Anrede und Beruf gehören nicht zum Wert, sonst ergibt die Rückübersetzung „Frau Frau Muster“.
-        while (m := re.match(r"(\S+)\s+", text[start:end])) and m[1].lower() in _NOT_A_NAME:
+        # Ein Punkt am Ende zählt nicht: „Mr.“ ist dieselbe Anrede wie „Mr“.
+        while (m := re.match(r"(\S+)\s+", text[start:end])) and m[1].lower().rstrip(".") in _NOT_A_NAME:
             start += m.end()
-        if text[start:end].lower() in _NOT_A_NAME:
+        if text[start:end].lower().rstrip(".") in _NOT_A_NAME:
             return None
     if end - start < 2:
         return None

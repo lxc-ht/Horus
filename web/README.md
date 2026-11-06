@@ -20,6 +20,8 @@ Layout A ist direkt in `web/static/index.html` eingebaut: drei flexible Spalten 
 
 ## Datei laden
 
+Oben rechts schaltet **DE / EN** die Beschriftungen der Oberfläche um, ohne Neuladen und ohne dass Text, Analyse, Freigabe oder Antwort verloren gehen; „Beispiel laden“ lädt dann ein englisches Beispiel, Meldungen aus dem Kern und die Platzhalter bleiben deutsch.
+
 „Datei laden“ oder eine Datei auf das Feld „Dein Original“ ziehen setzt ihren Text ins Feld. Das geht mit digitalen PDFs, Word-Dateien (.docx) und E-Mails (.eml). Scans erkennt LP7 nicht und meldet das, ebenso alte .doc- und Outlook-.msg-Dateien. Bei Word kommen Kopf- und Fußzeilen und Fußnoten mit, gelöschter Text aus „Änderungen nachverfolgen“ nicht. Eine Tabellenzeile wird eine Textzeile, die Zellen durch Tabulator getrennt, damit „IBAN“ neben dem Wert stehen bleibt. Bei E-Mails kommen Absender, Empfänger, Datum und Betreff mit. PDF- und Word-Anhänge kommen als Text dazu, jeweils unter „--- Anhang: Name ---“; andere Anhänge und solche, die nicht lesbar sind, stehen nur mit Namen und Grund da. Die Datei geht nur vom Browser an den lokalen Server auf 127.0.0.1, wird dort im Speicher gelesen und nirgends gespeichert oder protokolliert. Analysiert wird erst, wenn du selbst auf „Text analysieren“ klickst; eine vorherige Analyse und Freigabe verfallen beim Laden, ebenso bei „Beispiel laden“ und bei jeder Änderung am Text. Kann eine Datei nicht gelesen werden, steht die Meldung direkt unter „Dein Original“.
 
 ## Aufgabe für LLM
