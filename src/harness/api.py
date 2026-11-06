@@ -1,7 +1,6 @@
 """Der Vertrag des Harness-Kerns. Die Weboberfläche importiert NUR dieses Modul.
 
-Signaturen, Feldnamen und Ausnahmen bleiben stabil. Ergänzungen nur zusätzlich
-und mit Eintrag in BACKLOG.md unter „Vertrag erweitert“.
+Signaturen, Feldnamen und Ausnahmen bleiben stabil. Neue Funktionen ergänzen den Vertrag.
 
 Datentypen (Felder siehe jeweiliges Modul, hier re-exportiert):
     Replacement(placeholder, original, typ, start, end)             mask.py

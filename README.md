@@ -109,15 +109,13 @@ uv run pytest -m slow      # zusätzlich mit dem GLiNER-Modell
 uv run python -m harness run examples/kanzlei.txt   # Kommandozeile
 ```
 
-Ohne API-Key (siehe `.env.example`) läuft die Kommandozeile im Kopiermodus: Der freigegebene Text landet in der Zwischenablage, die Antwort fügt man von Hand wieder ein. Die Weboberfläche und ihr Testmodus sind in [`web/README.md`](web/README.md) beschrieben, Icons und Komponenten im [UI Kit](web/ui-kit/README.md).
+Ohne API-Key (siehe `.env.example`) läuft die Kommandozeile im Kopiermodus: Der freigegebene Text landet in der Zwischenablage, die Antwort fügt man von Hand wieder ein. Die Weboberfläche und ihr Testmodus sind in [`web/README.md`](web/README.md) beschrieben.
 
 **Aufbau**
 
 - `src/harness/api.py` – der Vertrag, gegen den die Weboberfläche (`web/`) programmiert.
 - `detect.py` (Regex + GLiNER), `vault.py` (SQLite), `mask.py`, `gate.py` (Freigabe und Leck-Check), `cloud.py` (Claude), `restore.py`, `cli.py`.
 - `examples/` – vollständig erfundene Beispieltexte.
-
-Die Regeln für Beiträge und Agenten stehen in [`CLAUDE.md`](CLAUDE.md), der Arbeitsstand des Teams in [`PROJEKTSTAND.md`](PROJEKTSTAND.md).
 
 </details>
 

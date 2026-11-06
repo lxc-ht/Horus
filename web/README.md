@@ -38,13 +38,3 @@ In einem zweiten Terminal die Browserprüfung ausführen. Playwright ist nur fü
     uv run --locked --extra web --group browser python -m web.test_ui
 
 Die Prüfung nutzt erfundene Daten mit der lokalen Attrappe, es geht keine Anfrage an Claude. Sie prüft Sperrzustände, Kopieren, Rückübersetzung, Freigabeverlust nach einer Änderung, den aktuellen Arbeitsbereich, die Unsicher Legende, Vorschau mit Emoji, verspätete Freigaben, fünf Bildschirmbreiten, Hover, Klick, Tastatur, geschützte Textauswahl, Touch und reduzierte Bewegung. Für einen anderen lokalen Port kann die URL als Argument übergeben werden.
-
-## UI Kit
-
-Das [vollständige UI Kit](ui-kit/README.md) liegt direkt in diesem Repository unter `web/ui-kit/`: 18 SVG Icons, drei Looks, Komponentendemos und interaktive Beispieldurchläufe. Es startet im bestätigten **Lime Soda** Look. Im Abschnitt **Dashboard** lassen sich die Variante mit Banner und die Glas Ablaufleiste ausprobieren, einschließlich Freigabe und erneuter Sperre nach Änderungen.
-
-Aus dem Repository starten:
-
-    python3 -m http.server 8013 --bind 127.0.0.1 --directory web/ui-kit
-
-Danach [UI Kit öffnen](http://127.0.0.1:8013). Es läuft unabhängig vom Kern und benötigt keinen API Schlüssel. Einstieg und Bearbeitungshinweise für die gemeinsame Weiterentwicklung stehen in der [Kit Anleitung](ui-kit/README.md#gemeinsam-weiterarbeiten).
