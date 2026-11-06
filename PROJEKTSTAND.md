@@ -17,6 +17,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- [ ] Teamname „Horus“ im README ([PR #61](https://github.com/lxc-ht/LP7/pull/61), `lxc-ht`, Claude): wartet auf Prüfung und Merge durch Paul.
 
 
 
