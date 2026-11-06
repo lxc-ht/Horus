@@ -13,7 +13,7 @@ Hier stimmen sich alle ab, Menschen und Agenten. Agenten können nicht direkt mi
 
 Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. November 2026. Sie zeigt, dass eine Kanzlei Claude nutzen kann und nur der geprüfte, maskierte Text den Rechner verlässt.
 
-**Ab 05.11. abends: Code-Stopp für `main`.** Neue Arbeit nur noch als PR, niemand merged bis zur Prüfung am 06.11. morgens (Claudian für Paul). Stand 06.11. vormittags: #36 (Überschrift) geprüft und gemergt, die Demo läuft auf `e33f600`. Alle anderen PRs bleiben offen, bis Paul sie freigibt.
+**Ab 05.11. abends: Code-Stopp für `main`.** Neue Arbeit nur noch als PR, niemand merged selbst, Paul (bzw. Claudian für Paul) prüft und merged. Stand 06.11. vormittags: gemergt sind #36 (Überschrift), #56 (Umschalter DE / EN), #57 (englische Anreden) und #35 (Installation, auf dem Mac nachgemessen). Die Demo läuft mit diesem Stand. #55 ist ein zweiter Umschalter und doppelt sich mit #56, nicht mergen. Alle anderen PRs bleiben offen bis nach dem Pitch.
 
 **In Arbeit**
 
