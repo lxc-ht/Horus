@@ -83,4 +83,4 @@ server_pid=$$
 ) &
 
 # Der Server bleibt im Vordergrund und erhält die Signale des Terminals direkt.
-exec uv run --with-requirements web/requirements.txt uvicorn web.app:app --host 127.0.0.1 --port "$port"
+exec uv run --locked --extra web uvicorn web.app:app --host 127.0.0.1 --port "$port"

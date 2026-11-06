@@ -72,15 +72,20 @@ def _now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def create_session() -> str:
+def prune_expired(cutoff: datetime) -> None:
+    """Löscht vor dem Stichtag angelegte Sitzungen samt Zuordnung."""
+    timestamp = cutoff.isoformat(timespec="seconds")
+    with closing(_connect()) as conn, conn:
+        conn.execute("DELETE FROM mappings WHERE session_id IN (SELECT id FROM sessions WHERE created_at < ?)", (timestamp,))
+        conn.execute("DELETE FROM sessions WHERE created_at < ?", (timestamp,))
+
+
+def create_session(created_at: datetime | None = None) -> str:
     session_id = uuid.uuid4().hex
     with closing(_connect()) as conn, conn:
-        cutoff = (_now() - SESSION_TTL).isoformat(timespec="seconds")
-        conn.execute("DELETE FROM mappings WHERE session_id IN (SELECT id FROM sessions WHERE created_at < ?)", (cutoff,))
-        conn.execute("DELETE FROM sessions WHERE created_at < ?", (cutoff,))
         conn.execute(
             "INSERT INTO sessions (id, created_at) VALUES (?, ?)",
-            (session_id, _now().isoformat(timespec="seconds")),
+            (session_id, (created_at or _now()).isoformat(timespec="seconds")),
         )
     return session_id
 

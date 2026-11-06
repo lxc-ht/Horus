@@ -1,8 +1,8 @@
 # LP7 – KI nutzen. Daten behalten.
 
-LP7 ersetzt Namen, Adressen, IBANs und andere sensible Angaben in einem Text durch Platzhalter wie `[PERSON_1]`, bevor er an eine KI geht. Die Antwort setzt LP7 danach wieder mit den echten Angaben zusammen. Alles läuft auf dem eigenen Rechner, und nichts geht raus, was ein Mensch nicht vorher geprüft und freigegeben hat.
+LP7 pseudonymisiert Texte lokal. Es ersetzt erkannte sensible Angaben durch Platzhalter wie `[PERSON_1]`. In der Weboberfläche prüfst du die Fassung, gibst sie zum Kopieren frei und setzt die Originalwerte in der Antwort lokal wieder ein.
 
-Gedacht für Kanzleien, Arztpraxen und Steuerbüros, die Claude oder einen anderen Chatbot nutzen wollen, aber keine Mandanten- oder Patientendaten auf fremde Server geben dürfen.
+Der Prototyp zeigt am Beispiel von Kanzleien, Arztpraxen und Steuerbüros, wie sich sensible Angaben vor dem Teilen eines Textes mit einem KI Dienst reduzieren lassen.
 
 ![LP7: Analysieren, Vorschau und Ausgabe. Klar. Lokal. Unter deiner Kontrolle.](web/assets/lp7-banner.png)
 
@@ -14,7 +14,7 @@ Gedacht für Kanzleien, Arztpraxen und Steuerbüros, die Claude oder einen ander
 4. **Kopieren und fragen.** Den freigegebenen Text kopierst du selbst in Claude oder einen anderen Chatbot. LP7 sendet nichts automatisch und braucht keinen API-Schlüssel.
 5. **Zurückübersetzen.** Die Antwort fügst du wieder ein. LP7 setzt die echten Angaben ein und meldet alles, was es nicht eindeutig zuordnen kann, statt zu raten.
 
-![Die Arbeitsoberfläche von LP7](web/assets/arbeitsoberflaeche-material-c.png)
+![LP7 mit erfundenem Original, freigegebener Vorschau und lokal zurückübersetzter Beispielantwort](web/assets/lp7-ablauf.png)
 
 ## Installation
 
@@ -40,7 +40,7 @@ Blockiert macOS das Öffnen, weil die Datei aus dem Internet kommt: Systemeinste
 
 ```bash
 uv sync
-uv run --with-requirements web/requirements.txt uvicorn web.app:app --host 127.0.0.1 --port 8000
+uv run --locked --extra web uvicorn web.app:app --host 127.0.0.1 --port 8000
 ```
 
 Die Oberfläche ist nur auf diesem Rechner erreichbar (127.0.0.1), nicht im Netzwerk.
@@ -74,13 +74,13 @@ Die Oberfläche ist nur auf diesem Rechner erreichbar (127.0.0.1), nicht im Netz
   | Serverstart mit gefüllten Caches, bis `/api/status` antwortet | 1,3 Sekunden |
 
   Größen sind belegter Speicher (`du`), keine Downloadmengen. Nicht gemessen: die übertragene Datenmenge und der Betrieb mit tatsächlich ausgeschaltetem WLAN.
-- Die Erkennung ist mit erfundenen Texten geprüft, nicht mit echten Akten. Eine Erkennungsrate für echte Dokumente gibt es noch nicht.
+- Erkennungsstichprobe mit 12 erfundenen Texten: 32 von 36 markierten Angaben vollständig ersetzt, vier übersehen (drei Kennungen, ein englisches Datum), fünf Falschtreffer. [Stichprobe und Messmethode](benchmarks/README.md).
 
 ## Für Entwicklerinnen und Entwickler
 
 ```bash
 uv sync
-uv run pytest              # ohne Netz, ohne Modell-Download
+uv run --locked --extra web python -m pytest tests web/test_app.py  # ohne Modell-Download
 uv run pytest -m slow      # zusätzlich mit dem GLiNER-Modell
 uv run python -m harness run examples/kanzlei.txt   # Kommandozeile
 ```
