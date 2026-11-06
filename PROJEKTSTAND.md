@@ -17,6 +17,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- Loc: Sound fürs Pitch-Video liegt in PR #63 (Ordner `audio-loc/`, Branch `claude/project-thread-00o8nh`): 22 Effekte + 2 Ersatz-Musikstücke, Quellen-CSV, favoriten.md. 5 Pixabay-Musikstücke stehen nur als Links in der CSV (NOCH LADEN). Für Paul zum Schnitt, PR nur mergen, wenn die WAVs auf `main` sollen.
 
 
 
