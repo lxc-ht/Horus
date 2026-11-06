@@ -1,4 +1,4 @@
-# LP7 – KI nutzen. Daten behalten.
+# Horus – KI nutzen. Daten behalten.
 
 **Team Horus** · Leuphana AI Hackathon 2026
 
