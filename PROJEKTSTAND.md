@@ -17,6 +17,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- [ ] Codex für Loc: Englischer Einstieg und direkt nutzbarer macOS Download auf `codex/horus-download`.
 
 
 
