@@ -39,7 +39,7 @@ __all__ = [
     "TYPES", "Replacement", "Uncertain", "MaskResult", "Release", "RestoreResult",
     "LeakError", "ReleaseMismatchError", "NoApiKeyError", "CloudError",
     "analyze", "add_manual", "remove", "get", "release", "has_api_key", "send", "restore",
-    "set_detectors",
+    "set_detectors", "warmup",
 ]
 
 log = logging.getLogger(__name__)
@@ -92,6 +92,16 @@ def _active_detectors() -> list[Detector]:
     if _detectors is None:
         _detectors = [RegexDetector(), GlinerDetector()]
     return _detectors
+
+
+def warmup() -> None:
+    """Lädt die Erkennung vorab, damit der erste Klick nicht auf das Modell wartet.
+
+    Läuft mit einem erfundenen Satz, legt keine Sitzung an und schreibt nichts in die Zuordnung.
+    Fehler wirft sie weiter, etwa ModelUnavailableError ohne Netz.
+    """
+    for d in _active_detectors():
+        d.detect("Termin mit Erika Musterfrau in Musterstadt.")
 
 
 def _session(session_id: str) -> _Session:

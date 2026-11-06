@@ -8,6 +8,7 @@ werden über merge_findings() zusammengeführt.
 from __future__ import annotations
 
 import logging
+import threading
 import os
 import re
 from dataclasses import dataclass
@@ -338,6 +339,8 @@ _ROLE_WORDS = {
 _NOT_A_NAME = _ROLE_WORDS | {"herr", "herrn", "frau"}
 
 _gliner_cache: dict[str, object] = {}
+# Vorladen beim Start und der erste Klick dürfen das Modell nicht zweimal gleichzeitig laden.
+_gliner_lock = threading.Lock()
 
 
 MODEL_UNAVAILABLE = (
@@ -352,6 +355,11 @@ class ModelUnavailableError(RuntimeError):
 
 def _load_gliner(model_name: str):
     """Lädt das Modell einmal pro Prozess und verwendet es danach wieder."""
+    with _gliner_lock:
+        return _load_gliner_locked(model_name)
+
+
+def _load_gliner_locked(model_name: str):
     if model_name not in _gliner_cache:
         os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
         os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")

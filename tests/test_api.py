@@ -470,3 +470,18 @@ def test_bare_placeholder_with_genitive_is_restored_and_reported():
     assert bare.text == "Anna Müllers Antrag"
     assert any("ohne Klammern" in warning for warning in bare.warnings)
     assert api.restore(session, "person 1s Antrag").changed == ["person 1"]
+
+
+def test_warmup_runs_detectors_without_session(monkeypatch):
+    # Vorladen ruft jede Erkennung einmal auf und legt dabei keine Sitzung an.
+    calls = []
+
+    class Recorder:
+        def detect(self, text):
+            calls.append(text)
+            return []
+
+    api.set_detectors([Recorder()])
+    before = dict(api._sessions)
+    api.warmup()
+    assert len(calls) == 1 and api._sessions == before
