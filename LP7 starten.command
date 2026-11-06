@@ -60,7 +60,7 @@ fi
 
 cat <<'TEXT'
 LP7 startet. Alles läuft nur auf diesem Rechner.
-Beim ersten Start lädt LP7 Pakete und bei der ersten Analyse das Erkennungsmodell; auf macOS 26.6.1 mit Apple M4 und WLAN am 06.11.2026 belegten Umgebung 795.008 KiB, uv-Cache 825.008 KiB und Modellcache 1.133.200 KiB, Paketinstallation und erste Analyse dauerten zusammen 108,31 Sekunden (Python war bereits installiert).
+Beim ersten Start lädt LP7 Pakete und das Erkennungsmodell, zusammen rund 2,7 GB. Das dauert mit schnellem Netz etwa 2 Minuten.
 Der Browser öffnet sich von selbst. Dieses Fenster bitte offen lassen.
 Zum Beenden: ctrl+C drücken oder das Fenster schließen.
 TEXT

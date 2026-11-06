@@ -18,24 +18,7 @@ Gedacht für Kanzleien, Arztpraxen und Steuerbüros, die Claude oder einen ander
 
 ## Installation
 
-Getestet auf macOS. Beim ersten Start lädt LP7 Python-Pakete aus dem Internet; bei der ersten Analyse kommt das Erkennungsmodell hinzu.
-
-**Mac-Messung vom 06.11.2026:** macOS 26.6.1, Apple M4, WLAN eingeschaltet, Internetzugang, frischer Klon und leere, getrennte uv- und Hugging-Face-Caches. uv 0.13.7, Python 3.12.16 bereits vorhanden (Python-Installation und dessen Speicherbedarf nicht gemessen). Paket- und Analyseschritte einzeln mit `/usr/bin/time -p` gemessen, jeweils die verstrichene Zeit (`real`); Serverbereitschaft mit einer monotonen Uhr (`time.perf_counter`):
-
-| Schritt | Gemessen auf diesem Mac |
-| --- | --- |
-| Python-Pakete: `uv sync` | 12,40 Sekunden |
-| Web-Pakete samt Importprüfung | 1,84 Sekunden |
-| Speicher nach beiden Paketschritten | `.venv`: 795.008 KiB (`du -sh`: 776M); uv-Cache: 825.008 KiB (806M) |
-| Erste Analyse von `examples/kanzlei.txt`, einschließlich Modelldownload und Laden in den Speicher | 94,07 Sekunden; 16 Ersetzungen |
-| Modellcache (`HF_HOME`) nach der ersten Analyse | 1.133.200 KiB (`du -sh`: 1,1G), einschließlich der vom Modell benötigten Dateien |
-| Zweite Analyse in einem neuen Prozess, Modell im Cache, Netz an | 10,22 Sekunden; 16 Ersetzungen |
-| Analyse ohne Netz simuliert mit `HF_HUB_OFFLINE=1 UV_OFFLINE=1`, WLAN weiterhin an | 9,74 Sekunden; 16 Ersetzungen |
-| Serverstart mit gefüllten Caches und `HF_HUB_OFFLINE=1`, bis `/api/status` auf Port 8768 antwortete | 1,273 Sekunden; Status `fake: false` (Abfrageintervall 0,05 Sekunden) |
-
-Paketinstallation und erste Analyse dauerten zusammen **108,31 Sekunden** (Summe der drei getrennt gemessenen Schritte, kein gemessener Doppelklick-Start). Größen sind belegter Speicher laut `du -sk`, keine Downloadmengen; Umgebung und Cache sind getrennt ausgewiesen und werden nicht als zusätzlicher physischer Gesamtbedarf addiert. Reine Modelldownloadzeit, übertragene Datenmenge und Betrieb mit tatsächlich ausgeschaltetem WLAN: **nicht gemessen**. Den Test mit ausgeschaltetem WLAN übernimmt Paul beim Probedurchlauf.
-
-**Linux-Vergleich vom 05.11.2026:** Linux in der Cloud, mit Internetzugang, aber gesperrtem Hugging Face; Python und Pakete belegten 5,8 GB, das Laden dauerte 7 Minuten (einschließlich Grafikkarten-Paketen für torch). Modellgröße und -ladezeit wurden dort nicht gemessen; Distribution und Chip sind nicht dokumentiert.
+Getestet auf macOS. Der erste Start braucht Internet: LP7 lädt die Python-Pakete und bei der ersten Analyse das Erkennungsmodell. Danach belegt es rund 2,7 GB (Pakete 0,8 GB, Paket-Cache 0,8 GB, Modell 1,1 GB). Auf einem Mac mit schnellem Netz dauerte das knapp 2 Minuten. Danach soll LP7 ohne Internet laufen, das ist bisher nur simuliert geprüft. Nach jedem Programmstart braucht die erste Analyse etwa 10 Sekunden, weil das Modell geladen wird. Wie gemessen wurde, steht unter „Getestet“.
 
 **1. uv installieren** (einmalig, im Terminal):
 
@@ -78,7 +61,19 @@ Die Oberfläche ist nur auf diesem Rechner erreichbar (127.0.0.1), nicht im Netz
 
 - Rückweg mit echtem Claude (claude.ai, Kopiermodus, 05.11.2026): 16 von 16 Platzhaltern, die Claude in seinen Antworten benutzt hat, kamen heil zurück, in 2 erfundenen Testtexten. Keine Person wurde verwechselt. Zwei Texte sind eine Stichprobe, kein Beweis.
 - Installation frisch durchgespielt (05.11.2026, Linux in der Cloud, leerer Klon und leere Caches): Pakete laden, Server starten und 213 Tests liefen durch. Das Erkennungsmodell ließ sich dort nicht laden, weil die Umgebung Hugging Face sperrt; dieser Schritt ist nicht geprüft.
-- Installation und Analyse auf dem Mac nachgemessen (06.11.2026, macOS 26.6.1, Apple M4, WLAN an, Internetzugang): frischer Klon und leere Caches, erste und zweite Analyse sowie ohne Netz simuliert mit `HF_HUB_OFFLINE=1` und `UV_OFFLINE=1` erfolgreich, jeweils 16 Ersetzungen in `examples/kanzlei.txt`; Server auf Port 8768 gestartet und beendet. Zeiten und Größen stehen unter „Installation“. WLAN tatsächlich aus: nicht gemessen.
+- Installation auf dem Mac gemessen (06.11.2026, macOS 26.6.1, Apple M4, WLAN an, frischer Klon, leere Caches, Python 3.12 und uv 0.13.7 schon vorhanden):
+
+  | Schritt | Gemessen |
+  | --- | --- |
+  | Python-Pakete laden (`uv sync` und Web-Pakete) | 14 Sekunden |
+  | Belegter Speicher danach | `.venv` 776 MB, uv-Cache 806 MB |
+  | Erste Analyse samt Download des Modells | 94 Sekunden, 16 Ersetzungen |
+  | Modell im Cache (`HF_HOME`) | 1,1 GB |
+  | Zweite Analyse in neuem Prozess (Modell laden) | 10 Sekunden, 16 Ersetzungen |
+  | Analyse ohne Netz, simuliert mit `HF_HUB_OFFLINE=1 UV_OFFLINE=1` | 10 Sekunden, 16 Ersetzungen |
+  | Serverstart mit gefüllten Caches, bis `/api/status` antwortet | 1,3 Sekunden |
+
+  Größen sind belegter Speicher (`du`), keine Downloadmengen. Nicht gemessen: die übertragene Datenmenge und der Betrieb mit tatsächlich ausgeschaltetem WLAN.
 - Die Erkennung ist mit erfundenen Texten geprüft, nicht mit echten Akten. Eine Erkennungsrate für echte Dokumente gibt es noch nicht.
 
 ## Für Entwicklerinnen und Entwickler
