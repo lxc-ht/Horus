@@ -120,6 +120,49 @@ def main() -> None:
         expect(touch.locator('#workspace')).to_have_attribute('data-focus', 'stepReview')
         assert touch.evaluate('document.documentElement.scrollWidth <= innerWidth')
         touch_context.close()
+
+        # Umschalter DE / EN: Beschriftungen wechseln, der Ablauf bleibt stehen.
+        lang_page = context.new_page()
+        lang_page.on("pageerror", lambda error: errors.append(str(error)))
+        lang_page.goto(url)
+        expect(lang_page.locator("#langDe")).to_have_attribute("aria-pressed", "true")
+        lang_page.locator("#langEn").click()
+        expect(lang_page.locator("#langEn")).to_have_attribute("aria-pressed", "true")
+        assert lang_page.evaluate("document.documentElement.lang") == "en"
+        expect(lang_page.locator("#analyzeLabel")).to_have_text("Analyze text")
+        lang_page.locator("#btnExample").click()
+        assert lang_page.locator("#original").input_value().startswith("From: Emily Hartwell")
+        lang_page.locator("#btnAnalyze").click()
+        lang_page.locator("#btnRelease").click()
+        expect(lang_page.locator("#releaseStatus")).to_have_text("Approved")
+        preview = lang_page.locator("#masked").inner_text()
+        lang_page.locator("#langDe").click()
+        expect(lang_page.locator("#releaseStatus")).to_have_text("Freigegeben")
+        expect(lang_page.locator("#btnCopy")).to_be_enabled()
+        assert lang_page.locator("#masked").inner_text() == preview
+        lang_page.locator("#langEn").click()
+        expect(lang_page.locator("#releaseStatus")).to_have_text("Approved")
+        # Kein deutsches Wort aus der Tabelle in der sichtbaren Oberfläche. Ausgenommen: Nutzertext und Meldungen aus dem Kern.
+        leftovers = lang_page.evaluate("""() => {
+            const words = (text) => text.match(/[A-Za-zÄÖÜäöüß]{4,}/g) || [];
+            const flat = (table) => Object.values(table).flat().join(" ");
+            const english = new Set(words(flat(I18N.en)));
+            const german = new Set(words(flat(I18N.de)).filter((w) => !english.has(w)));
+            const skip = "#original, #masked, #answer, #answerInput, #notes, #report, #tooltip, #typeMenu, .headline";
+            const found = new Set();
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+            for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+                const el = node.parentElement;
+                if (el.closest(skip) || !el.checkVisibility()) continue;
+                for (const w of words(node.data)) if (german.has(w)) found.add(w);
+            }
+            return [...found];
+        }""")
+        assert not leftovers, leftovers
+        lang_page.reload()
+        expect(lang_page.locator("#analyzeLabel")).to_have_text("Analyze text")
+        lang_page.locator("#langDe").click()
+        lang_page.close()
         assert not errors, errors
         browser.close()
     print("Browserprüfung bestanden: Freigabe, Kopieren, Rückübersetzung, fünf Bildschirmbreiten, Hover, Klick, Tastatur, Textauswahl und Touch.")
