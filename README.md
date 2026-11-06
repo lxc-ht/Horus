@@ -1,4 +1,4 @@
-# Horus
+# Horus – KI nutzen. Daten behalten.
 
 **Team Horus** · Leuphana AI Hackathon 2026
 
