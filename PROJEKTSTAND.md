@@ -48,7 +48,7 @@ Beide:
 **Erledigt**
 
 - [x] Auswahl „Aufgabe für LLM“ entfernt, `docs/DEMO-ABLAUF.md` (Pitch-Drehbuch) aus dem Repo genommen, damit es nach dem Pitch öffentlich werden kann ([PR #65](https://github.com/lxc-ht/Horus/pull/65), `lxc-ht`, Claude). Offen, Prüfung durch Paul. Behalten und im PR genannt: `PROJEKTSTAND.md` (Pitch-Notizen nach dem Pitch kürzen), `web/ui-kit/`. PR #63 (audio-loc) nicht auf main mergen.
-- [x] Codex für Loc: Projektnamen in Dokumentation, Startdatei, App, UI Kit und Grafiken auf Horus umgestellt. Prüfung und Merge durch Paul.
+- [x] Codex für Loc: Projektnamen in Dokumentation, Startdatei, App, UI Kit und Grafiken auf Horus umgestellt ([PR #62](https://github.com/lxc-ht/Horus/pull/62)).
 - [x] Teamname „Horus“ im README ([PR #61](https://github.com/lxc-ht/Horus/pull/61), `lxc-ht`, Claude). Gemergt am 06.11.
 - [x] Codex für Loc: Audit umgesetzt in [PR #60](https://github.com/lxc-ht/Horus/pull/60) und mit dem gemergten Pitch-Stand abgeglichen. Veraltete Freigaben verworfen, Vorschau bei Emoji korrigiert, Sitzungsablauf und wiederholbares Löschen abgesichert, GitHub Tests eingerichtet, Erkennungsstichprobe und README aktualisiert. Prüfung und Merge durch Paul.
 - [x] Pitch-Stand gemergt: [PR #59](https://github.com/lxc-ht/Horus/pull/59) bringt #39 bis #54 und #58 auf main, zusammen mit #35, #56 und #57. #55 gilt auf GitHub als gemergt, sein Code ist aber zurückgenommen (ersetzt durch #56). Offen bleiben #37 und #38.

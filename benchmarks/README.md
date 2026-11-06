@@ -1,4 +1,4 @@
-# Erkennung messen
+# Erkennung in Horus messen
 
 ```bash
 uv run --locked python -m benchmarks.erkennung
