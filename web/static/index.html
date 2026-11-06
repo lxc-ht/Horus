@@ -456,8 +456,16 @@ Emily Hartwell
 Please summarise the case in five sentences and draft a short reply to the person concerned. Keep every placeholder in square brackets exactly as it is.`,
 };
 
+const launchURL = new URL(location.href);
+const launchLanguage = launchURL.searchParams.get("lang");
 let lang = "de";
 try { if (localStorage.getItem("horus-lang") === "en") lang = "en"; } catch {}
+if (launchLanguage === "de" || launchLanguage === "en") {
+  lang = launchLanguage;
+  try { localStorage.setItem("horus-lang", lang); } catch {}
+  launchURL.searchParams.delete("lang");
+  history.replaceState(null, "", launchURL);
+}
 // Text in der aktuellen Sprache; {name} wird durch vars.name ersetzt.
 function t(key, vars = {}) {
   return I18N[lang][key].replace(/\{(\w+)\}/g, (_, name) => vars[name]);

@@ -2,6 +2,8 @@
 
 **Team Horus** · Leuphana AI Hackathon 2026
 
+[English](README.en.md) · [**Horus für macOS herunterladen**](https://github.com/lxc-ht/Horus/releases/download/v0.1.0-preview.1/Horus-macOS-AppleSilicon.zip)
+
 Horus pseudonymisiert Texte lokal. Es ersetzt erkannte sensible Angaben durch Platzhalter wie `[PERSON_1]`. In der Weboberfläche prüfst du die Fassung, gibst sie zum Kopieren frei und setzt die Originalwerte in der Antwort lokal wieder ein.
 
 Der Prototyp zeigt am Beispiel von Kanzleien, Arztpraxen und Steuerbüros, wie sich sensible Angaben vor dem Teilen eines Textes mit einem KI Dienst reduzieren lassen.
@@ -18,34 +20,23 @@ Der Prototyp zeigt am Beispiel von Kanzleien, Arztpraxen und Steuerbüros, wie s
 
 ![Horus mit erfundenem Original, freigegebener Vorschau und lokal zurückübersetzter Beispielantwort](web/assets/horus-ablauf.png)
 
-## Installation
+## Schnellstart auf macOS
 
-Getestet auf macOS. Der erste Start braucht Internet: Horus lädt die Python-Pakete und bei der ersten Analyse das Erkennungsmodell. Danach belegt es rund 2,7 GB (Pakete 0,8 GB, Paket-Cache 0,8 GB, Modell 1,1 GB). Auf einem Mac mit schnellem Netz dauerte das knapp 2 Minuten. Danach soll Horus ohne Internet laufen, das ist bisher nur simuliert geprüft. Nach jedem Programmstart braucht die erste Analyse etwa 10 Sekunden, weil das Modell geladen wird. Wie gemessen wurde, steht unter „Getestet“.
+1. [**Horus für Macs mit Apple Chip herunterladen**](https://github.com/lxc-ht/Horus/releases/download/v0.1.0-preview.1/Horus-macOS-AppleSilicon.zip).
+2. Das ZIP entpacken und `Horus starten.command` doppelklicken. Für Englisch öffne `Start Horus.command`.
+3. Der Browser öffnet sich automatisch. Zum Beenden im Terminal Ctrl+C drücken oder das Fenster schließen.
 
-**1. uv installieren** (einmalig, im Terminal):
+Das Paket enthält `uv`. Beim ersten Start lädt Horus Python, die benötigten Pakete und das Erkennungsmodell automatisch. Dafür brauchst du Internet und mehrere GB freien Speicher. macOS kann bei dieser Vorschau beim ersten Öffnen eine Bestätigung verlangen. [Apple Anleitung zum Öffnen geladener Apps](https://support.apple.com/de-de/102445)
 
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
+### Aus dem Quellcode starten
 
-**2. Horus herunterladen:** oben auf dieser Seite „Code“ → „Download ZIP“ und entpacken. Oder mit Git:
-
-```bash
-git clone https://github.com/lxc-ht/Horus.git
-```
-
-**3. Starten:** Doppelklick auf `Horus starten.command`. Der Browser öffnet sich mit http://127.0.0.1:8000. Das Terminalfenster bleibt offen, solange Horus läuft. Zum Beenden ctrl+C drücken oder das Fenster schließen.
-
-Blockiert macOS das Öffnen, weil die Datei aus dem Internet kommt: Systemeinstellungen → Datenschutz & Sicherheit → „Trotzdem öffnen“.
-
-**Ohne Doppelklick**, zum Beispiel auf Windows oder Linux (dort nicht getestet), im Horus-Ordner:
+Mit installiertem [uv](https://docs.astral.sh/uv/getting-started/installation/) im Horus Ordner:
 
 ```bash
-uv sync
 uv run --locked --extra web uvicorn web.app:app --host 127.0.0.1 --port 8000
 ```
 
-Die Oberfläche ist nur auf diesem Rechner erreichbar (127.0.0.1), nicht im Netzwerk.
+Die Oberfläche ist unter `http://127.0.0.1:8000` auf diesem Rechner erreichbar. Der Download ist auf macOS mit Apple Chip geprüft.
 
 ## Was Horus nicht ist
 

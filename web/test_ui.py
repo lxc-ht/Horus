@@ -165,6 +165,11 @@ def main() -> None:
         lang_page.reload()
         expect(lang_page.locator("#analyzeLabel")).to_have_text("Analyze text")
         lang_page.locator("#langDe").click()
+        lang_page.goto(url + "/?lang=en")
+        expect(lang_page.locator("#analyzeLabel")).to_have_text("Analyze text")
+        lang_page.locator("#langDe").click()
+        lang_page.reload()
+        expect(lang_page.locator("#analyzeLabel")).to_have_text("Text analysieren")
         lang_page.close()
         # Emoji vor einem Platzhalter und einer unsicheren Stelle verschieben die Vorschau nicht.
         page.locator("#original").fill("📄 An Erika Musterfrau von Nordlicht.")
