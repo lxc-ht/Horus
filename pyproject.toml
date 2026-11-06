@@ -29,4 +29,4 @@ packages = ["src/harness"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-m 'not slow'"
-markers = ["slow: lädt das GLiNER-Modell (Netz, mehrere hundert MB); läuft nur mit -m slow"]
+markers = ["slow: lädt das GLiNER-Modell (Netz; frischer HF_HOME-Cache 1.133.200 KiB, gemessen am 06.11.2026 auf macOS 26.6.1, Apple M4, WLAN an); läuft nur mit -m slow"]
