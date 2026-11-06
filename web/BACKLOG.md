@@ -13,3 +13,5 @@ Erledigt und deshalb entfernt (geprüft am 05.11.): unbekannte Sitzung meldet ei
 - Datei laden kann PDF, .docx und .eml. PDF- und Word-Anhänge einer E-Mail werden mitgelesen. Offen: Scans (OCR), Outlook .msg (bräuchte eine zusätzliche Bibliothek), E-Mails als Anhang, alte .doc-Dateien.
 - Markieren per Tastatur, bisher geht es nur mit der Maus.
 - Freigaben liegen im Speicher des Servers und werden nie aufgeräumt. Für die Demo reicht das.
+- `web/README.md` beschreibt unter „Arbeitsoberfläche“ noch das Glasmotiv zwischen „Klar. Lokal.“ und „Unter deiner Kontrolle.“, und der Screenshot `assets/arbeitsoberflaeche-material-c.png` zeigt die alte Kopfzeile. Nach dem Merge der Überschrift „Ask Anything, Reveal Nothing“ Text und Bild nachziehen.
+- `web/test_ui.py` könnte die Höhe der Kopfzeile auf 1440 × 900 und 1280 × 800 mitprüfen (höchstens 130 px, kein senkrechtes Scrollen). Bisher nur von Hand gemessen.
