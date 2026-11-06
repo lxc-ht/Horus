@@ -44,20 +44,15 @@ Die Oberfläche ist nur auf diesem Rechner erreichbar (127.0.0.1), nicht im Netz
 
 ## So funktioniert es
 
-![Erika Musterfrau im Original wird zu \[PERSON_1\] in der freigegebenen Vorschau und in der lokalen Antwort wieder zu Erika Musterfrau](docs/images/horus-workflow-de.jpg)
+Mara Lindner hat Unterlagen eingereicht. Du möchtest mit einem Chatbot eine Eingangsbestätigung formulieren. Name und E-Mail-Adresse sind für dieses Beispiel erfunden.
 
-1. **Einfügen und analysieren.** Gib deinen Text ein oder lade eine PDF, Word Datei oder E-Mail. Horus ersetzt erkannte Namen, Adressen, Kontodaten und andere sensible Angaben durch Platzhalter.
-2. **Prüfen und freigeben.** Kontrolliere die Vorschau und ergänze fehlende Stellen. Gelbe Markierungen zeigen unsichere Treffer. Erst nach deiner Freigabe lässt sich die Vorschau kopieren.
-3. **Kopieren und zurückübersetzen.** Füge die freigegebene Fassung in einen Chatbot deiner Wahl ein. Kopiere dessen Antwort zurück in Horus, um die Originalwerte lokal wieder einzusetzen.
+1. **Analysieren.** Horus ersetzt den Namen durch `[PERSON_1]` und die E-Mail-Adresse durch `[EMAIL_1]`.
+2. **Prüfen und freigeben.** Kontrolliere die gesamte Vorschau. Nach der Freigabe kopierst du diese Fassung in den Chatbot.
+3. **Antwort einsetzen.** Füge die Antwort mit den Platzhaltern wieder in Horus ein. Name und E-Mail-Adresse erscheinen in der lokalen Antwort grün markiert.
 
-Horus sendet im Browser nichts automatisch. Die Zuordnung zwischen Platzhaltern und Originalwerten bleibt auf deinem Rechner.
+![Horus auf Deutsch mit Original links, freigegebener Vorschau mit zwei Platzhaltern in der Mitte und lokal zurückübersetzter Antwort rechts](docs/images/horus-demo-de.png)
 
-<details>
-<summary>Die Oberfläche am Kanzleibeispiel ansehen</summary>
-
-![Horus mit erfundenem Original, freigegebener Vorschau und lokal zurückübersetzter Beispielantwort](web/assets/horus-ablauf.png)
-
-</details>
+*Ausschnitt aus Horus nach dem Zurückübersetzen einer vorbereiteten Beispielantwort.*
 
 ## Grenzen
 

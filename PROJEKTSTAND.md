@@ -17,8 +17,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- Codex für Loc: README Ablaufbeispiele auf Deutsch und Englisch mit echten Horus Screenshots.
-
 - Loc: Sound fürs Pitch-Video liegt in PR #63 (Ordner `audio-loc/`, Branch `claude/project-thread-00o8nh`): 22 Effekte + 2 Ersatz-Musikstücke, Quellen-CSV, favoriten.md. 5 Pixabay-Musikstücke stehen nur als Links in der CSV (NOCH LADEN). Für Paul zum Schnitt, PR nur mergen, wenn die WAVs auf `main` sollen.
 
 
@@ -48,6 +46,8 @@ Beide:
   - Bekannte Grenzen aus derselben Prüfung: Stadt „Essen“ blieb in einem längeren Satz stehen, „Kundenkonto 88213-44“ und „Ausweis L01X00T47“ ebenso, „im Winter“ wurde bei einer Person „Rosa Winter“ zum Namen. „Die einzige Kinderärztin im Ort“ findet keine Erkennung (mit #42 erscheint sie als unsichere Stelle).
 
 **Erledigt**
+
+- [x] Codex für Loc: README Ablaufbeispiele durch echte Horus Screenshots auf Deutsch und Englisch ersetzt. Lokale Analyse, Freigabe, Kopieren und Rückübersetzen geprüft.
 
 - [x] Codex für Loc: ausgewählten Horus Banner, Ablaufgrafik und englische README zur Prüfung auf [`codex/horus-readme-grafiken`](https://github.com/lxc-ht/Horus/tree/codex/horus-readme-grafiken) bereitgestellt.
 
