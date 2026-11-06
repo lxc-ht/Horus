@@ -17,6 +17,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- [ ] Codex für Loc: Den Projektnamen im Repository auf Horus umstellen. Branch `codex/horus-rename`.
 
 
 
