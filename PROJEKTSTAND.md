@@ -17,7 +17,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- [ ] **Für Pauls Agenten, Wunsch von Loc (06.11. 10:45):** [PR #59](https://github.com/lxc-ht/LP7/pull/59) mergen. Er enthält alle offenen Verbesserungen #39 bis #54 und #58, ist mit dem aktuellen main zusammengeführt, Konflikte gelöst, 244 Tests, `web.test_app` und Browserprüfung grün. Danach #55 schließen (ersetzt durch #56). #37 und #38 sind nicht enthalten und bleiben eure Entscheidung.
 
 
 
@@ -47,7 +46,8 @@ Beide:
 
 **Erledigt**
 
-- [x] Codex für Loc: Audit umgesetzt auf `codex/lp7-audit-fixes`. Veraltete Freigaben verworfen, Vorschau bei Emoji korrigiert, Sitzungsablauf und wiederholbares Löschen abgesichert, GitHub Tests eingerichtet, Erkennungsstichprobe und README aktualisiert. Prüfung und Merge durch Paul.
+- [x] Codex für Loc: Audit umgesetzt in [PR #60](https://github.com/lxc-ht/LP7/pull/60) und mit dem gemergten Pitch-Stand abgeglichen. Veraltete Freigaben verworfen, Vorschau bei Emoji korrigiert, Sitzungsablauf und wiederholbares Löschen abgesichert, GitHub Tests eingerichtet, Erkennungsstichprobe und README aktualisiert. Prüfung und Merge durch Paul.
+- [x] Pitch-Stand gemergt: [PR #59](https://github.com/lxc-ht/LP7/pull/59) bringt #39 bis #54 und #58 auf main, zusammen mit #35, #56 und #57. #55 gilt auf GitHub als gemergt, sein Code ist aber zurückgenommen (ersetzt durch #56). Offen bleiben #37 und #38.
 - [x] Innenabstand im Feld „Dein Original“, der Fokusrand verdeckt den ersten Buchstaben nicht mehr, Wunsch von Loc ([#58](https://github.com/lxc-ht/LP7/pull/58), offen, Prüfung durch Paul; im Sammelbranch).
 - [x] Englische Anreden (Mr, Mrs, Ms, Miss, Mx, Sir) im Kern wie Herr und Frau: nie Teil des Namens, „Mrs Kettle“ wird zu „Mrs [PERSON_3]“, Rückübersetzung ohne doppeltes „Mr“ ([#57](https://github.com/lxc-ht/LP7/pull/57), gemergt am 06.11., `lxc-ht`, Claude). 236 Tests grün, GLiNER-Test auf dem Mac nachprüfen. Rest (englische Kennungen, Datum, Straßen, Anreden in `api.py`) in `BACKLOG.md`.
 - [x] Umschalter DE / EN für die Weboberfläche: Übersetzungstabelle mit `data-i18n`, englisches Beispiel, Umschalten ohne API-Aufruf und ohne Verlust des Ablaufs, Kern-Meldungen bleiben deutsch (Liste in `web/BACKLOG.md`). Kopfzeile auf dem Desktop unverändert 84/76 px ([#56](https://github.com/lxc-ht/LP7/pull/56), offen, Prüfung durch Paul, ersetzt #55; `lxc-ht`, Claude).
