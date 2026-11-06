@@ -17,7 +17,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- [ ] Englische Anreden (Mr, Mrs, Ms, Miss, Mx, Sir) im Kern wie Herr und Frau behandeln, nach Locs Auftrag vom 06.11. (nur `detect.py`, `mask.py`, Tests; `api.py` und `web/` bleiben unverändert) (`lxc-ht`, Claude, Branch `claude/project-thread-wrhf9n`).
 
 
 
@@ -46,6 +45,7 @@ Beide:
 
 **Erledigt**
 
+- [x] Englische Anreden (Mr, Mrs, Ms, Miss, Mx, Sir) im Kern wie Herr und Frau: nie Teil des Namens, „Mrs Kettle“ wird zu „Mrs [PERSON_3]“, Rückübersetzung ohne doppeltes „Mr“ ([#57](https://github.com/lxc-ht/LP7/pull/57), offen, Prüfung durch Paul, `lxc-ht`, Claude). 236 Tests grün, GLiNER-Test auf dem Mac nachprüfen. Rest (englische Kennungen, Datum, Straßen, Anreden in `api.py`) in `BACKLOG.md`.
 - [x] Umschalter DE / EN für die Weboberfläche: Übersetzungstabelle mit `data-i18n`, englisches Beispiel, Umschalten ohne API-Aufruf und ohne Verlust des Ablaufs, Kern-Meldungen bleiben deutsch (Liste in `web/BACKLOG.md`). Kopfzeile auf dem Desktop unverändert 84/76 px ([#56](https://github.com/lxc-ht/LP7/pull/56), offen, Prüfung durch Paul, ersetzt #55; `lxc-ht`, Claude).
 - [x] Zweite Runde, sechs PRs, alle offen, Prüfung durch Paul (`lxc-ht`, Claude, 05.11. abends): IBAN mit kyrillischen Doppelgängern ([#46](https://github.com/lxc-ht/LP7/pull/46)), PDF- und Word-Anhänge in E-Mails ([#47](https://github.com/lxc-ht/LP7/pull/47)), Kennungen nach Konto, Police, Rechnung ([#48](https://github.com/lxc-ht/LP7/pull/48)), Demo-Drehbuch `docs/DEMO-ABLAUF.md` ([#49](https://github.com/lxc-ht/LP7/pull/49)), Satz ohne API-Key neutral ([#50](https://github.com/lxc-ht/LP7/pull/50)), web/BACKLOG aufgeräumt ([#51](https://github.com/lxc-ht/LP7/pull/51)). `claude/alle-verbesserungen` enthält jetzt #39 bis #51 zusammengeführt: 219 Tests, `web.test_app`, Browserprüfung grün, dazu ein Durchlauf mit echtem Kern (nur Regex) von Vorlage bis „Zuordnung jetzt löschen“, die Zuordnung ist danach wirklich aus SQLite weg. Kleine Konflikte zwischen den Einzel-PRs nur in Doku-Zeilen und `index.html`.
 - [x] Dritte Runde, Demo-Stabilität, offen, Prüfung durch Paul (`lxc-ht`, Claude, 06.11. früh): deutsche Meldung, wenn das Erkennungsmodell nicht lädt, statt „403 Forbidden“ ([#52](https://github.com/lxc-ht/LP7/pull/52)); Modell beim Serverstart im Hintergrund vorladen, damit der erste Klick nicht hängt, neu `api.warmup()` ([#53](https://github.com/lxc-ht/LP7/pull/53), baut auf #52 auf). Sammelbranch enthält #39 bis #53: 221 Tests, `web.test_app`, Browserprüfung grün.
