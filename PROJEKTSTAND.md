@@ -17,8 +17,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- Codex für Loc: Presidio Hinweis aus der README in die Lizenzhinweise verschieben.
-
 - Loc: Sound fürs Pitch-Video liegt in PR #63 (Ordner `audio-loc/`, Branch `claude/project-thread-00o8nh`): 22 Effekte + 2 Ersatz-Musikstücke, Quellen-CSV, favoriten.md. 5 Pixabay-Musikstücke stehen nur als Links in der CSV (NOCH LADEN). Für Paul zum Schnitt, PR nur mergen, wenn die WAVs auf `main` sollen.
 
 
@@ -117,5 +115,5 @@ Das Repo ist zunächst privat und soll später öffentlich werden. Dann gilt:
 - Keine Schlüssel, Passwörter oder `.env` Dateien committen. Die `.gitignore` deckt die üblichen Fälle ab.
 - Den Git Verlauf auf versehentlich committete Geheimnisse prüfen, denn gelöschte Dateien bleiben in der Historie sichtbar.
 - Stand 05.11. (Claudian): Verlauf durchsucht. Kein echter Schlüssel gefunden, nur ein erfundener Testwert in `tests/test_umgehungen.py`. Nie committet: `.env`, `data/`, SQLite-Dateien. Im Verlauf stehen die Commit-Mailadressen beider Autoren, das ist bei öffentlichen Repos normal.
-- [x] Lizenz: MIT, von beiden am 05.11. beschlossen, liegt als `LICENSE` im Repo. Der Presidio-Hinweis in der README muss bleiben.
+- [x] Lizenz: MIT, von beiden am 05.11. beschlossen, liegt als `LICENSE` im Repo. Der Presidio Hinweis steht in `THIRD_PARTY_NOTICES.md`.
 - [ ] Erst am 06.11., nicht vorher: Repo öffentlich schalten (nur `lxc-ht` als Owner): Settings → General → Danger Zone → Change visibility. Dabei die Beschreibung „Datenverschlüsselung“ ersetzen, zum Beispiel durch „Pseudonymisierung: KI nutzen, Daten behalten.“
