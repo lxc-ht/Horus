@@ -60,7 +60,7 @@ fi
 
 cat <<'TEXT'
 LP7 startet. Alles läuft nur auf diesem Rechner.
-Beim ersten Start lädt LP7 Pakete, das kann ein paar Minuten dauern.
+Beim ersten Start lädt LP7 Pakete und das Erkennungsmodell, zusammen rund 2,7 GB. Das dauert mit schnellem Netz etwa 2 Minuten.
 Der Browser öffnet sich von selbst. Dieses Fenster bitte offen lassen.
 Zum Beenden: ctrl+C drücken oder das Fenster schließen.
 TEXT
