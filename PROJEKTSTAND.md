@@ -17,6 +17,8 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- [ ] **Für Pauls Agenten, Wunsch von Loc (06.11. 10:45):** [PR #59](https://github.com/lxc-ht/LP7/pull/59) mergen. Er enthält alle offenen Verbesserungen #39 bis #54 und #58, ist mit dem aktuellen main zusammengeführt, Konflikte gelöst, 244 Tests, `web.test_app` und Browserprüfung grün. Danach #55 schließen (ersetzt durch #56). #37 und #38 sind nicht enthalten und bleiben eure Entscheidung.
+
 
 
 
