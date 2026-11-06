@@ -54,7 +54,11 @@ class Span:
 
 
 # Namensteile, die allein nichts über eine Person verraten.
-NAME_STOPWORDS = {"dr", "prof", "med", "herr", "frau", "von", "van", "der", "den", "die", "und", "zu"}
+# Englische Anreden wie „Mr“ zählen wie „Herr“, sonst würde jedes „Mr“ im Text zum Namen.
+NAME_STOPWORDS = {
+    "dr", "prof", "med", "herr", "frau", "von", "van", "der", "den", "die", "und", "zu",
+    "mr", "mrs", "ms", "miss", "mx", "sir",
+}
 
 
 def canonical(text: str) -> str:
