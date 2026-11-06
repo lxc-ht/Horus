@@ -7,10 +7,13 @@ werden über merge_findings() zusammengeführt.
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 from dataclasses import dataclass
 from typing import Protocol
+
+log = logging.getLogger(__name__)
 
 TYPES = ["PERSON", "FIRMA", "ADRESSE", "ORT", "EMAIL", "TELEFON", "IBAN", "DATUM", "KENNUNG"]
 
@@ -337,15 +340,30 @@ _NOT_A_NAME = _ROLE_WORDS | {"herr", "herrn", "frau"}
 _gliner_cache: dict[str, object] = {}
 
 
+MODEL_UNAVAILABLE = (
+    "Das Erkennungsmodell konnte nicht geladen werden. Beim ersten Start braucht LP7 einmal Internet, "
+    "danach liegt das Modell auf diesem Rechner. Bitte mit Netz neu starten und einmal analysieren."
+)
+
+
+class ModelUnavailableError(RuntimeError):
+    """GLiNER ließ sich nicht laden. Die Meldung ist ein fertiger deutscher Satz ohne Text der Nutzer."""
+
+
 def _load_gliner(model_name: str):
     """Lädt das Modell einmal pro Prozess und verwendet es danach wieder."""
     if model_name not in _gliner_cache:
         os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
         os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
         os.environ.setdefault("TRANSFORMERS_VERBOSITY", "error")
-        from gliner import GLiNER  # spät importieren: torch braucht Sekunden
+        try:
+            from gliner import GLiNER  # spät importieren: torch braucht Sekunden
 
-        _gliner_cache[model_name] = GLiNER.from_pretrained(model_name)
+            _gliner_cache[model_name] = GLiNER.from_pretrained(model_name)
+        except Exception as e:
+            # Sonst sähe der Mensch nur „403 Forbidden“ oder eine englische Netzwerkmeldung.
+            log.warning("GLiNER nicht geladen: %s", type(e).__name__)
+            raise ModelUnavailableError(MODEL_UNAVAILABLE) from None
     return _gliner_cache[model_name]
 
 

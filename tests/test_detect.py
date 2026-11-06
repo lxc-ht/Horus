@@ -296,3 +296,24 @@ def test_german_ids_from_presidio():
 def test_vat_id_needs_valid_checksum_without_label():
     assert not any(t == "KENNUNG" for t, _ in _found("Vorgang DE 136 695 977 erledigt"))
     assert not any(t == "KENNUNG" for t, _ in _found("Der Reisepass ist abgelaufen."))
+
+
+def test_model_load_failure_gives_german_sentence(monkeypatch):
+    # Ohne Netz beim ersten Start käme sonst „403 Forbidden“ oder eine englische Meldung in der Oberfläche an.
+    import sys
+    import types
+
+    import pytest
+
+    from harness import detect
+
+    class Broken:
+        @staticmethod
+        def from_pretrained(name):
+            raise OSError("Connection refused to huggingface.co")
+
+    monkeypatch.setitem(sys.modules, "gliner", types.SimpleNamespace(GLiNER=Broken))
+    monkeypatch.setattr(detect, "_gliner_cache", {})
+    with pytest.raises(detect.ModelUnavailableError) as e:
+        detect.GlinerDetector(model_name="nicht/da").detect("Erika Musterfrau")
+    assert str(e.value) == detect.MODEL_UNAVAILABLE and "huggingface" not in str(e.value)
