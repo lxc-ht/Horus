@@ -17,6 +17,7 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
+- [ ] Umschalter DE / EN für die Weboberfläche nach Locs Auftrag vom 06.11. (Übersetzungstabelle mit data-i18n, englisches Beispiel, Kern bleibt deutsch), ersetzt #55 (`lxc-ht`, Claude, Branch `claude/umschalter-de-en`).
 
 
 
