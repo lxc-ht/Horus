@@ -80,7 +80,8 @@ Die Oberfläche ist nur auf diesem Rechner erreichbar (127.0.0.1), nicht im Netz
 
 ```bash
 uv sync
-uv run --locked --extra web python -m pytest tests web/test_app.py  # ohne Modell-Download
+uv run --locked python -m pytest  # ohne Modell-Download
+uv run --locked --extra web python -m web.test_app
 uv run pytest -m slow      # zusätzlich mit dem GLiNER-Modell
 uv run python -m harness run examples/kanzlei.txt   # Kommandozeile
 ```
