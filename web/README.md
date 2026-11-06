@@ -14,7 +14,7 @@ Danach http://127.0.0.1:8000 öffnen. Das erste Analysieren lädt das Modell und
 
 ## Arbeitsoberfläche
 
-Layout A ist direkt in `web/static/index.html` eingebaut: drei flexible Spalten mit hellen Arbeitsflächen und einem feinen Farbrand. Auf dem Desktop wird die genutzte Spalte durch Hover, Klick oder Tastaturfokus breiter. Beim Schreiben in einem Eingabefeld und bei markiertem Text ist der Hoverwechsel ausgesetzt. Auf Mobilgeräten bleiben die Bereiche untereinander. Die Kopfzeile zeigt „Lokal prüfen“, das Horusauge und „Bewusst teilen“. Die mittlere Spalte heißt „Vorschau für LLM“. Die Legende erklärt erkannte Datentypen und markierte unsichere Stellen. Die Oberfläche verwendet den echten Kern, sofern sie nicht ausdrücklich mit `HARNESS_FAKE=1` gestartet wird.
+Layout A ist direkt in `web/static/index.html` eingebaut: drei flexible Spalten mit hellen Arbeitsflächen und einem feinen Farbrand. Auf dem Desktop wird die genutzte Spalte durch Hover, Klick oder Tastaturfokus breiter. Beim Schreiben in einem Eingabefeld und bei markiertem Text ist der Hoverwechsel ausgesetzt. Auf Mobilgeräten bleiben die Bereiche untereinander. Die englische Überschrift „Ask Anything, Reveal Nothing“ steht mit dem Horusauge in der Kopfzeile. Die mittlere Spalte heißt „Vorschau für LLM“. Die Legende erklärt erkannte Datentypen und markierte unsichere Stellen. Die Oberfläche verwendet den echten Kern, sofern sie nicht ausdrücklich mit `HARNESS_FAKE=1` gestartet wird.
 
 ![LP7 mit erfundenem Original, freigegebener Vorschau und lokal zurückübersetzter Beispielantwort](assets/lp7-ablauf.png)
 

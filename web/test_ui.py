@@ -125,10 +125,13 @@ def main() -> None:
         lang_page = context.new_page()
         lang_page.on("pageerror", lambda error: errors.append(str(error)))
         lang_page.goto(url)
+        headline = lang_page.locator(".headline > span:not(.headline-eye)")
+        expect(headline).to_have_text(["Ask Anything", "Reveal Nothing"])
         expect(lang_page.locator("#langDe")).to_have_attribute("aria-pressed", "true")
         lang_page.locator("#langEn").click()
         expect(lang_page.locator("#langEn")).to_have_attribute("aria-pressed", "true")
         assert lang_page.evaluate("document.documentElement.lang") == "en"
+        expect(headline).to_have_text(["Ask Anything", "Reveal Nothing"])
         expect(lang_page.locator("#analyzeLabel")).to_have_text("Analyze text")
         lang_page.locator("#btnExample").click()
         assert lang_page.locator("#original").input_value().startswith("From: Emily Hartwell")
