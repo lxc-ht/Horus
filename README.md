@@ -1,5 +1,7 @@
 # LP7 – KI nutzen. Daten behalten.
 
+**Team Horus** · Leuphana AI Hackathon 2026
+
 LP7 pseudonymisiert Texte lokal. Es ersetzt erkannte sensible Angaben durch Platzhalter wie `[PERSON_1]`. In der Weboberfläche prüfst du die Fassung, gibst sie zum Kopieren frei und setzt die Originalwerte in der Antwort lokal wieder ein.
 
 Der Prototyp zeigt am Beispiel von Kanzleien, Arztpraxen und Steuerbüros, wie sich sensible Angaben vor dem Teilen eines Textes mit einem KI Dienst reduzieren lassen.
@@ -98,7 +100,7 @@ Die Regeln für Beiträge und Agenten stehen in [`CLAUDE.md`](CLAUDE.md), der Ar
 
 ## Entstehung
 
-Gebaut beim Leuphana AI Hackathon 2026 von [lxc-ht](https://github.com/lxc-ht) und [Phantom-create-1](https://github.com/Phantom-create-1).
+Gebaut beim Leuphana AI Hackathon 2026 von Team Horus: [lxc-ht](https://github.com/lxc-ht) und [Phantom-create-1](https://github.com/Phantom-create-1).
 
 ### Danksagung
 
