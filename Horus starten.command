@@ -77,19 +77,13 @@ say 'Der Browser öffnet sich von selbst. Zum Beenden ctrl+C drücken oder diese
 # exec behält die PID. Die Warteschleife endet auch, wenn der Server vorher endet.
 server_pid=$$
 (
-    deadline=$((SECONDS + 90))
-    while [ "$SECONDS" -lt "$deadline" ]; do
-        kill -0 "$server_pid" 2>/dev/null || exit 0
+    while kill -0 "$server_pid" 2>/dev/null; do
         if horus_ready; then
             open_browser
             exit 0
         fi
         sleep 1
     done
-    if kill -0 "$server_pid" 2>/dev/null; then
-        say "Horus antwortet noch nicht. Öffne den Browser nach dem Start selbst: $url/?lang=$language" \
-            "Horus is still starting. Open this address once it is ready: $url/?lang=$language"
-    fi
 ) &
 
 # Der Server bleibt im Vordergrund und erhält die Signale des Terminals direkt.
