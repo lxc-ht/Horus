@@ -44,7 +44,7 @@ PDF_MAX_BYTES = 20 * 1024 * 1024
 # Weniger auslesbarer Text als das (ohne Leerraum) heißt fast immer: eingescannte Seiten.
 PDF_MIN_CHARS = 20
 PDF_TOO_LARGE = "Die PDF ist größer als 20 MB."
-PDF_SCAN = "In dieser PDF steht kein auslesbarer Text, vermutlich ist sie ein Scan. Scans kann LP7 noch nicht lesen."
+PDF_SCAN = "In dieser PDF steht kein auslesbarer Text, vermutlich ist sie ein Scan. Scans kann Horus noch nicht lesen."
 PDF_PASSWORD = "Diese PDF ist mit einem Passwort geschützt. Entferne den Schutz und lade sie erneut."
 PDF_INVALID = "Das ist keine lesbare PDF-Datei."
 FILE_TOO_LARGE = "Die Datei ist größer als 20 MB."
@@ -54,7 +54,7 @@ DOCX_EMPTY = "In dieser Word-Datei steht kein Text."
 EML_INVALID = "Das ist keine lesbare E-Mail-Datei (.eml)."
 # Längere Texte halten die Analyse über eine halbe Minute auf, die Demo wirkt dann eingefroren.
 TEXT_MAX_CHARS = 100_000
-TEXT_TOO_LONG = "Der Text hat {n} Zeichen. LP7 analysiert höchstens 100.000 Zeichen auf einmal, etwa 30 Seiten. Teile ihn bitte auf."
+TEXT_TOO_LONG = "Der Text hat {n} Zeichen. Horus analysiert höchstens 100.000 Zeichen auf einmal, etwa 30 Seiten. Teile ihn bitte auf."
 # Entpackt höchstens so viel. Eine kleine ZIP-Datei kann sonst Gigabytes an XML enthalten.
 DOCX_MAX_XML = 50 * 1024 * 1024
 
@@ -69,8 +69,8 @@ def preload() -> None:
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     # Das Modell im Hintergrund laden, damit der erste Klick in der Demo nicht eine halbe Minute hängt.
-    if hasattr(core, "warmup") and os.environ.get("LP7_NO_WARMUP") != "1":
-        threading.Thread(target=preload, name="lp7-vorladen", daemon=True).start()
+    if hasattr(core, "warmup") and os.environ.get("HORUS_NO_WARMUP") != "1":
+        threading.Thread(target=preload, name="horus-vorladen", daemon=True).start()
     yield
 
 
