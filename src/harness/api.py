@@ -26,6 +26,7 @@ import sys
 import threading
 from collections import Counter
 from dataclasses import dataclass, field
+from datetime import datetime
 
 from . import cloud, gate, mask, vault
 from . import restore as _restore
@@ -39,7 +40,7 @@ __all__ = [
     "TYPES", "Replacement", "Uncertain", "MaskResult", "Release", "RestoreResult",
     "LeakError", "ReleaseMismatchError", "NoApiKeyError", "CloudError",
     "analyze", "add_manual", "remove", "get", "release", "has_api_key", "send", "restore",
-    "set_detectors",
+    "set_detectors", "warmup", "forget",
 ]
 
 log = logging.getLogger(__name__)
@@ -60,6 +61,7 @@ class _UnknownSession(KeyError):
 @dataclass
 class _Session:
     original_text: str
+    created_at: datetime
     spans: list[Span] = field(default_factory=list)
     issued: set[str] = field(default_factory=set)   # SHA-256 der gültigen Freigaben
     hints: list[Finding] = field(default_factory=list)   # Stellen unter der Schwelle des Modells
@@ -94,11 +96,30 @@ def _active_detectors() -> list[Detector]:
     return _detectors
 
 
+def warmup() -> None:
+    """Lädt die Erkennung vorab, damit der erste Klick nicht auf das Modell wartet.
+
+    Läuft mit einem erfundenen Satz, legt keine Sitzung an und schreibt nichts in die Zuordnung.
+    Fehler wirft sie weiter, etwa ModelUnavailableError ohne Netz.
+    """
+    for d in _active_detectors():
+        d.detect("Termin mit Erika Musterfrau in Musterstadt.")
+
+
+def _prune_expired(cutoff: datetime) -> None:
+    vault.prune_expired(cutoff)
+    for session_id in [sid for sid, session in _sessions.items() if session.created_at < cutoff]:
+        del _sessions[session_id]
+
+
 def _session(session_id: str) -> _Session:
-    try:
-        return _sessions[session_id]
-    except KeyError:
-        raise _UnknownSession(UNKNOWN_SESSION) from None
+    session = _sessions.get(session_id)
+    cutoff = vault._now().replace(microsecond=0) - vault.SESSION_TTL
+    if session is not None:
+        if session.created_at >= cutoff:
+            return session
+        _prune_expired(cutoff)
+    raise _UnknownSession(UNKNOWN_SESSION)
 
 
 def _masked(session_id: str, s: _Session) -> tuple[str, list[Replacement], list[vault.Mapping]]:
@@ -117,12 +138,20 @@ REASON_MODEL_LOW = "Das Modell ist unsicher, ob das eine sensible Angabe ist."
 REASON_NUMBER = "Diese Nummer wurde nicht ersetzt. Prüfe, ob sie eine Kennung ist, etwa ein Aktenzeichen."
 REASON_UNSURE = "Ersetzt, aber das Modell war sich nicht sicher. Prüfe, ob das wirklich eine sensible Angabe ist."
 REASON_NAME_PART = "Nur ein Namensteil von „{full}“. Prüfe, ob hier wirklich diese Person gemeint ist."
+REASON_CONTEXT = "Kann die Person auch ohne Namen verraten, weil es sie nur einmal gibt. Prüfe, ob das so raus darf, oder ersetze es."
 
 _LITERAL_PLACEHOLDER = re.compile(r"\b([A-Z]+)_(\d+)\b")
 _NUMBER_LIKE = re.compile(r"(?<![\w/.-])[\w/.-]*\d[\w/.-]*")
 _YEAR = re.compile(r"(?:19|20)\d\d")
 _NOT_AN_ID_AFTER = re.compile(r"(?:,\d+)?\s*(?:Euro|EUR|€|%|Prozent)", re.IGNORECASE)
 _SALUTATION_BEFORE = re.compile(r"(?:Frau|Herrn?|Dr\.|Prof\.)\s+$", re.IGNORECASE)
+# Zusammenhang, der eine Person ohne Namen verrät: „die einzige Kinderärztin im Ort“, „der Bürgermeister von Hasenwinkel“.
+# Bewusst kurz gehalten, nur ein Hinweis. Bei „einzige“ nur Wörter, die nach Person klingen, sonst meldet „der einzige Weg“. Folgt ein Platzhalter („Bürgermeister von [ORT_1]“), passt die Regel nicht.
+_ONLY_ONE = re.compile(r"\b(?:[Dd]er|[Dd]ie|[Dd]en|[Dd]em)\s+einzigen?\s+[A-ZÄÖÜ][\wäöüß-]*(?:in|er|ist|ant|ent|eur|mann|frau|arzt|or)\b(?:\s+(?:im|in|am|an|der|des|von|vom|beim)\s+(?:[Oo]rt|[Dd]orf|[A-ZÄÖÜ][\wäöüß-]+))?")
+_UNIQUE_ROLE = re.compile(
+    r"\b(?:Ober)?(?:Bürgermeister(?:in)?|Landr(?:at|ätin)|Schulleiter(?:in)?|Chefarzt|Chefärztin|Pfarrer(?:in)?|Präsident(?:in)?)"
+    r"\s+(?:von|vom|der|des|im|am|in)\s+(?!\[)[A-ZÄÖÜ][\wäöüß-]+"
+)
 
 
 def _uncertain(s: _Session, masked: str, replacements: list[Replacement], mappings: list[vault.Mapping]) -> list[Uncertain]:
@@ -145,6 +174,10 @@ def _uncertain(s: _Session, masked: str, replacements: list[Replacement], mappin
         if sum(c.isdigit() for c in token) < 3 or _YEAR.fullmatch(token) or is_paragraph or _NOT_AN_ID_AFTER.match(masked, end):
             continue
         add_plain(m.start(), end, "KENNUNG", REASON_NUMBER)
+
+    for pattern in (_ONLY_ONE, _UNIQUE_ROLE):
+        for m in pattern.finditer(masked):
+            add_plain(m.start(), m.end(), "PERSON", REASON_CONTEXT)
 
     full_names = {m.placeholder: m.original for m in mappings}
     for r in replacements:
@@ -181,8 +214,10 @@ def analyze(text: str) -> MaskResult:
     text = mask.canonical(text)
     reserved = _literal_placeholders(text)
     with _lock:
-        session_id = vault.create_session()
-        s = _Session(original_text=text)
+        created_at = vault._now().replace(microsecond=0)
+        _prune_expired(created_at - vault.SESSION_TTL)
+        session_id = vault.create_session(created_at)
+        s = _Session(original_text=text, created_at=created_at)
         for f in detect_all(text, _active_detectors()):
             placeholder = vault.placeholder_for(session_id, f.text, f.typ, reserved)
             if all(f.end <= x.start or f.start >= x.end for x in s.spans):
@@ -278,16 +313,28 @@ def send(rel: Release) -> str:
     rel.text ist gültig freigegeben und darf im Kopier-Modus ausgegeben werden.
     """
     with _lock:
-        s = _sessions.get(rel.session_id)
-        current = _masked(rel.session_id, s)[0] if s else None
-        gate.verify(rel, current, s.issued if s else set())
+        try:
+            s = _session(rel.session_id)
+        except _UnknownSession:
+            raise ReleaseMismatchError() from None
+        current = _masked(rel.session_id, s)[0]
+        gate.verify(rel, current, s.issued)
     return cloud.ask(rel.text)
+
+
+def forget(session_id: str) -> None:
+    """Löscht eine Sitzung und ihre Zuordnung. Unbekannte Sitzung: KeyError."""
+    with _lock:
+        _session(session_id)
+        vault.delete_sessions([session_id])
+        del _sessions[session_id]
 
 
 def restore(session_id: str, answer: str) -> RestoreResult:
     with _lock:
         s = _session(session_id)
         masked, _, mappings = _masked(session_id, s)
+        spans = s.spans
     originals = {m.placeholder: m.original for m in mappings}
     # Nur eigene Platzhalter: Ein wörtlich im Text stehender wird nicht ersetzt, restore() meldet ihn als unbekannt.
     sent = [p for p in dict.fromkeys(gate.PLACEHOLDER_RE.findall(masked)) if p in originals]
@@ -295,7 +342,7 @@ def restore(session_id: str, answer: str) -> RestoreResult:
     # Ein Platzhalter kennt nur den vollen Wert. Stand er für einen Namensteil, kann das Eingesetzte falsch sein („Antrag“).
     parts = {
         (span.placeholder, s.original_text[span.start : span.end])
-        for span in s.spans
+        for span in spans
         if span.name_part and span.placeholder[1:-1] in answer   # auch ohne Klammern wird ersetzt
         and not _AFTER_SALUTATION.search(s.original_text[: span.start])
     }

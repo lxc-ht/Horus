@@ -4,6 +4,8 @@ import re
 import zipfile
 import logging
 import os
+import threading
+from contextlib import asynccontextmanager
 import warnings
 from dataclasses import asdict
 from email import policy
@@ -50,10 +52,29 @@ DOCX_INVALID = "Das ist keine lesbare Word-Datei (.docx)."
 DOCX_OLD = "Diese Word-Datei ist im alten Format (.doc) oder mit einem Passwort geschützt. Speichere sie in Word ohne Passwort als .docx und lade sie erneut."
 DOCX_EMPTY = "In dieser Word-Datei steht kein Text."
 EML_INVALID = "Das ist keine lesbare E-Mail-Datei (.eml)."
+# Längere Texte halten die Analyse über eine halbe Minute auf, die Demo wirkt dann eingefroren.
+TEXT_MAX_CHARS = 100_000
+TEXT_TOO_LONG = "Der Text hat {n} Zeichen. LP7 analysiert höchstens 100.000 Zeichen auf einmal, etwa 30 Seiten. Teile ihn bitte auf."
 # Entpackt höchstens so viel. Eine kleine ZIP-Datei kann sonst Gigabytes an XML enthalten.
 DOCX_MAX_XML = 50 * 1024 * 1024
 
-app = FastAPI()
+def preload() -> None:
+    # Fehler hier nur zählen, nie zeigen: Der erste Klick auf „Analysieren“ bringt dann die deutsche Meldung.
+    try:
+        core.warmup()
+    except Exception as e:
+        logging.getLogger(__name__).warning("Vorladen fehlgeschlagen: %s", type(e).__name__)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # Das Modell im Hintergrund laden, damit der erste Klick in der Demo nicht eine halbe Minute hängt.
+    if hasattr(core, "warmup") and os.environ.get("LP7_NO_WARMUP") != "1":
+        threading.Thread(target=preload, name="lp7-vorladen", daemon=True).start()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 class AnalyzeBody(BaseModel):
@@ -120,6 +141,8 @@ def status() -> dict:
 
 @app.post("/api/analyze")
 def analyze(body: AnalyzeBody) -> dict:
+    if len(body.text) > TEXT_MAX_CHARS:
+        raise CoreError({"error": TEXT_TOO_LONG.format(n=f"{len(body.text):,}".replace(",", "."))})
     return asdict(call(core.analyze, body.text))
 
 
@@ -142,6 +165,13 @@ def release(body: SessionBody) -> dict:
 @app.post("/api/restore")
 def restore(body: RestoreBody) -> dict:
     return asdict(call(core.restore, body.session_id, body.answer))
+
+
+@app.post("/api/forget")
+def forget(body: SessionBody) -> dict:
+    # Zuordnung sofort löschen. Danach kann diese Sitzung nichts mehr zurückübersetzen.
+    call(core.forget, body.session_id)
+    return {"ok": True}
 
 
 class PdfError(Exception):
@@ -228,15 +258,25 @@ DOCX_ORDER = {"header": 0, "document": 1, "footnotes": 2, "endnotes": 3, "footer
 def docx_paragraphs(root) -> list[str]:
     # Absätze in Textfeldern stecken in einem äußeren Absatz. Sie werden eigene Zeilen,
     # sonst stünde ihr Text doppelt da.
+    # Eine Tabellenzeile wird eine Zeile, die Zellen durch Tabulator getrennt. So bleibt „IBAN“ neben dem Wert.
     paragraphs = []
 
-    def walk(element, buffer):
+    def walk(element, buffer, out):
         for child in element:
             tag = child.tag
             if tag == W + "p":
                 inner = []
-                walk(child, inner)
-                paragraphs.append("".join(inner))
+                walk(child, inner, out)
+                out.append("".join(inner))
+            elif tag == W + "tr":
+                cells = []
+                for cell in child:
+                    if cell.tag != W + "tc":
+                        continue
+                    cell_lines = []
+                    walk(cell, [], cell_lines)
+                    cells.append(" ".join(line.strip() for line in cell_lines if line.strip()))
+                out.append("\t".join(cells))
             elif tag == W + "t":
                 buffer.append(child.text or "")
             elif tag == W + "tab":
@@ -247,9 +287,9 @@ def docx_paragraphs(root) -> list[str]:
                 # Gelöschter Text aus „Änderungen nachverfolgen“ steht nicht mehr im Dokument.
                 continue
             else:
-                walk(child, buffer)
+                walk(child, buffer, out)
 
-    walk(root, [])
+    walk(root, [], paragraphs)
     return paragraphs
 
 
@@ -319,6 +359,8 @@ class HtmlText(HTMLParser):
         return re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
 
 
+EML_ATTACHMENT_SKIPPED = "--- Anhang: {name} (nicht gelesen, nur PDF und Word werden gelesen) ---"
+EML_ATTACHMENT_FAILED = "--- Anhang: {name} (nicht gelesen: {reason}) ---"
 EML_HEADERS = [("From", "Von"), ("To", "An"), ("Cc", "Cc"), ("Date", "Datum"), ("Subject", "Betreff")]
 
 
@@ -342,7 +384,38 @@ def eml_text(data: bytes) -> dict:
     # Ohne Absender, Empfänger, Betreff und Text ist es keine E-Mail, auch wenn der Parser alles annimmt.
     if not head or not (text or message["Subject"]):
         raise FileError(EML_INVALID)
-    return {"text": "\n".join(head) + ("\n\n" + text if text else "")}
+    parts = ["\n".join(head)] + ([text] if text else []) + eml_attachments(message)
+    return {"text": "\n\n".join(parts)}
+
+
+def eml_attachments(message) -> list[str]:
+    # PDF- und Word-Anhänge kommen als Text dazu, jeder unter einer eigenen Zeile mit seinem Namen.
+    # Alles andere wird nur mit Namen genannt, damit niemand glaubt, es sei geprüft.
+    found = []
+    try:
+        attachments = list(message.iter_attachments())
+    except Exception:
+        return []
+    for part in attachments:
+        name = " ".join((part.get_filename() or "ohne Namen").split())
+        kind = part.get_content_type()
+        try:
+            data = part.get_payload(decode=True) or b""
+            if name.lower().endswith(".pdf") or kind == "application/pdf":
+                body = pdf_text(data)[0]
+            elif name.lower().endswith(".docx") or kind == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                body = docx_text(data)["text"]
+            else:
+                found.append(EML_ATTACHMENT_SKIPPED.format(name=name))
+                continue
+        except (FileError, PdfError) as e:
+            found.append(EML_ATTACHMENT_FAILED.format(name=name, reason=str(e)))
+            continue
+        except Exception:
+            found.append(EML_ATTACHMENT_FAILED.format(name=name, reason="Die Datei ist nicht lesbar."))
+            continue
+        found.append(f"--- Anhang: {name} ---\n{body}")
+    return found
 
 
 @app.post("/api/eml")

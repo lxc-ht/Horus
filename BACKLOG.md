@@ -7,6 +7,8 @@ Was auffällt, aber nicht in den aktuellen Block gehört.
 Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausgehen. Bestehende Signaturen bleiben unverändert.
 
 - `api.set_detectors(detectors | None)` – Detektoren festlegen (Tests mit Fake-Detektor, später weitere Detektoren). `None` = Standard (Regex + GLiNER).
+- `api.forget(session_id)` – Sitzung samt Zuordnung sofort löschen (Knopf „Zuordnung jetzt löschen“). Danach gilt keine Freigabe der Sitzung mehr, `restore` wirft `KeyError`. Unbekannte Sitzung → `KeyError` mit fertigem Satz. Schlägt SQLite fehl, kann der Aufruf wiederholt werden.
+- `api.warmup()` – lädt die Erkennung vorab mit einem erfundenen Satz, ohne Sitzung und ohne Zuordnung. Die Weboberfläche ruft sie beim Start im Hintergrund auf (abschaltbar mit `LP7_NO_WARMUP=1`). Lädt das Modell nicht, wirft sie `ModelUnavailableError` mit deutschem Satz.
 - `api.CloudError` – `send()` wirft sie, wenn Claude nicht erreichbar ist, den Key ablehnt oder die Anfrage ablehnt (`stop_reason: refusal`). Die Meldung ist ein fertiger deutscher Satz und enthält nie Text aus der Anfrage.
 - `analyze` vereinheitlicht den Text mit `mask.canonical` (NFKC, ohne unsichtbare Formatzeichen). `original_text` ist diese Fassung, nicht die eingegebene Zeichenfolge. `add_manual` behandelt den Begriff genauso.
 - `vault.placeholder_for` kennt `reserved`: Platzhalter, die wörtlich im Text stehen, werden nicht vergeben. Bei der Rückübersetzung bleiben sie stehen und kommen in `unknown`.
@@ -21,16 +23,18 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Neuer Typ `KENNUNG` in `TYPES`: Steuer-ID, Steuernummer, SV-Nummer, Versichertennummer, Aktenzeichen, Mandanten- und Patientennummer, URL.
 - `send()`: Stoppt Claude wegen `max_tokens`, liefert es den Teil plus `cloud.TRUNCATED_NOTE` am Ende. Die Signatur bleibt ein String.
 
+- `MaskResult.uncertain` meldet zusätzlich Zusammenhang, der eine Person ohne Namen verrät (Typ-Vorschlag PERSON, Text bleibt unverändert).
 - `MaskResult.uncertain` – Liste von `Uncertain` (Text, Typ, Position im maskierten Text, `masked`, Grund als fertiger deutscher Satz). Stellen, die der Mensch ansehen soll: Modell unter der Schwelle, nicht ersetzte Nummern, knappe Modelltreffer, Namensteile ohne Anrede. Der Text ändert sich dadurch nicht. Bestehende Felder bleiben.
 
 ## Bekannte Schwächen
 
-- Umgehungstest gegen die Demo, noch offen: kyrillische Doppelgänger in IBANs („DЕ89“ mit kyrillischem Е, nur der Rest wird maskiert), Quasi-Identifikatoren aus dem Kontext („der Bürgermeister von …“).
+- Kyrillische und griechische Doppelgänger werden nur bei der IBAN-Suche wie lateinische Buchstaben behandelt („DЕ89“ mit kyrillischem Е). In E-Mails, Kennungen oder Namen gilt das nicht.
+- Umgehungstest gegen die Demo, noch offen: Quasi-Identifikatoren aus dem Kontext („der Bürgermeister von …“): Eine kurze Regel zeigt „die einzige Kinderärztin im Ort“ und Ämter wie „Bürgermeister von Hasenwinkel“ als unsichere Stelle, ersetzt aber nichts. Alles andere („die Nachbarin mit dem roten Porsche“) bleibt Sache der Prüfung.
 - Eine Antwort von Claude kann Links oder Markdown-Bilder enthalten, in denen nach der Rückübersetzung echte Werte stehen („![x](https://…?a=[IBAN_1])“). Die Oberfläche zeigt das nur als Text. Riskant wird es erst, wenn jemand den Text in ein Programm kopiert, das Markdown oder HTML darstellt.
 - Zweibuchstabige Namensteile („Wu“, „Do“) werden in genau dieser Schreibweise mitmaskiert. Bei einer Person „Tran Do“ wird auch die Abkürzung „Do“ für Donnerstag zum Namen. Die Prüfung zeigt solche Stellen als unsicher.
 - Die Ausnahmen beim Kfz-Kennzeichen sind eine kurze Liste (EU, VO, DIN, ISO, VDE, VW, BMW). Andere Normen wie „ABC-DE 12“ werden maskiert, echte Kennzeichen aus Dinslaken („DIN-AB 123“) nicht.
-- Bezeichner ohne Nummernwort wie „Konto 532013000“ werden nicht ersetzt, sondern nur als unsichere Stelle gezeigt.
-- Sehr lange Texte (200 KB) blockieren die Analyse über eine Minute und halten dabei die globale Sperre. Nichts wird gesendet, die Demo hängt aber. Eventuell eine Längengrenze.
+- Kurze Bezeichner ohne Nummernwort (Konto, Kto., Depot, Vertrag, Police, Rechnung) zählen mit einem Wert ab drei Ziffern, Jahre und Zeiträume ausgenommen. Andere Wörter wie „Vorgang 4471-B“ werden weiter nur als unsichere Stelle gezeigt.
+- Sehr lange Texte (200 KB) blockieren die Analyse über eine Minute und halten dabei die globale Sperre. Nichts wird gesendet, die Demo hängt aber. Die Weboberfläche lehnt deshalb Texte über 100.000 Zeichen mit einem Hinweis ab; der Kern und die CLI haben keine Grenze.
 - Die Weboberfläche setzt keinen Frame-Schutz (X-Frame-Options) und prüft den Origin nicht. Fremde Seiten können sie einbetten, Antworten aber nicht lesen, Text und JSON lehnt die Preflight-Regel ab.
 - Wegen canonical() fallen auch Formatzeichen in Emojis weg (Zero-Width-Joiner) und „m²“ wird zu „m2“. Sicher, ändert aber minimal den gesendeten Text.
 - Maskiert wird jedes Vorkommen als Teilzeichenkette, passend zum Leck-Check. Das ergibt manchmal hässliche Stellen wie „[FIRMA_3]skündigung“ (aus „Eigenbedarfskündigung“). Sicher, aber nicht schön. Ein Leck-Check und eine Maskierung an Wortgrenzen bräuchten eine eigene Entscheidung, weil dann „Müllerstraße“ durchrutscht.
@@ -52,6 +56,25 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Nicht erkannt: IP-Adressen und einstellige Daten ohne Jahr („am 1.3.“), weil sie von Gliederungen wie „3.1.“ nicht zu unterscheiden sind. Zweistellige Gliederungen wie „12.10.“ gelten dagegen als Datum.
 - Schreibweisen und Genitiv-s gelten nur für großgeschriebene ganze Wörter. Am Satzanfang wird bei „Anna Link“ auch „Links“ maskiert, bei Herrn Koenig auch „Der König“. Sicher, verfälscht aber die Antwort.
 - Kleingeschriebene Schreibweisen („weiß“ bei „Hans Weiss“) bleiben im Text, die Warnung nennt sie. Der Leck-Check prüft bewusst nur die exakte Schreibweise, sonst könnte „ich weiß es“ jede Freigabe blockieren.
+
+- Englische Texte, aus dem Block „Englische Anreden“ (06.11.) bewusst herausgelassen:
+  - Kennungen mit englischem Bezeichner wie „client number C-26-0815“ werden nur als unsicher markiert, nicht ersetzt. Eigener Auftrag: Bezeichner der Kennungen um englische Wörter erweitern.
+  - Straßen ohne Hausnummer wie „Mill Road“ werden nicht erkannt, im Deutschen genauso („Bardowicker Straße“).
+  - Datum: „14 September 2026“ wird ersetzt, „2 October 2026“ nicht. Englische Monatsnamen fehlen in `_DATE`, „September“ passt nur, weil er deutsch gleich heißt.
+  - `api.py` kennt die englischen Anreden noch nicht (`_AFTER_SALUTATION`, `_SALUTATION_BEFORE`, Vertrag, deshalb nicht angefasst). Folge: „Mrs [PERSON_3]“ wird als „Nur ein Namensteil“ unsicher markiert, und die Rückübersetzung warnt bei „Mr [PERSON_2]“, wenn der Platzhalter sonst auch allein für den Nachnamen stand. Bei „Frau“ und „Herr“ unterbleibt das. Nur zusätzliche Hinweise, kein Leck; beide Ausdrücke um Mr, Mrs, Ms, Miss, Mx, Sir erweitern.
+  - Der Regex-Detektor findet „Mr X“ und „Ms X“ in jeder Schreibweise, „Miss“ und „Sir“ nur großgeschrieben (sonst wäre „you miss Paris“ ein Name). Englische Berufswörter vor dem Namen („Mr Justice Whitaker“, „Doctor“) kennt er nicht.
+
+## Aus der frischen Installation (05.11.2026 Linux; 06.11.2026 Mac)
+
+- Auf Linux zieht `torch` rund 3,2 GB CUDA-Bibliotheken (`nvidia-*`) mit, `.venv` wird 5,7 GB groß. LP7 braucht keine Grafikkarte. Eine CPU-Variante von torch wäre ein Umbau, kein Prüf-Auftrag. Mac-Messung siehe unten; dort wurde kein CUDA-Speicherbedarf separat gemessen.
+- Fehlt der Zugang zu huggingface.co, antwortet `/api/analyze` mit HTTP 409 und nur `403 Forbidden` bzw. einer englischen Meldung von Hugging Face. Eine deutsche Meldung wie „Das Erkennungsmodell konnte nicht geladen werden (huggingface.co nicht erreichbar)“ würde Nutzern hinter einer Firewall helfen.
+- Mac-Messung am 06.11.2026, macOS 26.6.1, Apple M4, WLAN an, Internetzugang; uv 0.13.7, Python 3.12.16 bereits installiert. Frischer Klon von PR #35 (Stand `217aaf7`), leere Caches unter `/tmp/lp7-messung`, eigene Datenbank über `HARNESS_DB`; bestehende Demo und deren Caches unberührt. `/usr/bin/time -p`: `uv sync` 12,40 s; `uv run --with-requirements web/requirements.txt python -c "import fastapi, uvicorn, pypdf"` 1,84 s. Danach `du -sk`: `.venv` 795.008 KiB (`du -sh`: 776M), uv-Cache 825.008 KiB (806M). Python-Installation und -Speicherbedarf nicht gemessen.
+- Dieselbe Mac-Umgebung: `uv run python -c "from harness import api; r = api.analyze(open('examples/kanzlei.txt').read()); print(len(r.replacements))"` benötigte erstmals einschließlich Modelldownload 94,07 s, im zweiten neuen Prozess mit Modellcache 10,22 s und mit `HF_HUB_OFFLINE=1 UV_OFFLINE=1` 9,74 s; jeweils Exitcode 0 und 16 Ersetzungen. `HF_HOME` nach dem ersten Lauf: 1.133.200 KiB (`du -sh`: 1,1G). Summe Paketinstallation und erste Analyse: 108,31 s; Doppelklick-Start, reine Modelldownloadzeit und übertragene Datenmenge nicht gemessen. Startmeldung und slow-Marker nennen jetzt diese Messwerte.
+- Dieselbe Mac-Umgebung: Server mit gefüllten Caches und `HF_HUB_OFFLINE=1` auf 127.0.0.1:8768 in 1,273 s bis zur erfolgreichen Statusabfrage (`fake: false`, Abfrageintervall 0,05 s); eigenen Server anschließend beendet. Das prüft Serverbereitschaft, keine weitere Analyse.
+- Ohne Netz wurde nur simuliert, WLAN blieb eingeschaltet. Echter Test mit ausgeschaltetem WLAN weiterhin nicht gemessen; Paul übernimmt ihn beim Probedurchlauf.
+- Auffällig: Der frische Modellcache belegt weniger als die vorab genannten rund 2,2 GB im bestehenden Mac-Cache. Dessen Größe und die Ursache der Abweichung wurden nicht nachgemessen; dokumentiert ist nur der frische Cache. Hugging Face legt große Dateien hier unter `hub/blobs` ab und verlinkt sie aus den Modellordnern; die Größe eines einzelnen Modellordners ohne Verfolgen der Links wäre irreführend.
+- Beim Modelllauf erschienen Warnungen zu veraltetem `torch.jit.script`, ignoriertem `resume_download`, nicht unterstützten Prozess-Ausgabeumleitungen unter macOS und beim ersten Lauf zu nicht authentifizierten Hugging-Face-Anfragen; die Analysen liefen dennoch erfolgreich durch.
+- Prüfhinweis: `git diff origin/main --stat` enthält schon vor diesem Auftrag Unterschiede in `PROJEKTSTAND.md` und `web/`, weil `main` seit der Abzweigung weitergelaufen ist. Der PR-Vergleich `git diff origin/main...HEAD --stat` und der neue Commit betreffen ausschließlich README.md, BACKLOG.md, pyproject.toml und `LP7 starten.command`; keine Anpassung fremder Dateien und kein Merge oder Rebase auf main.
 
 ## Später
 

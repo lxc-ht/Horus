@@ -132,11 +132,20 @@ def _review(result: api.MaskResult, inp: LineInput) -> api.Release | None:
         _show(result)
 
 
+COPIED_HINT = "Der freigegebene Text liegt in der Zwischenablage."
+NOT_COPIED_HINT = "Kopiere den freigegebenen Text oben selbst, die Zwischenablage ist hier nicht verfügbar."
+PASTE_HINT = "Füge die Antwort hier ein und beende mit einer Zeile, auf der nur END steht."
+
+
 def _copy_mode(rel: api.Release, message: str, inp: LineInput) -> str | None:
     console.print(Panel(Text(rel.text), title="Freigegebener Text", border_style="green"))
+    copied = False
     if shutil.which("pbcopy"):
-        subprocess.run(["pbcopy"], input=rel.text.encode("utf-8"), check=False)
+        copied = subprocess.run(["pbcopy"], input=rel.text.encode("utf-8"), check=False).returncode == 0
     console.print(f"[bold yellow]{message}")
+    # Nur behaupten, was stimmt: Ohne pbcopy (Linux, Windows) liegt nichts in der Zwischenablage.
+    console.print(COPIED_HINT if copied else NOT_COPIED_HINT)
+    console.print(PASTE_HINT)
     lines: list[str] = []
     while True:
         line = inp.readline()

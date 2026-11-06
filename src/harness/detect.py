@@ -7,10 +7,14 @@ werden über merge_findings() zusammengeführt.
 
 from __future__ import annotations
 
+import logging
+import threading
 import os
 import re
 from dataclasses import dataclass
 from typing import Protocol
+
+log = logging.getLogger(__name__)
 
 TYPES = ["PERSON", "FIRMA", "ADRESSE", "ORT", "EMAIL", "TELEFON", "IBAN", "DATUM", "KENNUNG"]
 
@@ -47,6 +51,12 @@ _IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?:[\s\-.]?[A-Z0-9]{4}){2,7}(?:[\s\-.]?[A-Z0
 # Auch über Zeilenumbrüche, wie sie beim Kopieren aus PDFs entstehen.
 _IBAN_DE = re.compile(r"(?<![A-Za-z0-9])[Dd][Ee][\s\-.]{0,2}\d{2}(?:[\s\-.]{0,2}\d){18}(?!\d)")
 _IBAN_SEPARATORS = re.compile(r"[\s\-.]")
+# Kyrillische und griechische Buchstaben, die wie lateinische aussehen („DЕ89“ mit kyrillischem Е).
+# Nur für die IBAN-Suche, Zeichen für Zeichen, damit die Positionen gleich bleiben. Der Text selbst bleibt unverändert.
+_LOOKALIKES = str.maketrans(
+    "АВСЕНІЈКМОРЅТХУаеіјорсхуѕԁΑΒΕΖΗΙΚΜΝΟΡΤΥΧον",
+    "ABCEHIJKMOPSTXYaeijopcxysdABEZHIKMNOPTYXov",
+)
 
 # Telefonnummern: +Ländervorwahl / 0049 / führende 0, Trennzeichen Leerzeichen, - oder /.
 _PHONE = re.compile(
@@ -76,6 +86,14 @@ _LABELED_ID = re.compile(
     # Wert: Blöcke aus Großbuchstaben und Ziffern. Ein Punkt am Blockende beendet ihn, sonst käme der nächste Satz mit.
     r"[\s:.#]*(?P<value>[A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w)(?: [A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w))*)"
 )
+
+# Kurze Bezeichner ohne Nummernwort („Konto 532013000“, „Police AX-77812“). Diese Wörter stehen auch vor Mengen
+# („Konto 3 Tage überzogen“), deshalb zählt der Wert nur mit mindestens drei Ziffern.
+_SHORT_LABELED_ID = re.compile(
+    r"(?<!\w)(?:Konto|Kto\.?|Depot|Vertrag|Police|Rechnung)"
+    r"[\s:.#]*(?P<value>[A-Z0-9](?:[A-Z0-9/\-]*[A-Z0-9])?)(?![\w.,]\d)(?!\w)"
+)
+_YEAR_OR_PERIOD = re.compile(r"(?:19|20)\d\d(?:[/-](?:19|20)?\d\d)?")   # „Vertrag 2024“, „Rechnung 2023/24“
 
 # Steuer-ID ohne Bezeichner, 11 Stellen. Zählt nur mit gültiger Prüfziffer, sonst wäre jede lange Zahl eine Kennung.
 # Steuernummern sind ohne Bezeichner nicht von Rechnungs- oder Aktennummern zu unterscheiden, sie kommen nur über _LABELED_ID.
@@ -160,7 +178,8 @@ _NAME_WORD = r"[^\W\d_]+(?:['’\-][^\W\d_]+)*"   # alle Schriften: Nguyễn, Ç
 _NAME_PARTICLES = {"von", "van", "de", "der", "den", "zu", "la", "di", "da", "del", "ten", "ter"}
 # Anrede oder Titel, dahinter bis zu vier Wörter. Welche davon zum Namen gehören, entscheidet _salutation_name().
 _SALUTATION = re.compile(
-    r"(?<!\w)(?:(?i:Herrn?|Frau)|Dr\.|Prof\.)\s+(?:(?:Dr\.|Prof\.|med\.|jur\.|rer\.|nat\.)\s+)*"
+    # Englisch: Mr, Mrs, Ms, Mx in jeder Schreibweise, „Miss“ und „Sir“ nur groß, sonst wäre „you miss Paris“ ein Name.
+    r"(?<!\w)(?:(?i:Herrn?|Frau)|(?i:Mrs?|Ms|Mx)\.?|(?:Miss|Sir)|Dr\.|Prof\.)\s+(?:(?:Dr\.|Prof\.|med\.|jur\.|rer\.|nat\.)\s+)*"
     # Nur vorausschauen: Die Wörter dürfen die nächste Anrede nicht verbrauchen („Frau Çelik schreibt Herrn Šimić“).
     rf"(?=(?P<name>{_NAME_WORD}(?: {_NAME_WORD}){{0,3}}))"
 )
@@ -254,15 +273,25 @@ class RegexDetector:
             found.append(Finding(m.start(group), m.end(group), m.group(group), typ, self.name, 1.0))
 
         # IBAN vor KENNUNG, Kennungen vor TELEFON: Bei gleicher Länge gewinnt, was zuerst gefunden wurde („022/815/08150“).
-        for m in _IBAN_DE.finditer(text):
-            add(m, "IBAN")
-        for m in _IBAN.finditer(text):
+        # Gesucht wird in der lateinischen Fassung, gemeldet wird der Originaltext an derselben Stelle.
+        latin = text.translate(_LOOKALIKES)
+
+        def add_iban(m: re.Match) -> None:
+            found.append(Finding(m.start(), m.end(), text[m.start() : m.end()], "IBAN", self.name, 1.0))
+
+        for m in _IBAN_DE.finditer(latin):
+            add_iban(m)
+        for m in _IBAN.finditer(latin):
             compact = _IBAN_SEPARATORS.sub("", m.group())
             # Deutsche IBAN am Format erkennen, alle anderen nur mit gültiger Prüfsumme.
             if (compact[:2].upper() == "DE" and len(compact) == 22) or _iban_valid(m.group()):
-                add(m, "IBAN")
+                add_iban(m)
         for m in _LABELED_ID.finditer(text):
             if any(c.isdigit() for c in m.group("value")):
+                add(m, "KENNUNG", "value")
+        for m in _SHORT_LABELED_ID.finditer(text):
+            value = m.group("value")
+            if sum(c.isdigit() for c in value) >= 3 and not _YEAR_OR_PERIOD.fullmatch(value):
                 add(m, "KENNUNG", "value")
         for m in _TAX_ID.finditer(text):
             if _tax_id_valid(m.group()):
@@ -332,20 +361,44 @@ _ROLE_WORDS = {
     "doktor", "rechtsanwalt", "rechtsanwältin", "anwalt", "anwältin", "richter", "richterin", "notar", "notarin",
     "professor", "professorin", "steuerberater", "steuerberaterin", "vorsitzender", "vorsitzende",
 }
-_NOT_A_NAME = _ROLE_WORDS | {"herr", "herrn", "frau"}
+# Anreden gehören nie zum Namen. Englische wie „Mr“ verhalten sich genau wie „Herr“, auch mit Punkt („Mr.“).
+_SALUTATIONS = {"herr", "herrn", "frau", "mr", "mrs", "ms", "miss", "mx", "sir"}
+_NOT_A_NAME = _ROLE_WORDS | _SALUTATIONS
 
 _gliner_cache: dict[str, object] = {}
+# Vorladen beim Start und der erste Klick dürfen das Modell nicht zweimal gleichzeitig laden.
+_gliner_lock = threading.Lock()
+
+
+MODEL_UNAVAILABLE = (
+    "Das Erkennungsmodell konnte nicht geladen werden. Beim ersten Start braucht LP7 einmal Internet, "
+    "danach liegt das Modell auf diesem Rechner. Bitte mit Netz neu starten und einmal analysieren."
+)
+
+
+class ModelUnavailableError(RuntimeError):
+    """GLiNER ließ sich nicht laden. Die Meldung ist ein fertiger deutscher Satz ohne Text der Nutzer."""
 
 
 def _load_gliner(model_name: str):
     """Lädt das Modell einmal pro Prozess und verwendet es danach wieder."""
+    with _gliner_lock:
+        return _load_gliner_locked(model_name)
+
+
+def _load_gliner_locked(model_name: str):
     if model_name not in _gliner_cache:
         os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
         os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")
         os.environ.setdefault("TRANSFORMERS_VERBOSITY", "error")
-        from gliner import GLiNER  # spät importieren: torch braucht Sekunden
+        try:
+            from gliner import GLiNER  # spät importieren: torch braucht Sekunden
 
-        _gliner_cache[model_name] = GLiNER.from_pretrained(model_name)
+            _gliner_cache[model_name] = GLiNER.from_pretrained(model_name)
+        except Exception as e:
+            # Sonst sähe der Mensch nur „403 Forbidden“ oder eine englische Netzwerkmeldung.
+            log.warning("GLiNER nicht geladen: %s", type(e).__name__)
+            raise ModelUnavailableError(MODEL_UNAVAILABLE) from None
     return _gliner_cache[model_name]
 
 
@@ -467,9 +520,10 @@ def _trim(f: Finding, text: str) -> Finding | None:
         end -= 1
     if f.typ == "PERSON":
         # Anrede und Beruf gehören nicht zum Wert, sonst ergibt die Rückübersetzung „Frau Frau Muster“.
-        while (m := re.match(r"(\S+)\s+", text[start:end])) and m[1].lower() in _NOT_A_NAME:
+        # Ein Punkt am Ende zählt nicht: „Mr.“ ist dieselbe Anrede wie „Mr“.
+        while (m := re.match(r"(\S+)\s+", text[start:end])) and m[1].lower().rstrip(".") in _NOT_A_NAME:
             start += m.end()
-        if text[start:end].lower() in _NOT_A_NAME:
+        if text[start:end].lower().rstrip(".") in _NOT_A_NAME:
             return None
     if end - start < 2:
         return None

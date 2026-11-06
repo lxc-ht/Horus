@@ -27,8 +27,8 @@ SYSTEM_PROMPT = (
 _FALLBACK_MODELS = {"claude-sonnet-5-5", "claude-opus-5-5", "claude-opus-5", "claude-fable-5-1"}
 
 NO_KEY_MESSAGE = (
-    "Kein API-Key gefunden — Kopier-Modus. Der freigegebene Text liegt in der Zwischenablage. "
-    "Füge die Antwort hier ein und beende mit einer Zeile, auf der nur END steht."
+    # Neutral, weil auch die Weboberfläche ihn zeigen kann. Die Bedienhinweise gibt die CLI selbst.
+    "Kein API-Key gefunden — Kopier-Modus. Der freigegebene Text kann kopiert und von Hand an Claude gegeben werden."
 )
 
 

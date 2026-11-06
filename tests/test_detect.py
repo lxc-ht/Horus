@@ -296,3 +296,36 @@ def test_german_ids_from_presidio():
 def test_vat_id_needs_valid_checksum_without_label():
     assert not any(t == "KENNUNG" for t, _ in _found("Vorgang DE 136 695 977 erledigt"))
     assert not any(t == "KENNUNG" for t, _ in _found("Der Reisepass ist abgelaufen."))
+
+
+def test_short_labels_without_number_word():
+    # „Konto 532013000“ stand bisher nur als unsichere Stelle da.
+    for text, value in [("Konto 532013000 ist gesperrt.", "532013000"), ("Kto. 12345678", "12345678"),
+                        ("Police: AX-77812", "AX-77812"), ("Rechnung RE-2026-0042 offen", "RE-2026-0042"),
+                        ("Vertrag 4711-0815 gekündigt", "4711-0815")]:
+        assert [v for t, v in _found(text) if t == "KENNUNG"] == [value], text
+    # Mengen, Jahre, Zeiträume und Beträge bleiben stehen.
+    for text in ["Das Konto 3 Tage überzogen.", "Vertrag 2024 wurde geschlossen.", "die Rechnung 2023/24",
+                 "Rechnung 1.250,00 Euro", "Vertrag vom 14.03.2026"]:
+        assert not any(t == "KENNUNG" for t, _ in _found(text)), text
+
+
+def test_model_load_failure_gives_german_sentence(monkeypatch):
+    # Ohne Netz beim ersten Start käme sonst „403 Forbidden“ oder eine englische Meldung in der Oberfläche an.
+    import sys
+    import types
+
+    import pytest
+
+    from harness import detect
+
+    class Broken:
+        @staticmethod
+        def from_pretrained(name):
+            raise OSError("Connection refused to huggingface.co")
+
+    monkeypatch.setitem(sys.modules, "gliner", types.SimpleNamespace(GLiNER=Broken))
+    monkeypatch.setattr(detect, "_gliner_cache", {})
+    with pytest.raises(detect.ModelUnavailableError) as e:
+        detect.GlinerDetector(model_name="nicht/da").detect("Erika Musterfrau")
+    assert str(e.value) == detect.MODEL_UNAVAILABLE and "huggingface" not in str(e.value)
