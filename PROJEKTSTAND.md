@@ -47,6 +47,7 @@ Beide:
 
 **Erledigt**
 
+- [x] Presidio Muster in der aktuellen Fassung durch LP7 Regeln ersetzt. Die öffentliche README stellt LP7 und seine Lizenz vor. Der frühere Stand bleibt in der Projekthistorie dokumentiert.
 - [x] Codex für Loc: Audit umgesetzt auf `codex/lp7-audit-fixes`. Veraltete Freigaben verworfen, Vorschau bei Emoji korrigiert, Sitzungsablauf und wiederholbares Löschen abgesichert, GitHub Tests eingerichtet, Erkennungsstichprobe und README aktualisiert. Prüfung und Merge durch Paul.
 - [x] Innenabstand im Feld „Dein Original“, der Fokusrand verdeckt den ersten Buchstaben nicht mehr, Wunsch von Loc ([#58](https://github.com/lxc-ht/LP7/pull/58), offen, Prüfung durch Paul; im Sammelbranch).
 - [x] Englische Anreden (Mr, Mrs, Ms, Miss, Mx, Sir) im Kern wie Herr und Frau: nie Teil des Namens, „Mrs Kettle“ wird zu „Mrs [PERSON_3]“, Rückübersetzung ohne doppeltes „Mr“ ([#57](https://github.com/lxc-ht/LP7/pull/57), gemergt am 06.11., `lxc-ht`, Claude). 236 Tests grün, GLiNER-Test auf dem Mac nachprüfen. Rest (englische Kennungen, Datum, Straßen, Anreden in `api.py`) in `BACKLOG.md`.
@@ -106,5 +107,5 @@ Das Repo ist zunächst privat und soll später öffentlich werden. Dann gilt:
 - Keine Schlüssel, Passwörter oder `.env` Dateien committen. Die `.gitignore` deckt die üblichen Fälle ab.
 - Den Git Verlauf auf versehentlich committete Geheimnisse prüfen, denn gelöschte Dateien bleiben in der Historie sichtbar.
 - Stand 05.11. (Claudian): Verlauf durchsucht. Kein echter Schlüssel gefunden, nur ein erfundener Testwert in `tests/test_umgehungen.py`. Nie committet: `.env`, `data/`, SQLite-Dateien. Im Verlauf stehen die Commit-Mailadressen beider Autoren, das ist bei öffentlichen Repos normal.
-- [x] Lizenz: MIT, von beiden am 05.11. beschlossen, liegt als `LICENSE` im Repo. Der Presidio-Hinweis in der README muss bleiben.
+- [x] Lizenz: MIT, von beiden am 05.11. beschlossen, liegt als `LICENSE` im Repo. Der Presidio-Hinweis gehörte zur Fassung mit den damals übernommenen Mustern.
 - [ ] Erst am 06.11., nicht vorher: Repo öffentlich schalten (nur `lxc-ht` als Owner): Settings → General → Danger Zone → Change visibility. Dabei die Beschreibung „Datenverschlüsselung“ ersetzen, zum Beispiel durch „Pseudonymisierung: KI nutzen, Daten behalten.“

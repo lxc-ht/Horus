@@ -70,9 +70,9 @@ _LABELED_ID = re.compile(
     r"|SV-?(?:Nr\.?|Nummer)|Sozialversicherungsnummer|Versicherten-?(?:Nr\.?|Nummer)"
     r"|Aktenzeichen|Az\.?|Gesch[äa]ftszeichen|Mandanten-?(?:Nr\.?|Nummer)|Patienten-?(?:Nr\.?|Nummer)"
     r"|(?:Personal)?Ausweis(?:-?(?:Nr\.?|Nummer))?|Kundenkonto|Kennzeichen|BLZ|Bankleitzahl|(?:Unser|Ihr)\s+Zeichen"
-    # Bezeichner nach den deutschen Erkennern von Presidio (MIT-Lizenz), siehe README unter „Danksagung“.
-    r"|Reisepass(?:nummer)?|F[üu]hrerschein(?:nummer)?|USt\.?-?Id(?:Nr\.?)?|Umsatzsteuer-?ID"
-    r"|(?:Konto|Kunden|Fall|Vertrags|Rechnungs|Policen|Versicherungs|Beleg|Auftrags|Reisepass)-?(?:Nr\.?|Nummer))"
+    r"|(?:Reisepass|Führerschein|Fuhrerschein)(?:[ -]?(?:Nr\.?|Nummer))?"
+    r"|USt[. -]*Id(?:[. -]*Nr\.?)?|Umsatzsteuer[ -]?(?:ID|Identifikationsnummer)"
+    r"|(?:Konto|Kunden|Fall|Vertrags|Rechnungs|Policen|Versicherungs|Beleg|Auftrags)-?(?:Nr\.?|Nummer))"
     # Wert: Blöcke aus Großbuchstaben und Ziffern. Ein Punkt am Blockende beendet ihn, sonst käme der nächste Satz mit.
     r"[\s:.#]*(?P<value>[A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w)(?: [A-ZÄÖÜ0-9](?:[A-ZÄÖÜ0-9./\-]*[A-ZÄÖÜ0-9])?(?!\w))*)"
 )
@@ -89,13 +89,13 @@ _BARE_IDS = [
     re.compile(r"(?<![\w/])(?:\d{1,3}|[IVX]+) [A-Z][A-Za-z]{0,2} \d{1,6}/\d{2,4}\b"),  # Aktenzeichen 3 O 123/26
     re.compile(r"(?<![\w@.])(?:https?://|www\.)[^\s<>\"']+"),                # URL, kann Patienten- oder Fallnummern enthalten
     re.compile(r"(?<![\d.])(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)(?![\d.]\d)"),  # IP-Adresse
+    # Registerart und Registernummer, bei einigen Gerichten mit Buchstabenzusatz.
+    re.compile(r"(?<![\w-])(?:HRA|HRB)\s*[0-9]{1,6}(?:\s*[A-Z]{1,2})?(?![\w-])"),
     # Kfz-Kennzeichen, aber keine Normen und Modelle wie „EU-VO 2016“, „DIN-EN 1090“ oder „VW-ID 3“.
     re.compile(r"(?<![\w\-])(?!(?:EU|VO|DIN|ISO|VDE|VW|BMW)-)[A-ZÄÖÜ]{1,3}-[A-Z]{1,2} \d{1,4}[EH]?(?!\w)"),
 ]
-# Handelsregister: „HRB 12345“, „HRA 4711 B“. Das Kürzel ist eindeutig genug, Muster nach Presidio (MIT-Lizenz).
-_HANDELSREGISTER = re.compile(r"(?<![\w\-])HR[AB]\s?\d{1,6}(?:\s?[A-Z]{1,2}\b)?(?!\w)")
-# USt-IdNr: DE und neun Ziffern, auch mit Trennern. Zählt nur mit gültiger Prüfziffer, wie bei Presidio (MIT-Lizenz).
-_VAT_ID = re.compile(r"(?<![\w\-])DE[\s.\-]?\d{3}[\s.\-]?\d{3}[\s.\-]?\d{3}(?![\w\-]|[.\s]\d)")
+# BZSt: Eine deutsche USt-IdNr besteht aus DE und neun Ziffern.
+_VAT_ID = re.compile(r"(?<![\w-])DE(?:[\s.-]*\d){9}(?![\w-]|[.\s]\d)")
 
 # BIC enthält oft keine Ziffer, zählt deshalb nur mit Bezeichner.
 # Geheimnisse: mit Bezeichner nur vor „:“ oder „=“, sonst wäre „das Passwort wurde geändert“ ein Treffer.
@@ -134,7 +134,6 @@ _ADDRESS = re.compile(
 )
 # Adresse ohne Straßenwort: „Am Sande 12“, „An der Kirche 3“, „Im Grund 4“. Ohne Straßenendung sähe das aus wie
 # „Am Montag 14 Termine“. Deshalb zählt es nur mit PLZ dahinter oder einem Kontextwort kurz davor („wohnhaft“, „Anschrift“).
-# Die Idee mit Kontextwörtern stammt aus Presidio (Context Enhancement), der Code ist eigen.
 _PREPOSITION = r"(?:[Aa]m|[Aa]n der|[Aa]uf der|[Aa]uf dem|[Ii]m|[Ii]n der|[Zz]um|[Zz]ur)"
 # Wörter, die nach „am“ oder „im“ fast nie eine Straße sind.
 _NOT_A_STREET_NAME = (
@@ -183,28 +182,16 @@ _DATE = re.compile(
 )
 
 
-def _tax_id_valid(raw: str) -> bool:
-    """Prüfziffer der Steuer-ID nach ISO 7064 (MOD 11,10)."""
-    digits = [int(c) for c in raw if c.isdigit()]
-    if len(digits) != 11:
+def _mod_11_10_valid(raw: str, length: int) -> bool:
+    """Prüfziffer nach ISO 7064 (MOD 11,10) für Steuer-ID und USt-IdNr."""
+    digits = [int(c) for c in raw if c.isdecimal()]
+    if len(digits) != length:
         return False
     product = 10
-    for d in digits[:10]:
-        total = (d + product) % 10 or 10
+    for digit in digits[:-1]:
+        total = (digit + product) % 10 or 10
         product = total * 2 % 11
-    return (11 - product) % 10 == digits[10]
-
-
-def _vat_id_valid(raw: str) -> bool:
-    """Prüfziffer der deutschen USt-IdNr nach ISO 7064 (MOD 11,10) über acht Ziffern, wie bei Presidio."""
-    digits = [int(c) for c in raw if c.isdigit()]
-    if len(digits) != 9:
-        return False
-    product = 10
-    for d in digits[:8]:
-        total = (d + product) % 10 or 10
-        product = total * 2 % 11
-    return (11 - product) % 10 == digits[8]
+    return (11 - product) % 10 == digits[-1]
 
 
 def _luhn_valid(raw: str) -> bool:
@@ -266,7 +253,7 @@ class RegexDetector:
             if any(c.isdigit() for c in m.group("value")):
                 add(m, "KENNUNG", "value")
         for m in _TAX_ID.finditer(text):
-            if _tax_id_valid(m.group()):
+            if _mod_11_10_valid(m.group(), 11):
                 add(m, "KENNUNG")
         for pattern in _BARE_IDS:
             for m in pattern.finditer(text):
@@ -276,10 +263,8 @@ class RegexDetector:
         for pattern in (_BARE_SECRET, _HANDLE):
             for m in pattern.finditer(text):
                 add(m, "KENNUNG")
-        for m in _HANDELSREGISTER.finditer(text):
-            add(m, "KENNUNG")
         for m in _VAT_ID.finditer(text):
-            if _vat_id_valid(m.group()):
+            if _mod_11_10_valid(m.group(), 9):
                 add(m, "KENNUNG")
         for m in _LABELED_CASE_NUMBER.finditer(text):
             add(m, "KENNUNG", "value")
