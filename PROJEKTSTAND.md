@@ -17,7 +17,6 @@ Eine Demo für die Jury beim Leuphana AI Hackathon: Team-Pitch am Freitag, 6. No
 
 **In Arbeit**
 
-- [ ] Teamname „Horus“ im README ([PR #61](https://github.com/lxc-ht/LP7/pull/61), `lxc-ht`, Claude): wartet auf Prüfung und Merge durch Paul.
 
 
 
@@ -47,6 +46,7 @@ Beide:
 
 **Erledigt**
 
+- [x] Teamname „Horus“ im README ([PR #61](https://github.com/lxc-ht/LP7/pull/61), `lxc-ht`, Claude). Gemergt am 06.11.
 - [x] Codex für Loc: Audit umgesetzt in [PR #60](https://github.com/lxc-ht/LP7/pull/60) und mit dem gemergten Pitch-Stand abgeglichen. Veraltete Freigaben verworfen, Vorschau bei Emoji korrigiert, Sitzungsablauf und wiederholbares Löschen abgesichert, GitHub Tests eingerichtet, Erkennungsstichprobe und README aktualisiert. Prüfung und Merge durch Paul.
 - [x] Pitch-Stand gemergt: [PR #59](https://github.com/lxc-ht/LP7/pull/59) bringt #39 bis #54 und #58 auf main, zusammen mit #35, #56 und #57. #55 gilt auf GitHub als gemergt, sein Code ist aber zurückgenommen (ersetzt durch #56). Offen bleiben #37 und #38.
 - [x] Innenabstand im Feld „Dein Original“, der Fokusrand verdeckt den ersten Buchstaben nicht mehr, Wunsch von Loc ([#58](https://github.com/lxc-ht/LP7/pull/58), offen, Prüfung durch Paul; im Sammelbranch).
