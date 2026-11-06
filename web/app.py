@@ -4,6 +4,8 @@ import re
 import zipfile
 import logging
 import os
+import threading
+from contextlib import asynccontextmanager
 import warnings
 from dataclasses import asdict
 from email import policy
@@ -56,7 +58,23 @@ TEXT_TOO_LONG = "Der Text hat {n} Zeichen. LP7 analysiert höchstens 100.000 Zei
 # Entpackt höchstens so viel. Eine kleine ZIP-Datei kann sonst Gigabytes an XML enthalten.
 DOCX_MAX_XML = 50 * 1024 * 1024
 
-app = FastAPI()
+def preload() -> None:
+    # Fehler hier nur zählen, nie zeigen: Der erste Klick auf „Analysieren“ bringt dann die deutsche Meldung.
+    try:
+        core.warmup()
+    except Exception as e:
+        logging.getLogger(__name__).warning("Vorladen fehlgeschlagen: %s", type(e).__name__)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # Das Modell im Hintergrund laden, damit der erste Klick in der Demo nicht eine halbe Minute hängt.
+    if hasattr(core, "warmup") and os.environ.get("LP7_NO_WARMUP") != "1":
+        threading.Thread(target=preload, name="lp7-vorladen", daemon=True).start()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 class AnalyzeBody(BaseModel):

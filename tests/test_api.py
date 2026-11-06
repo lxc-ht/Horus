@@ -488,3 +488,18 @@ def test_forget_deletes_mapping_and_session():
     # Die alte Freigabe gilt nicht mehr.
     with pytest.raises(api.ReleaseMismatchError):
         api.send(rel)
+
+
+def test_warmup_runs_detectors_without_session(monkeypatch):
+    # Vorladen ruft jede Erkennung einmal auf und legt dabei keine Sitzung an.
+    calls = []
+
+    class Recorder:
+        def detect(self, text):
+            calls.append(text)
+            return []
+
+    api.set_detectors([Recorder()])
+    before = dict(api._sessions)
+    api.warmup()
+    assert len(calls) == 1 and api._sessions == before

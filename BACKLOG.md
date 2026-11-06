@@ -8,6 +8,7 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 
 - `api.set_detectors(detectors | None)` – Detektoren festlegen (Tests mit Fake-Detektor, später weitere Detektoren). `None` = Standard (Regex + GLiNER).
 - `api.forget(session_id)` – Sitzung samt Zuordnung sofort löschen (Knopf „Zuordnung jetzt löschen“). Danach gilt keine Freigabe der Sitzung mehr, `restore` wirft `KeyError`. Unbekannte Sitzung → `KeyError` mit fertigem Satz.
+- `api.warmup()` – lädt die Erkennung vorab mit einem erfundenen Satz, ohne Sitzung und ohne Zuordnung. Die Weboberfläche ruft sie beim Start im Hintergrund auf (abschaltbar mit `LP7_NO_WARMUP=1`). Lädt das Modell nicht, wirft sie `ModelUnavailableError` mit deutschem Satz.
 - `api.CloudError` – `send()` wirft sie, wenn Claude nicht erreichbar ist, den Key ablehnt oder die Anfrage ablehnt (`stop_reason: refusal`). Die Meldung ist ein fertiger deutscher Satz und enthält nie Text aus der Anfrage.
 - `analyze` vereinheitlicht den Text mit `mask.canonical` (NFKC, ohne unsichtbare Formatzeichen). `original_text` ist diese Fassung, nicht die eingegebene Zeichenfolge. `add_manual` behandelt den Begriff genauso.
 - `vault.placeholder_for` kennt `reserved`: Platzhalter, die wörtlich im Text stehen, werden nicht vergeben. Bei der Rückübersetzung bleiben sie stehen und kommen in `unknown`.

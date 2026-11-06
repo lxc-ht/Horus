@@ -308,3 +308,24 @@ def test_short_labels_without_number_word():
     for text in ["Das Konto 3 Tage überzogen.", "Vertrag 2024 wurde geschlossen.", "die Rechnung 2023/24",
                  "Rechnung 1.250,00 Euro", "Vertrag vom 14.03.2026"]:
         assert not any(t == "KENNUNG" for t, _ in _found(text)), text
+
+
+def test_model_load_failure_gives_german_sentence(monkeypatch):
+    # Ohne Netz beim ersten Start käme sonst „403 Forbidden“ oder eine englische Meldung in der Oberfläche an.
+    import sys
+    import types
+
+    import pytest
+
+    from harness import detect
+
+    class Broken:
+        @staticmethod
+        def from_pretrained(name):
+            raise OSError("Connection refused to huggingface.co")
+
+    monkeypatch.setitem(sys.modules, "gliner", types.SimpleNamespace(GLiNER=Broken))
+    monkeypatch.setattr(detect, "_gliner_cache", {})
+    with pytest.raises(detect.ModelUnavailableError) as e:
+        detect.GlinerDetector(model_name="nicht/da").detect("Erika Musterfrau")
+    assert str(e.value) == detect.MODEL_UNAVAILABLE and "huggingface" not in str(e.value)
