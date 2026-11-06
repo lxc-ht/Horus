@@ -18,7 +18,24 @@ Gedacht für Kanzleien, Arztpraxen und Steuerbüros, die Claude oder einen ander
 
 ## Installation
 
-Getestet auf macOS. Beim ersten Start lädt LP7 Python-Pakete und das Erkennungsmodell aus dem Internet. Python und Pakete belegen danach 5,8 GB, das Laden dauerte 7 Minuten (gemessen auf Linux in der Cloud, dort mit Grafikkarten-Paketen für torch; auf macOS nicht gemessen). Größe und Ladezeit des Erkennungsmodells sind nicht gemessen.
+Getestet auf macOS. Beim ersten Start lädt LP7 Python-Pakete aus dem Internet; bei der ersten Analyse kommt das Erkennungsmodell hinzu.
+
+**Mac-Messung vom 06.11.2026:** macOS 26.6.1, Apple M4, WLAN eingeschaltet, Internetzugang, frischer Klon und leere, getrennte uv- und Hugging-Face-Caches. uv 0.13.7, Python 3.12.16 bereits vorhanden (Python-Installation und dessen Speicherbedarf nicht gemessen). Paket- und Analyseschritte einzeln mit `/usr/bin/time -p` gemessen, jeweils die verstrichene Zeit (`real`); Serverbereitschaft mit einer monotonen Uhr (`time.perf_counter`):
+
+| Schritt | Gemessen auf diesem Mac |
+| --- | --- |
+| Python-Pakete: `uv sync` | 12,40 Sekunden |
+| Web-Pakete samt Importprüfung | 1,84 Sekunden |
+| Speicher nach beiden Paketschritten | `.venv`: 795.008 KiB (`du -sh`: 776M); uv-Cache: 825.008 KiB (806M) |
+| Erste Analyse von `examples/kanzlei.txt`, einschließlich Modelldownload und Laden in den Speicher | 94,07 Sekunden; 16 Ersetzungen |
+| Modellcache (`HF_HOME`) nach der ersten Analyse | 1.133.200 KiB (`du -sh`: 1,1G), einschließlich der vom Modell benötigten Dateien |
+| Zweite Analyse in einem neuen Prozess, Modell im Cache, Netz an | 10,22 Sekunden; 16 Ersetzungen |
+| Analyse ohne Netz simuliert mit `HF_HUB_OFFLINE=1 UV_OFFLINE=1`, WLAN weiterhin an | 9,74 Sekunden; 16 Ersetzungen |
+| Serverstart mit gefüllten Caches und `HF_HUB_OFFLINE=1`, bis `/api/status` auf Port 8768 antwortete | 1,273 Sekunden; Status `fake: false` (Abfrageintervall 0,05 Sekunden) |
+
+Paketinstallation und erste Analyse dauerten zusammen **108,31 Sekunden** (Summe der drei getrennt gemessenen Schritte, kein gemessener Doppelklick-Start). Größen sind belegter Speicher laut `du -sk`, keine Downloadmengen; Umgebung und Cache sind getrennt ausgewiesen und werden nicht als zusätzlicher physischer Gesamtbedarf addiert. Reine Modelldownloadzeit, übertragene Datenmenge und Betrieb mit tatsächlich ausgeschaltetem WLAN: **nicht gemessen**. Den Test mit ausgeschaltetem WLAN übernimmt Paul beim Probedurchlauf.
+
+**Linux-Vergleich vom 05.11.2026:** Linux in der Cloud, mit Internetzugang, aber gesperrtem Hugging Face; Python und Pakete belegten 5,8 GB, das Laden dauerte 7 Minuten (einschließlich Grafikkarten-Paketen für torch). Modellgröße und -ladezeit wurden dort nicht gemessen; Distribution und Chip sind nicht dokumentiert.
 
 **1. uv installieren** (einmalig, im Terminal):
 
@@ -61,6 +78,7 @@ Die Oberfläche ist nur auf diesem Rechner erreichbar (127.0.0.1), nicht im Netz
 
 - Rückweg mit echtem Claude (claude.ai, Kopiermodus, 05.11.2026): 16 von 16 Platzhaltern, die Claude in seinen Antworten benutzt hat, kamen heil zurück, in 2 erfundenen Testtexten. Keine Person wurde verwechselt. Zwei Texte sind eine Stichprobe, kein Beweis.
 - Installation frisch durchgespielt (05.11.2026, Linux in der Cloud, leerer Klon und leere Caches): Pakete laden, Server starten und 213 Tests liefen durch. Das Erkennungsmodell ließ sich dort nicht laden, weil die Umgebung Hugging Face sperrt; dieser Schritt ist nicht geprüft.
+- Installation und Analyse auf dem Mac nachgemessen (06.11.2026, macOS 26.6.1, Apple M4, WLAN an, Internetzugang): frischer Klon und leere Caches, erste und zweite Analyse sowie ohne Netz simuliert mit `HF_HUB_OFFLINE=1` und `UV_OFFLINE=1` erfolgreich, jeweils 16 Ersetzungen in `examples/kanzlei.txt`; Server auf Port 8768 gestartet und beendet. Zeiten und Größen stehen unter „Installation“. WLAN tatsächlich aus: nicht gemessen.
 - Die Erkennung ist mit erfundenen Texten geprüft, nicht mit echten Akten. Eine Erkennungsrate für echte Dokumente gibt es noch nicht.
 
 ## Für Entwicklerinnen und Entwickler
