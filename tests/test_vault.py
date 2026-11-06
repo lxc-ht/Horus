@@ -17,14 +17,40 @@ def _session_ids():
         return {row[0] for row in conn.execute("SELECT id FROM sessions")}
 
 
-def test_old_sessions_are_deleted(monkeypatch):
-    old = vault.create_session()
-    vault.placeholder_for(old, "Max Müller", "PERSON")
+@pytest.mark.parametrize("new_analysis", [True, False])
+def test_expired_sessions_are_deleted_from_database_and_memory(monkeypatch, new_analysis):
+    old = api.analyze("Kontakt: erika.musterfrau@example.org")
+    release = api.release(old.session_id)
     real_now = vault._now()
     monkeypatch.setattr(vault, "_now", lambda: real_now + vault.SESSION_TTL + timedelta(minutes=1))
-    new = vault.create_session()
-    assert _session_ids() == {new}
-    assert vault.mappings(old) == []
+
+    new = api.analyze("Neuer Fall.") if new_analysis else None
+
+    with pytest.raises(KeyError, match=api.UNKNOWN_SESSION):
+        api.get(old.session_id)
+    with pytest.raises(api.ReleaseMismatchError):
+        api.send(release)
+    assert old.session_id not in api._sessions
+    assert vault.mappings(old.session_id) == []
+    assert _session_ids() == ({new.session_id} if new else set())
+
+def test_forget_can_be_retried_after_database_failure(monkeypatch):
+    result = api.analyze("Kontakt: erika.musterfrau@example.org")
+
+    def fail_to_delete(_):
+        raise sqlite3.OperationalError("Datenbank vorübergehend gesperrt")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(vault, "delete_sessions", fail_to_delete)
+        with pytest.raises(sqlite3.OperationalError):
+            api.forget(result.session_id)
+
+    assert api.get(result.session_id) == result
+    api.forget(result.session_id)
+    assert vault.mappings(result.session_id) == []
+    with pytest.raises(KeyError, match=api.UNKNOWN_SESSION):
+        api.get(result.session_id)
+
 
 
 def test_recent_sessions_stay():

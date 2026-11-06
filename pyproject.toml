@@ -16,8 +16,12 @@ dependencies = [
 [project.scripts]
 harness = "harness.cli:main"
 
+[project.optional-dependencies]
+web = ["fastapi", "uvicorn", "pypdf"]
+
 [dependency-groups]
 dev = ["pytest>=8"]
+browser = ["playwright"]
 
 [build-system]
 requires = ["hatchling"]

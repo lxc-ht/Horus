@@ -26,6 +26,7 @@ import sys
 import threading
 from collections import Counter
 from dataclasses import dataclass, field
+from datetime import datetime
 
 from . import cloud, gate, mask, vault
 from . import restore as _restore
@@ -39,7 +40,7 @@ __all__ = [
     "TYPES", "Replacement", "Uncertain", "MaskResult", "Release", "RestoreResult",
     "LeakError", "ReleaseMismatchError", "NoApiKeyError", "CloudError",
     "analyze", "add_manual", "remove", "get", "release", "has_api_key", "send", "restore",
-    "set_detectors", "warmup",
+    "set_detectors", "warmup", "forget",
 ]
 
 log = logging.getLogger(__name__)
@@ -60,6 +61,7 @@ class _UnknownSession(KeyError):
 @dataclass
 class _Session:
     original_text: str
+    created_at: datetime
     spans: list[Span] = field(default_factory=list)
     issued: set[str] = field(default_factory=set)   # SHA-256 der gültigen Freigaben
     hints: list[Finding] = field(default_factory=list)   # Stellen unter der Schwelle des Modells
@@ -104,11 +106,20 @@ def warmup() -> None:
         d.detect("Termin mit Erika Musterfrau in Musterstadt.")
 
 
+def _prune_expired(cutoff: datetime) -> None:
+    vault.prune_expired(cutoff)
+    for session_id in [sid for sid, session in _sessions.items() if session.created_at < cutoff]:
+        del _sessions[session_id]
+
+
 def _session(session_id: str) -> _Session:
-    try:
-        return _sessions[session_id]
-    except KeyError:
-        raise _UnknownSession(UNKNOWN_SESSION) from None
+    session = _sessions.get(session_id)
+    cutoff = vault._now().replace(microsecond=0) - vault.SESSION_TTL
+    if session is not None:
+        if session.created_at >= cutoff:
+            return session
+        _prune_expired(cutoff)
+    raise _UnknownSession(UNKNOWN_SESSION)
 
 
 def _masked(session_id: str, s: _Session) -> tuple[str, list[Replacement], list[vault.Mapping]]:
@@ -203,8 +214,10 @@ def analyze(text: str) -> MaskResult:
     text = mask.canonical(text)
     reserved = _literal_placeholders(text)
     with _lock:
-        session_id = vault.create_session()
-        s = _Session(original_text=text)
+        created_at = vault._now().replace(microsecond=0)
+        _prune_expired(created_at - vault.SESSION_TTL)
+        session_id = vault.create_session(created_at)
+        s = _Session(original_text=text, created_at=created_at)
         for f in detect_all(text, _active_detectors()):
             placeholder = vault.placeholder_for(session_id, f.text, f.typ, reserved)
             if all(f.end <= x.start or f.start >= x.end for x in s.spans):
@@ -300,32 +313,28 @@ def send(rel: Release) -> str:
     rel.text ist gültig freigegeben und darf im Kopier-Modus ausgegeben werden.
     """
     with _lock:
-        s = _sessions.get(rel.session_id)
-        current = _masked(rel.session_id, s)[0] if s else None
-        gate.verify(rel, current, s.issued if s else set())
+        try:
+            s = _session(rel.session_id)
+        except _UnknownSession:
+            raise ReleaseMismatchError() from None
+        current = _masked(rel.session_id, s)[0]
+        gate.verify(rel, current, s.issued)
     return cloud.ask(rel.text)
 
 
 def forget(session_id: str) -> None:
-    """Erweiterung: Sitzung samt Zuordnung sofort löschen, nicht erst beim Beenden.
-
-    Danach lässt sich nichts mehr zurückübersetzen, und alle Freigaben der Sitzung sind ungültig.
-    Unbekannte Sitzung → KeyError mit fertigem Satz.
-    """
+    """Löscht eine Sitzung und ihre Zuordnung. Unbekannte Sitzung: KeyError."""
     with _lock:
         _session(session_id)
-        del _sessions[session_id]
         vault.delete_sessions([session_id])
-        log.info("forget: Sitzung %s gelöscht", session_id[:8])
-
-
-__all__ += ["forget"]
+        del _sessions[session_id]
 
 
 def restore(session_id: str, answer: str) -> RestoreResult:
     with _lock:
         s = _session(session_id)
         masked, _, mappings = _masked(session_id, s)
+        spans = s.spans
     originals = {m.placeholder: m.original for m in mappings}
     # Nur eigene Platzhalter: Ein wörtlich im Text stehender wird nicht ersetzt, restore() meldet ihn als unbekannt.
     sent = [p for p in dict.fromkeys(gate.PLACEHOLDER_RE.findall(masked)) if p in originals]
@@ -333,7 +342,7 @@ def restore(session_id: str, answer: str) -> RestoreResult:
     # Ein Platzhalter kennt nur den vollen Wert. Stand er für einen Namensteil, kann das Eingesetzte falsch sein („Antrag“).
     parts = {
         (span.placeholder, s.original_text[span.start : span.end])
-        for span in s.spans
+        for span in spans
         if span.name_part and span.placeholder[1:-1] in answer   # auch ohne Klammern wird ersetzt
         and not _AFTER_SALUTATION.search(s.original_text[: span.start])
     }

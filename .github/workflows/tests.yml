@@ -1,0 +1,36 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HF_HUB_OFFLINE: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.13.7"
+      - name: Kern testen
+        run: uv run --locked python -m pytest
+      - name: Web-API testen
+        run: uv run --locked --extra web python -m web.test_app
+      - name: Chromium installieren
+        run: uv run --locked --extra web --group browser playwright install --with-deps chromium --only-shell
+      - name: Weboberfläche testen
+        env:
+          HARNESS_FAKE: "1"
+        run: |
+          uv run --locked --extra web --group browser uvicorn web.app:app --host 127.0.0.1 --port 8000 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent --show-error http://127.0.0.1:8000/api/status
+          uv run --locked --extra web --group browser python -m web.test_ui

@@ -125,10 +125,13 @@ def main() -> None:
         lang_page = context.new_page()
         lang_page.on("pageerror", lambda error: errors.append(str(error)))
         lang_page.goto(url)
+        headline = lang_page.locator(".headline > span:not(.headline-eye)")
+        expect(headline).to_have_text(["Ask Anything", "Reveal Nothing"])
         expect(lang_page.locator("#langDe")).to_have_attribute("aria-pressed", "true")
         lang_page.locator("#langEn").click()
         expect(lang_page.locator("#langEn")).to_have_attribute("aria-pressed", "true")
         assert lang_page.evaluate("document.documentElement.lang") == "en"
+        expect(headline).to_have_text(["Ask Anything", "Reveal Nothing"])
         expect(lang_page.locator("#analyzeLabel")).to_have_text("Analyze text")
         lang_page.locator("#btnExample").click()
         assert lang_page.locator("#original").input_value().startswith("From: Emily Hartwell")
@@ -163,6 +166,34 @@ def main() -> None:
         expect(lang_page.locator("#analyzeLabel")).to_have_text("Analyze text")
         lang_page.locator("#langDe").click()
         lang_page.close()
+        # Emoji vor einem Platzhalter und einer unsicheren Stelle verschieben die Vorschau nicht.
+        page.locator("#original").fill("📄 An Erika Musterfrau von Nordlicht.")
+        page.locator("#btnAnalyze").click()
+        expect(page.locator("#masked .suspect")).to_have_text("Nordlicht")
+        page.locator("#btnRelease").click()
+        page.locator("#btnCopy").click()
+        clipboard = page.evaluate("navigator.clipboard.readText()")
+        assert clipboard == "📄 An [PERSON_1] von Nordlicht."
+        assert page.locator("#masked").text_content() == clipboard
+
+        # Die Freigabeantwort trifft erst ein, nachdem der Nutzer zum neuen Original gewechselt ist.
+        page.locator("#original").fill("An Erika Musterfrau.")
+        page.locator("#btnAnalyze").click()
+        expect(page.locator("#btnRelease")).to_be_enabled()
+
+        def delayed_release(route):
+            response = route.fetch()
+            assert response.ok
+            page.locator("#original").fill("Neuer Text für einen anderen Fall.")
+            route.fulfill(response=response)
+
+        page.route("**/api/release", delayed_release)
+        with page.expect_response("**/api/release"):
+            page.locator("#btnRelease").click()
+        expect(workspace).to_have_attribute("aria-busy", "false")
+        expect(page.locator("#releaseStatus")).to_have_text("Gesperrt")
+        expect(page.locator("#btnCopy")).to_be_disabled()
+        page.unroute("**/api/release", delayed_release)
         assert not errors, errors
         browser.close()
     print("Browserprüfung bestanden: Freigabe, Kopieren, Rückübersetzung, fünf Bildschirmbreiten, Hover, Klick, Tastatur, Textauswahl und Touch.")
