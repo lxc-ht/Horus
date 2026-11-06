@@ -7,6 +7,8 @@ Was auffällt, aber nicht in den aktuellen Block gehört.
 Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausgehen. Bestehende Signaturen bleiben unverändert.
 
 - `api.set_detectors(detectors | None)` – Detektoren festlegen (Tests mit Fake-Detektor, später weitere Detektoren). `None` = Standard (Regex + GLiNER).
+- `api.forget(session_id)` – Sitzung samt Zuordnung sofort löschen (Knopf „Zuordnung jetzt löschen“). Danach gilt keine Freigabe der Sitzung mehr, `restore` wirft `KeyError`. Unbekannte Sitzung → `KeyError` mit fertigem Satz.
+- `api.warmup()` – lädt die Erkennung vorab mit einem erfundenen Satz, ohne Sitzung und ohne Zuordnung. Die Weboberfläche ruft sie beim Start im Hintergrund auf (abschaltbar mit `LP7_NO_WARMUP=1`). Lädt das Modell nicht, wirft sie `ModelUnavailableError` mit deutschem Satz.
 - `api.CloudError` – `send()` wirft sie, wenn Claude nicht erreichbar ist, den Key ablehnt oder die Anfrage ablehnt (`stop_reason: refusal`). Die Meldung ist ein fertiger deutscher Satz und enthält nie Text aus der Anfrage.
 - `analyze` vereinheitlicht den Text mit `mask.canonical` (NFKC, ohne unsichtbare Formatzeichen). `original_text` ist diese Fassung, nicht die eingegebene Zeichenfolge. `add_manual` behandelt den Begriff genauso.
 - `vault.placeholder_for` kennt `reserved`: Platzhalter, die wörtlich im Text stehen, werden nicht vergeben. Bei der Rückübersetzung bleiben sie stehen und kommen in `unknown`.
@@ -21,16 +23,18 @@ Ergänzungen an `src/harness/api.py`, die über den festgelegten Vertrag hinausg
 - Neuer Typ `KENNUNG` in `TYPES`: Steuer-ID, Steuernummer, SV-Nummer, Versichertennummer, Aktenzeichen, Mandanten- und Patientennummer, URL.
 - `send()`: Stoppt Claude wegen `max_tokens`, liefert es den Teil plus `cloud.TRUNCATED_NOTE` am Ende. Die Signatur bleibt ein String.
 
+- `MaskResult.uncertain` meldet zusätzlich Zusammenhang, der eine Person ohne Namen verrät (Typ-Vorschlag PERSON, Text bleibt unverändert).
 - `MaskResult.uncertain` – Liste von `Uncertain` (Text, Typ, Position im maskierten Text, `masked`, Grund als fertiger deutscher Satz). Stellen, die der Mensch ansehen soll: Modell unter der Schwelle, nicht ersetzte Nummern, knappe Modelltreffer, Namensteile ohne Anrede. Der Text ändert sich dadurch nicht. Bestehende Felder bleiben.
 
 ## Bekannte Schwächen
 
-- Umgehungstest gegen die Demo, noch offen: kyrillische Doppelgänger in IBANs („DЕ89“ mit kyrillischem Е, nur der Rest wird maskiert), Quasi-Identifikatoren aus dem Kontext („der Bürgermeister von …“).
+- Kyrillische und griechische Doppelgänger werden nur bei der IBAN-Suche wie lateinische Buchstaben behandelt („DЕ89“ mit kyrillischem Е). In E-Mails, Kennungen oder Namen gilt das nicht.
+- Umgehungstest gegen die Demo, noch offen: Quasi-Identifikatoren aus dem Kontext („der Bürgermeister von …“): Eine kurze Regel zeigt „die einzige Kinderärztin im Ort“ und Ämter wie „Bürgermeister von Hasenwinkel“ als unsichere Stelle, ersetzt aber nichts. Alles andere („die Nachbarin mit dem roten Porsche“) bleibt Sache der Prüfung.
 - Eine Antwort von Claude kann Links oder Markdown-Bilder enthalten, in denen nach der Rückübersetzung echte Werte stehen („![x](https://…?a=[IBAN_1])“). Die Oberfläche zeigt das nur als Text. Riskant wird es erst, wenn jemand den Text in ein Programm kopiert, das Markdown oder HTML darstellt.
 - Zweibuchstabige Namensteile („Wu“, „Do“) werden in genau dieser Schreibweise mitmaskiert. Bei einer Person „Tran Do“ wird auch die Abkürzung „Do“ für Donnerstag zum Namen. Die Prüfung zeigt solche Stellen als unsicher.
 - Die Ausnahmen beim Kfz-Kennzeichen sind eine kurze Liste (EU, VO, DIN, ISO, VDE, VW, BMW). Andere Normen wie „ABC-DE 12“ werden maskiert, echte Kennzeichen aus Dinslaken („DIN-AB 123“) nicht.
-- Bezeichner ohne Nummernwort wie „Konto 532013000“ werden nicht ersetzt, sondern nur als unsichere Stelle gezeigt.
-- Sehr lange Texte (200 KB) blockieren die Analyse über eine Minute und halten dabei die globale Sperre. Nichts wird gesendet, die Demo hängt aber. Eventuell eine Längengrenze.
+- Kurze Bezeichner ohne Nummernwort (Konto, Kto., Depot, Vertrag, Police, Rechnung) zählen mit einem Wert ab drei Ziffern, Jahre und Zeiträume ausgenommen. Andere Wörter wie „Vorgang 4471-B“ werden weiter nur als unsichere Stelle gezeigt.
+- Sehr lange Texte (200 KB) blockieren die Analyse über eine Minute und halten dabei die globale Sperre. Nichts wird gesendet, die Demo hängt aber. Die Weboberfläche lehnt deshalb Texte über 100.000 Zeichen mit einem Hinweis ab; der Kern und die CLI haben keine Grenze.
 - Die Weboberfläche setzt keinen Frame-Schutz (X-Frame-Options) und prüft den Origin nicht. Fremde Seiten können sie einbetten, Antworten aber nicht lesen, Text und JSON lehnt die Preflight-Regel ab.
 - Wegen canonical() fallen auch Formatzeichen in Emojis weg (Zero-Width-Joiner) und „m²“ wird zu „m2“. Sicher, ändert aber minimal den gesendeten Text.
 - Maskiert wird jedes Vorkommen als Teilzeichenkette, passend zum Leck-Check. Das ergibt manchmal hässliche Stellen wie „[FIRMA_3]skündigung“ (aus „Eigenbedarfskündigung“). Sicher, aber nicht schön. Ein Leck-Check und eine Maskierung an Wortgrenzen bräuchten eine eigene Entscheidung, weil dann „Müllerstraße“ durchrutscht.

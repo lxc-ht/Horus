@@ -39,7 +39,7 @@ __all__ = [
     "TYPES", "Replacement", "Uncertain", "MaskResult", "Release", "RestoreResult",
     "LeakError", "ReleaseMismatchError", "NoApiKeyError", "CloudError",
     "analyze", "add_manual", "remove", "get", "release", "has_api_key", "send", "restore",
-    "set_detectors",
+    "set_detectors", "warmup",
 ]
 
 log = logging.getLogger(__name__)
@@ -94,6 +94,16 @@ def _active_detectors() -> list[Detector]:
     return _detectors
 
 
+def warmup() -> None:
+    """Lädt die Erkennung vorab, damit der erste Klick nicht auf das Modell wartet.
+
+    Läuft mit einem erfundenen Satz, legt keine Sitzung an und schreibt nichts in die Zuordnung.
+    Fehler wirft sie weiter, etwa ModelUnavailableError ohne Netz.
+    """
+    for d in _active_detectors():
+        d.detect("Termin mit Erika Musterfrau in Musterstadt.")
+
+
 def _session(session_id: str) -> _Session:
     try:
         return _sessions[session_id]
@@ -117,12 +127,20 @@ REASON_MODEL_LOW = "Das Modell ist unsicher, ob das eine sensible Angabe ist."
 REASON_NUMBER = "Diese Nummer wurde nicht ersetzt. Prüfe, ob sie eine Kennung ist, etwa ein Aktenzeichen."
 REASON_UNSURE = "Ersetzt, aber das Modell war sich nicht sicher. Prüfe, ob das wirklich eine sensible Angabe ist."
 REASON_NAME_PART = "Nur ein Namensteil von „{full}“. Prüfe, ob hier wirklich diese Person gemeint ist."
+REASON_CONTEXT = "Kann die Person auch ohne Namen verraten, weil es sie nur einmal gibt. Prüfe, ob das so raus darf, oder ersetze es."
 
 _LITERAL_PLACEHOLDER = re.compile(r"\b([A-Z]+)_(\d+)\b")
 _NUMBER_LIKE = re.compile(r"(?<![\w/.-])[\w/.-]*\d[\w/.-]*")
 _YEAR = re.compile(r"(?:19|20)\d\d")
 _NOT_AN_ID_AFTER = re.compile(r"(?:,\d+)?\s*(?:Euro|EUR|€|%|Prozent)", re.IGNORECASE)
 _SALUTATION_BEFORE = re.compile(r"(?:Frau|Herrn?|Dr\.|Prof\.)\s+$", re.IGNORECASE)
+# Zusammenhang, der eine Person ohne Namen verrät: „die einzige Kinderärztin im Ort“, „der Bürgermeister von Hasenwinkel“.
+# Bewusst kurz gehalten, nur ein Hinweis. Bei „einzige“ nur Wörter, die nach Person klingen, sonst meldet „der einzige Weg“. Folgt ein Platzhalter („Bürgermeister von [ORT_1]“), passt die Regel nicht.
+_ONLY_ONE = re.compile(r"\b(?:[Dd]er|[Dd]ie|[Dd]en|[Dd]em)\s+einzigen?\s+[A-ZÄÖÜ][\wäöüß-]*(?:in|er|ist|ant|ent|eur|mann|frau|arzt|or)\b(?:\s+(?:im|in|am|an|der|des|von|vom|beim)\s+(?:[Oo]rt|[Dd]orf|[A-ZÄÖÜ][\wäöüß-]+))?")
+_UNIQUE_ROLE = re.compile(
+    r"\b(?:Ober)?(?:Bürgermeister(?:in)?|Landr(?:at|ätin)|Schulleiter(?:in)?|Chefarzt|Chefärztin|Pfarrer(?:in)?|Präsident(?:in)?)"
+    r"\s+(?:von|vom|der|des|im|am|in)\s+(?!\[)[A-ZÄÖÜ][\wäöüß-]+"
+)
 
 
 def _uncertain(s: _Session, masked: str, replacements: list[Replacement], mappings: list[vault.Mapping]) -> list[Uncertain]:
@@ -145,6 +163,10 @@ def _uncertain(s: _Session, masked: str, replacements: list[Replacement], mappin
         if sum(c.isdigit() for c in token) < 3 or _YEAR.fullmatch(token) or is_paragraph or _NOT_AN_ID_AFTER.match(masked, end):
             continue
         add_plain(m.start(), end, "KENNUNG", REASON_NUMBER)
+
+    for pattern in (_ONLY_ONE, _UNIQUE_ROLE):
+        for m in pattern.finditer(masked):
+            add_plain(m.start(), m.end(), "PERSON", REASON_CONTEXT)
 
     full_names = {m.placeholder: m.original for m in mappings}
     for r in replacements:
@@ -282,6 +304,22 @@ def send(rel: Release) -> str:
         current = _masked(rel.session_id, s)[0] if s else None
         gate.verify(rel, current, s.issued if s else set())
     return cloud.ask(rel.text)
+
+
+def forget(session_id: str) -> None:
+    """Erweiterung: Sitzung samt Zuordnung sofort löschen, nicht erst beim Beenden.
+
+    Danach lässt sich nichts mehr zurückübersetzen, und alle Freigaben der Sitzung sind ungültig.
+    Unbekannte Sitzung → KeyError mit fertigem Satz.
+    """
+    with _lock:
+        _session(session_id)
+        del _sessions[session_id]
+        vault.delete_sessions([session_id])
+        log.info("forget: Sitzung %s gelöscht", session_id[:8])
+
+
+__all__ += ["forget"]
 
 
 def restore(session_id: str, answer: str) -> RestoreResult:

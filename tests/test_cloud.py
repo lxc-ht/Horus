@@ -28,3 +28,10 @@ def test_refusal_is_an_error(monkeypatch):
     _stub(monkeypatch, "refusal")
     with pytest.raises(cloud.CloudError):
         cloud.ask("x")
+
+
+def test_no_key_message_has_no_cli_instructions():
+    # Die Weboberfläche kann den Satz zeigen, dort gibt es weder END noch eine automatisch gefüllte Zwischenablage.
+    message = str(cloud.NoApiKeyError())
+    assert message.startswith("Kein API-Key gefunden")
+    assert "END" not in message and "Zwischenablage" not in message

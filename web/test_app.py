@@ -162,6 +162,12 @@ def check_docx() -> None:
         "Erika Musterfrau wohnt in Lüneburg.\nAz.\t123/26\nMax Mustermann\nZelle eins\nIm Textfeld\nAußen"
     ), data["text"]
 
+    # Zellen einer Tabellenzeile bleiben in einer Zeile, getrennt durch Tabulator.
+    cell = lambda *texts: "<w:tc>" + "".join(para(f"<w:t>{t}</w:t>") for t in texts) + "</w:tc>"
+    table = "<w:tbl><w:tr>" + cell("IBAN") + cell("DE00 1234", "5678") + "</w:tr><w:tr>" + cell("Name") + cell("Erika Musterfrau") + "</w:tr></w:tbl>"
+    status, data = post("/api/docx", docx(table))
+    assert status == 200 and data["text"] == "IBAN\tDE00 1234 5678\nName\tErika Musterfrau", data
+
     assert post("/api/docx", docx(para("<w:t> </w:t>"))) == (422, {"error": server.DOCX_EMPTY})
     assert post("/api/docx", b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1" + b"0" * 100) == (422, {"error": server.DOCX_OLD})
     assert post("/api/docx", b"Das ist keine Word-Datei.") == (422, {"error": server.DOCX_INVALID})
@@ -205,9 +211,25 @@ def check_eml() -> None:
     assert "Betreff: Kündigung durch Nordlicht Bau" in data["text"]
     assert data["text"].endswith("\n\nGuten Tag,\nmir wurde am 14.03.2026 gekündigt.")
 
-    # Bei Text und HTML gewinnt der Text, Anhänge bleiben draußen.
+    # Bei Text und HTML gewinnt der Text. Ein kaputter Anhang wird nur mit Namen genannt.
     status, data = post("/api/eml", eml(html=True))
-    assert status == 200 and "14.03.2026" in data["text"] and "PDF" not in data["text"]
+    assert status == 200 and "14.03.2026" in data["text"] and "<p>" not in data["text"]
+    assert data["text"].endswith("--- Anhang: anhang.pdf (nicht gelesen: Das ist keine lesbare PDF-Datei.) ---"), data["text"]
+
+    # Lesbare PDF- und Word-Anhänge kommen als Text dazu, andere nur mit Namen.
+    mail = EmailMessage()
+    mail["From"] = "erika@example.org"
+    mail["Subject"] = "Unterlagen"
+    mail.set_content("Anbei die Unterlagen.")
+    mail.add_attachment(text_pdf("Kuendigung vom 14.03.2026", "Max Mustermann"), maintype="application", subtype="pdf", filename="kuendigung.pdf")
+    mail.add_attachment(docx(para("<w:t>Vollmacht für Erika Musterfrau</w:t>")), maintype="application",
+                        subtype="vnd.openxmlformats-officedocument.wordprocessingml.document", filename="vollmacht.docx")
+    mail.add_attachment(b"\x89PNG", maintype="image", subtype="png", filename="foto.png")
+    status, data = post("/api/eml", mail.as_bytes())
+    assert status == 200, data
+    assert "Anbei die Unterlagen.\n\n--- Anhang: kuendigung.pdf ---\nKuendigung vom 14.03.2026" in data["text"], data["text"]
+    assert "--- Anhang: vollmacht.docx ---\nVollmacht für Erika Musterfrau" in data["text"], data["text"]
+    assert data["text"].endswith("--- Anhang: foto.png (nicht gelesen, nur PDF und Word werden gelesen) ---"), data["text"]
 
     only_html = EmailMessage()
     only_html["From"] = "erika@example.org"
@@ -257,11 +279,21 @@ def main() -> None:
     hint = marked["uncertain"][0]
     assert marked["masked_text"][hint["start"]:hint["end"]] == "Nordlicht"
 
+    # Zu lange Texte lehnt der Server ab, bevor der Kern sie sieht.
+    too_long = rejected(server.analyze, server.AnalyzeBody(text="a" * (server.TEXT_MAX_CHARS + 1)))
+    assert "100.001 Zeichen" in too_long["error"]
+    assert server.analyze(server.AnalyzeBody(text="a" * server.TEXT_MAX_CHARS))["masked_text"]
+
     # Rückübersetzung meldet Unbekanntes und Fehlendes.
     restored = server.restore(server.RestoreBody(session_id=sid, answer="[PERSON_1] und [PERSON_9]"))
     assert restored["text"] == "Erika Musterfrau und [PERSON_9]"
     assert restored["unknown"] == ["[PERSON_9]"]
     assert restored["missing"] == ["[EMAIL_1]"]
+
+    # Zuordnung löschen: danach ist die Sitzung weg, Rückübersetzen wird abgelehnt.
+    assert server.forget(server.SessionBody(session_id=sid)) == {"ok": True}
+    assert "error" in rejected(server.restore, server.RestoreBody(session_id=sid, answer="[PERSON_1]"))
+    assert "error" in rejected(server.forget, server.SessionBody(session_id=sid))
 
     # Ohne HARNESS_FAKE und ohne Kern bricht der Start ab, statt die Attrappe zu nehmen.
     env = {k: v for k, v in os.environ.items() if k != "HARNESS_FAKE"}
