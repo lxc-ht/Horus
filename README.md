@@ -1,26 +1,19 @@
-# Horus – KI nutzen. Daten behalten.
+# Horus · KI nutzen. Daten behalten.
 
-**Team Horus** · Leuphana AI Hackathon 2026
+**Horus ersetzt sensible Angaben lokal durch Platzhalter.** Aus „Erika Musterfrau“ wird zum Beispiel `[PERSON_1]`. Du prüfst den maskierten Text, bevor du ihn an einen Chatbot weitergibst. Horus setzt die Originalwerte in der Antwort anschließend lokal wieder ein.
 
-Horus pseudonymisiert Texte lokal. Es ersetzt erkannte sensible Angaben durch Platzhalter wie `[PERSON_1]`. In der Weboberfläche prüfst du die Fassung, gibst sie zum Kopieren frei und setzt die Originalwerte in der Antwort lokal wieder ein.
-
-Der Prototyp zeigt am Beispiel von Kanzleien, Arztpraxen und Steuerbüros, wie sich sensible Angaben vor dem Teilen eines Textes mit einem KI Dienst reduzieren lassen.
+[Auf dem Mac starten](#schnellstart) · [Ablauf ansehen](#so-funktioniert-es) · [Grenzen kennen](#grenzen)
 
 ![Horus: Analysieren, Vorschau und Ausgabe. Klar. Lokal. Unter deiner Kontrolle.](web/assets/horus-banner.png)
 
-## So funktioniert es
+## Schnellstart
 
-1. **Text einfügen.** Einen Brief, eine E-Mail oder einen Sachverhalt.
-2. **Analysieren.** Horus erkennt Personen, Firmen, Adressen, Orte, E-Mail, Telefon, IBAN, Datum und Kennungen wie Aktenzeichen oder Steuer-ID und ersetzt sie durch Platzhalter. Die Zuordnung bleibt lokal.
-3. **Prüfen und freigeben.** Du siehst genau den Text, der rausgehen würde. Unsichere Stellen sind gelb markiert, Übersehenes markierst du selbst, falsche Treffer nimmst du mit × zurück.
-4. **Kopieren und fragen.** Den freigegebenen Text kopierst du selbst in Claude oder einen anderen Chatbot. Horus sendet nichts automatisch und braucht keinen API-Schlüssel.
-5. **Zurückübersetzen.** Die Antwort fügst du wieder ein. Horus setzt die echten Angaben ein und meldet alles, was es nicht eindeutig zuordnen kann, statt zu raten.
+1. [Horus für Macs mit Apple Chip herunterladen](https://github.com/lxc-ht/Horus/releases/download/v0.1.0-preview.1/Horus-macOS-AppleSilicon.zip) und die ZIP Datei entpacken. Das Paket ist eine Vorschau.
+2. `Horus starten.command` doppelklicken. Die Oberfläche öffnet sich im Browser. Beim ersten Start lädt Horus die nötigen Pakete und das Erkennungsmodell. Dafür brauchst du Internet und mehrere GB freien Speicher.
+3. **Beispiel laden** und dann **Text analysieren** wählen. Das Beispiel enthält frei erfundene Angaben.
 
-![Horus mit erfundenem Original, freigegebener Vorschau und lokal zurückübersetzter Beispielantwort](web/assets/horus-ablauf.png)
-
-## Installation
-
-Getestet auf macOS. Der erste Start braucht Internet: Horus lädt die Python-Pakete und bei der ersten Analyse das Erkennungsmodell. Danach belegt es rund 2,7 GB (Pakete 0,8 GB, Paket-Cache 0,8 GB, Modell 1,1 GB). Auf einem Mac mit schnellem Netz dauerte das knapp 2 Minuten. Danach soll Horus ohne Internet laufen, das ist bisher nur simuliert geprüft. Nach jedem Programmstart braucht die erste Analyse etwa 10 Sekunden, weil das Modell geladen wird. Wie gemessen wurde, steht unter „Getestet“.
+<details>
+<summary>Aus dem Repository starten</summary>
 
 **1. uv installieren** (einmalig, im Terminal):
 
@@ -47,19 +40,47 @@ uv run --locked --extra web uvicorn web.app:app --host 127.0.0.1 --port 8000
 
 Die Oberfläche ist nur auf diesem Rechner erreichbar (127.0.0.1), nicht im Netzwerk.
 
-## Was Horus nicht ist
+</details>
 
-- **Pseudonymisierung ist keine Anonymisierung.** Auch ohne Namen kann der Zusammenhang eine Person verraten („die einzige Kinderärztin in Ort X“, eine seltene Diagnose, ein bekannter Rechtsstreit). Deshalb ist die menschliche Prüfung vor jeder Freigabe Pflicht.
+## So funktioniert es
+
+1. **Einfügen und analysieren.** Gib deinen Text ein oder lade eine PDF, Word Datei oder E-Mail. Horus ersetzt erkannte Namen, Adressen, Kontodaten und andere sensible Angaben durch Platzhalter.
+2. **Prüfen und freigeben.** Kontrolliere die Vorschau und ergänze fehlende Stellen. Gelbe Markierungen zeigen unsichere Treffer. Erst nach deiner Freigabe lässt sich die Vorschau kopieren.
+3. **Kopieren und zurückübersetzen.** Füge die freigegebene Fassung in einen Chatbot deiner Wahl ein. Kopiere dessen Antwort zurück in Horus, um die Originalwerte lokal wieder einzusetzen.
+
+Horus sendet im Browser nichts automatisch. Die Zuordnung zwischen Platzhaltern und Originalwerten bleibt auf deinem Rechner.
+
+<details>
+<summary>Die Oberfläche am Kanzleibeispiel ansehen</summary>
+
+![Horus mit erfundenem Original, freigegebener Vorschau und lokal zurückübersetzter Beispielantwort](web/assets/horus-ablauf.png)
+
+</details>
+
+## Grenzen
+
+**Pseudonymisierung ist keine Anonymisierung.** Horus kann Angaben übersehen. Auch der Zusammenhang kann Rückschlüsse auf Personen zulassen. Prüfe deshalb die gesamte Vorschau vor jeder Freigabe.
+
+<details>
+<summary>Erkennungsgrenzen und Verhalten bei Namen</summary>
+
 - Die Erkennung ist nicht vollständig. Ein Modell übersieht Namen, Regex-Muster decken nicht jedes Format ab. Der Leck-Check fängt nur Werte, die der Harness schon kennt.
 - Das Werkzeug macht einen Prozess nicht automatisch DSGVO-konform. Es ist ein technischer Baustein, der die Prüfung durch einen Menschen unterstützt.
 - Keine Rechtsberatung. Ob und wie ihr KI mit Mandanten- oder Patientendaten nutzen dürft, klärt ihr mit eurer Datenschutzberatung.
 
-## Bekannte Eigenheiten
+**Bekannte Eigenheiten**
 
 - **Nachnamen und Vornamen allein werden mitmaskiert.** Ist „Erika Musterfrau“ als `[PERSON_1]` erkannt, wird aus „Frau Musterfrau“ „Frau [PERSON_1]“. Das gilt für Namensteile ab 3 Zeichen, nur als ganzes Wort („Musterfrauenverband“ bleibt stehen) und nur, wenn der Teil zu genau einer Person der Sitzung gehört. Teilen sich zwei Personen einen Nachnamen („Max Mustermann“, „Erika Mustermann“), bleibt „Mustermann“ allein stehen und der Harness warnt mit beiden Platzhaltern.
 - **Die Rückübersetzung setzt immer den vollen Namen ein.** Aus „Frau [PERSON_1]“ in der Antwort wird „Frau Erika Musterfrau“, nicht „Frau Musterfrau“. Das ist so gewollt: Der Platzhalter steht für die Person, nicht für die Schreibweise, und ein voller Name ist in der lokalen Antwort unschädlich.
 
-## Getestet
+</details>
+
+## Tests und Entwicklung
+
+Die Erkennung wurde mit erfundenen Texten geprüft. Ergebnisse und Messmethode stehen in der [Erkennungsstichprobe](benchmarks/README.md).
+
+<details>
+<summary>Testergebnisse und Installationsmessungen</summary>
 
 - Rückweg mit echtem Claude (claude.ai, Kopiermodus, 05.11.2026): 16 von 16 Platzhaltern, die Claude in seinen Antworten benutzt hat, kamen heil zurück, in 2 erfundenen Testtexten. Keine Person wurde verwechselt. Zwei Texte sind eine Stichprobe, kein Beweis.
 - Installation frisch durchgespielt (05.11.2026, Linux in der Cloud, leerer Klon und leere Caches): Pakete laden, Server starten und 213 Tests liefen durch. Das Erkennungsmodell ließ sich dort nicht laden, weil die Umgebung Hugging Face sperrt; dieser Schritt ist nicht geprüft.
@@ -78,7 +99,10 @@ Die Oberfläche ist nur auf diesem Rechner erreichbar (127.0.0.1), nicht im Netz
   Größen sind belegter Speicher (`du`), keine Downloadmengen. Nicht gemessen: die übertragene Datenmenge und der Betrieb mit tatsächlich ausgeschaltetem WLAN.
 - Erkennungsstichprobe mit 12 erfundenen Texten: 32 von 36 markierten Angaben vollständig ersetzt, vier übersehen (drei Kennungen, ein englisches Datum), fünf Falschtreffer. [Stichprobe und Messmethode](benchmarks/README.md).
 
-## Für Entwicklerinnen und Entwickler
+</details>
+
+<details>
+<summary>Entwicklungsbefehle und Aufbau</summary>
 
 ```bash
 uv sync
@@ -97,6 +121,8 @@ Ohne API-Key (siehe `.env.example`) läuft die Kommandozeile im Kopiermodus: Der
 - `examples/` – vollständig erfundene Beispieltexte.
 
 Die Regeln für Beiträge und Agenten stehen in [`CLAUDE.md`](CLAUDE.md), der Arbeitsstand des Teams in [`PROJEKTSTAND.md`](PROJEKTSTAND.md).
+
+</details>
 
 ## Entstehung
 
