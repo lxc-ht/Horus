@@ -51,7 +51,7 @@
   .pane:has(> .empty:only-child) { display: grid; place-items: center; text-align: center; padding: 28px 10px; }
   .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .actions { margin-top: auto; }
-  /* Vorlage für die Aufgabe an Claude, kompakt über den Knöpfen. */
+  /* Vorlage für die Aufgabe an das LLM, kompakt über den Knöpfen. */
   .task-row { gap: 6px; }
   .task-row label { font-size: 12px; }
   #taskTemplate { flex: 1; min-width: 0; min-height: 36px; font: inherit; font-size: 13px; color: var(--ink); border: 1px solid #dce5e8; border-radius: 10px; background: #ffffffc9; padding: 6px 10px; cursor: pointer; }
@@ -186,7 +186,7 @@
       <p class="card-subtitle" id="originalHelp">Bleibt auf diesem Rechner.</p>
       <div class="editor-wrap scroll-frame"><textarea id="original" aria-labelledby="h-original" aria-describedby="originalHelp" spellcheck="false" placeholder="Füge hier deinen Text ein …&#10;&#10;Zum Beispiel einen Brief, eine E-Mail oder einen Sachverhalt.&#10;&#10;Noch keinen Text zur Hand? Starte mit unserem erfundenen Kanzleibeispiel.&#10;&#10;Oder zieh eine PDF, Word-Datei oder E-Mail hierher."></textarea></div>
       <div class="row task-row">
-        <label for="taskTemplate">Aufgabe für Claude</label>
+        <label for="taskTemplate">Aufgabe für LLM</label>
         <select id="taskTemplate" aria-describedby="taskHelp">
           <option value="">Vorlage anhängen …</option>
           <option value="summary">Sachverhalt zusammenfassen</option>
@@ -561,7 +561,7 @@ const FILE_HINTS = [
 ];
 const NOT_SUPPORTED = "Diese Datei kann LP7 nicht lesen. Möglich sind PDF, Word (.docx) und E-Mail (.eml).";
 
-// Vorlagen für die Aufgabe an Claude. Sie werden Teil des Originals, also mit analysiert, geprüft und freigegeben.
+// Vorlagen für die Aufgabe an das LLM (Claude, ChatGPT, Codex …). Sie werden Teil des Originals, also mit analysiert, geprüft und freigegeben.
 // Kein Platzhalter wörtlich im Text: „[PERSON_1]“ wäre sonst reserviert und käme bei der Rückübersetzung als unbekannt zurück.
 const KEEP_PLACEHOLDERS = "Übernimm alle Platzhalter in eckigen Klammern unverändert.";
 const TASKS = {
