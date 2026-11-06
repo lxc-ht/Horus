@@ -28,20 +28,15 @@ Open `http://127.0.0.1:8000` in your browser and select **EN**. Installation was
 
 ## How it works
 
-![Erika Musterfrau in the original becomes \[PERSON_1\] in the approved preview and returns as Erika Musterfrau in the local reply](docs/images/horus-workflow-en.jpg)
+Mara Lindner submitted her documents. You want a chatbot to draft an acknowledgment. The name and email address are fictional.
 
-1. **Enter and analyze.** Paste text or load a digital PDF, Word document or email. Horus replaces detected names, addresses, bank details and other sensitive information with placeholders.
-2. **Review and approve.** Check the preview and mark anything Horus missed. Yellow highlights flag uncertain matches. Approve the preview to enable copying.
-3. **Copy and restore.** Paste the approved text into a chatbot of your choice. Paste its reply into Horus to restore the original values on your computer.
+1. **Analyze.** Horus replaces the name with `[PERSON_1]` and the email address with `[EMAIL_1]`.
+2. **Review and approve.** Check the entire preview. Once you approve it, copy that version into the chatbot.
+3. **Restore the reply.** Paste the reply with its placeholders back into Horus. The restored name and email address appear in green in the local reply.
 
-You decide what to copy to the chatbot. The browser interface keeps the mapping between placeholders and original values on your computer.
+![Horus in English showing the original on the left, the approved preview with two placeholders in the middle, and the locally restored reply on the right](docs/images/horus-demo-en.png)
 
-<details>
-<summary>See the interface with a fictional law firm example (German)</summary>
-
-![Horus showing a fictional original, an approved preview and a locally restored reply](web/assets/horus-ablauf.png)
-
-</details>
+*Screenshot from Horus after restoring a prepared sample reply.*
 
 ## Limits
 

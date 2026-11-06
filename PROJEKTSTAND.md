@@ -47,6 +47,8 @@ Beide:
 
 **Erledigt**
 
+- [x] Codex für Loc: README Ablaufbeispiele durch echte Horus Screenshots auf Deutsch und Englisch ersetzt. Lokale Analyse, Freigabe, Kopieren und Rückübersetzen geprüft.
+
 - [x] Codex für Loc: ausgewählten Horus Banner, Ablaufgrafik und englische README zur Prüfung auf [`codex/horus-readme-grafiken`](https://github.com/lxc-ht/Horus/tree/codex/horus-readme-grafiken) bereitgestellt.
 
 - [x] Auf Locs Wunsch am 06.11. gegen 11:20 UTC gemergt: #65, #62 (Horus-Umbenennung), #64 (englischer Einstieg, macOS-Download), #38 (Freigabe-Nachweis, jetzt „Horus“). Konflikte nur in `docs/DEMO-ABLAUF.md` (bleibt gelöscht) und hier. #63 (Audio) bewusst nicht gemergt. Auf main 246 Tests, `web.test_app`, Browserprüfung grün (`lxc-ht`, Claude).
