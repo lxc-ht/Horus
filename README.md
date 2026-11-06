@@ -100,6 +100,10 @@ Die Regeln für Beiträge und Agenten stehen in [`CLAUDE.md`](CLAUDE.md), der Ar
 
 Gebaut beim Leuphana AI Hackathon 2026 von [lxc-ht](https://github.com/lxc-ht) und [Phantom-create-1](https://github.com/Phantom-create-1).
 
+### Danksagung
+
+Einige deutsche Erkennungsmuster (Handelsregister, USt-IdNr mit Prüfziffer, Bezeichner für Reisepass und Führerschein) und die Idee, unsichere Muster über Kontextwörter abzusichern, stammen aus [Microsoft Presidio](https://github.com/data-privacy-stack/presidio), MIT-Lizenz, Copyright (c) Presidio Contributors.
+
 ## Lizenz
 
 [MIT](LICENSE): Du darfst LP7 nutzen, verändern und weitergeben, auch kommerziell, solange der Lizenzhinweis erhalten bleibt. Ohne Gewähr.
